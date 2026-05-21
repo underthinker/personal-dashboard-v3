@@ -239,28 +239,38 @@
   }
 
   // ----------- Container drop (for drops on empty list area) -----------
+  function makeDropHandler(getTargetKey) {
+    return function(e) {
+      e.preventDefault();
+      var data = getDragData(e);
+      if (!data) return;
+      var targetKey = getTargetKey();
+      if (data.key === targetKey) return;
+      var fromGoals = storeGet(data.key) || [];
+      if (!fromGoals[data.idx]) return;
+      var moved = fromGoals.splice(data.idx, 1)[0];
+      storeSet(data.key, fromGoals);
+      var toGoals = storeGet(targetKey) || [];
+      toGoals.push(moved);
+      storeSet(targetKey, toGoals);
+      loadToday();
+      loadTomorrow();
+    };
+  }
+
   function initDragContainers() {
     try {
-      [goalList, tomorrowList].forEach(function(list) {
-        if (!list) return;
-        list.addEventListener('dragover', function(e) { e.preventDefault(); });
-        list.addEventListener('drop', function(e) {
-          e.preventDefault();
-          var data = getDragData(e);
-          if (!data) return;
-          var targetKey = list.id === 'goalList'
-            ? 'goals:' + getActiveDateString()
-            : 'goals:' + getTomorrowDateString();
-          if (data.key === targetKey) return;
-          var fromGoals = storeGet(data.key) || [];
-          if (!fromGoals[data.idx]) return;
-          var moved = fromGoals.splice(data.idx, 1)[0];
-          storeSet(data.key, fromGoals);
-          var toGoals = storeGet(targetKey) || [];
-          toGoals.push(moved);
-          storeSet(targetKey, toGoals);
-          loadToday();
-          loadTomorrow();
+      var pairs = [
+        [goalList,     emptyState,   function() { return 'goals:' + getActiveDateString(); }],
+        [tomorrowList, tomorrowEmpty, function() { return 'goals:' + getTomorrowDateString(); }],
+      ];
+      pairs.forEach(function(pair) {
+        var list = pair[0], emptyEl = pair[1], getKey = pair[2];
+        var handler = makeDropHandler(getKey);
+        [list, emptyEl].forEach(function(el) {
+          if (!el) return;
+          el.addEventListener('dragover', function(e) { e.preventDefault(); });
+          el.addEventListener('drop', handler);
         });
       });
     } catch (e) { /* drag containers not available */ }
