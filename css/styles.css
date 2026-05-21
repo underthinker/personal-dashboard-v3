@@ -158,7 +158,7 @@ body {
 .nav-item .icon { width: 18px; height: 18px; flex: 0 0 18px; opacity: 0.85; }
 .nav-item:hover { background: var(--surface); color: var(--text); }
 .nav-item.active { background: var(--surface); color: var(--text); }
-.nav-item.active .icon { color: var(--green); opacity: 1; }
+.nav-item.active .icon { color: var(--accent); opacity: 1; }
 .nav-item .badge {
   margin-left: auto;
   background: var(--surface-2);
@@ -168,7 +168,7 @@ body {
   padding: 1px 7px;
   border-radius: 99px;
 }
-.nav-item.active .badge { background: var(--green-soft); color: var(--green); }
+.nav-item.active .badge { background: var(--accent-soft); color: var(--accent); }
 
 .sidebar-user {
   margin-top: auto;
@@ -502,9 +502,9 @@ body {
 .add-goal .add-btn {
   width: 32px; height: 32px;
   border-radius: 8px;
-  background: var(--green);
+  background: var(--accent);
   border: 0;
-  color: #08120c;
+  color: #ffffff;
   font-size: 18px;
   font-weight: 600;
   display: grid;
@@ -732,8 +732,8 @@ body {
 .nb-add {
   width: 30px; height: 30px;
   border-radius: 7px;
-  background: var(--green);
-  color: #08120c;
+  background: var(--accent);
+  color: #ffffff;
   border: 0;
   font-size: 17px;
   font-weight: 600;
