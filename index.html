@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>broken crayons — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vendor/tesseract/tesseract.min.js"></script>
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="brand"><span class="b1">broken</span><span class="b2">crayons</span></div>
+
+  <div class="nav">
+    <div class="nav-section-label">Main</div>
+    <button class="nav-item active" data-tab="main">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
+      Home
+      <span class="badge" id="homeBadge">0</span>
+    </button>
+    <button class="nav-item" data-tab="finances">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Finances
+    </button>
+    <button class="nav-item" data-tab="habits">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+      Habits
+    </button>
+    <button class="nav-item" data-tab="health">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Health
+    </button>
+    <button class="nav-item" data-tab="gym">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+      Gym
+    </button>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="su-avatar"></div>
+    <div class="su-info">
+      <span class="su-name">Tristen</span>
+      <span class="su-status">● Focus mode</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- ═══ TOPBAR ═══ -->
+<header class="topbar">
+  <div class="greeting">
+    <h1>Good <span id="greetPeriod">evening</span>, <span class="name">Tristen</span>.</h1>
+    <p id="greetSubtitle">Loading session...</p>
+  </div>
+  <div class="topbar-right">
+    <span id="topbarDate"></span>
+    <button class="icon-btn" id="tweaksToggleBtn" type="button" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ═══ TAB: HOME ═══ -->
+<div id="tab-main" class="tab-content is-visible">
+
+<div class="home-grid">
+
+  <!-- ═══ SESSION CARD ═══ -->
+  <div class="card a-session">
+    <div class="card-head">
+      <span class="pill pill-live"><span class="dot"></span>Live</span>
+      <button class="hm-settings-btn" id="drSettingsBtn" type="button" aria-label="Day Ring Settings">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+    <div class="session-body">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120" overflow="visible">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line-2)" stroke-width="8" stroke-linecap="round"></circle>
+          <circle id="dayRingFill" cx="60" cy="60" r="52" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 327" transform="rotate(-90 60 60)" style="transition: stroke-dasharray 0.6s ease"></circle>
+        </svg>
+        <div class="pct">
+          <span class="pct-num" id="dayRingPercent">0%</span>
+          <span class="pct-lbl" id="dayRingPhase">MORNING</span>
+        </div>
+      </div>
+      <div>
+        <div class="session-title">
+          <span id="sessionPhaseIcon">🔥</span>
+          <span id="sessionPhaseName">Deep Focus</span>
+        </div>
+        <p class="session-sub" id="dayRingRange">—</p>
+        <div class="session-sub" id="dayRingStatus" style="font-size:11px;"></div>
+        <div class="next-up">
+          <span class="next-up-label">Next up</span>
+          <div class="next-up-row">
+            <span class="nu-dot"></span>
+            <span class="nu-text" id="priorityPillTextHero">No focus item queued</span>
+          </div>
+        </div>
+        <div class="focus-timer-row">
+          <button id="focusTimerBtn" class="focus-timer-btn">▶ Start Focus</button>
+          <span id="focusTimerDisplay" class="focus-timer-display" style="display:none">0:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="session-foot">
+      <span class="foot-now-label">Now</span>
+      <div class="digital-clock" id="digitalClock" tabindex="0" role="button" aria-label="Toggle clock format">12:00:00</div>
+      <div class="stat-mini">
+        <div class="v focus-time" id="focusStatTime">0m</div>
+        <div class="l">focus</div>
+      </div>
+      <div class="stat-mini">
+        <div class="v done-count" id="focusStatDone">0</div>
+        <div class="l">done</div>
+      </div>
+      <div class="stat-mini">
+        <div class="v" id="focusStatStreak">0</div>
+        <div class="l">streak</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GOALS CARD ═══ -->
+  <div class="card a-goals" id="gmCardToday">
+    <div class="card-head">
+      <div class="gc-head">
+        <span class="gc-count" id="gmProgressNum">0</span>
+        <span class="gc-total" id="gmProgressTotal">/ 0</span>
+        <span class="gc-today" id="gmProgressLabel">TODAY</span>
+      </div>
+      <span class="pill pill-streak" id="gmStreak">🔥 <span id="gmStreakNum">0</span> day streak</span>
+    </div>
+    <div id="gmBar" class="goal-progress-bar"></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+      <ul id="goalList" class="goal-list"></ul>
+      <div id="emptyState" class="hm-empty"><span>No goals for today yet — add one below.</span></div>
+      <button id="gmPushBtn" class="push-tomorrow" style="display:none;">Push remaining to tomorrow →</button>
+    </div>
+    <div class="add-goal">
+      <input type="text" id="goalInput" placeholder="Add a goal...">
+      <button id="goalAddBtn" class="add-btn">+</button>
+    </div>
+    <div id="todayLabel" style="display:none;"></div>
+  </div>
+
+  <!-- ═══ STATS PANEL ═══ -->
+  <div class="card a-stats">
+    <div class="stats-grid">
+      <div class="sp-cell">
+        <span class="sp-label">FOCUS TIME</span>
+        <span class="sp-val coral" id="spFocusTime">0m</span>
+        <span class="sp-sub">Today</span>
+        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkFocus" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sp-cell">
+        <span class="sp-label">COMPLETED</span>
+        <span class="sp-val green" id="spCompleted">0</span>
+        <span class="sp-sub">Tasks</span>
+        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkDone" fill="none" stroke="var(--green)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sp-cell">
+        <span class="sp-label">STREAK</span>
+        <span class="sp-val amber" id="spStreak">0d</span>
+        <span class="sp-sub">Current</span>
+        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkStreak" fill="none" stroke="var(--amber)" stroke-width="1.5"/></svg>
+      </div>
+      <div class="sp-cell">
+        <span class="sp-label">BEST</span>
+        <span class="sp-val blue" id="spBest">0d</span>
+        <span class="sp-sub">Best streak</span>
+        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkBest" fill="none" stroke="var(--blue)" stroke-width="1.5"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TOMORROW CARD ═══ -->
+  <div class="card a-tomorrow">
+    <div class="card-head">
+      <span class="card-label">Tomorrow</span>
+      <span class="pill" style="color:var(--muted-2);background:transparent;font-size:11px;" id="gmTomorrowCount">0 planned</span>
+    </div>
+    <ul id="tomorrowList" class="tomorrow-list"></ul>
+    <div id="tomorrowEmpty" class="hm-empty"><span>Nothing planned for tomorrow yet.</span></div>
+    <div class="add-goal" style="margin-top:auto;">
+      <input type="text" id="tomorrowInput" placeholder="Plan ahead...">
+      <button id="tomorrowAddBtn" class="add-btn">+</button>
+    </div>
+    <div id="tomorrowLabel" style="display:none;"></div>
+  </div>
+
+  <!-- ═══ TIMELINE CARD ═══ -->
+  <div class="card a-timeline">
+    <div class="card-head"><span class="card-label">Schedule</span></div>
+    <div class="timeline" id="timelineWidget"></div>
+  </div>
+
+  <!-- ═══ HABITS MINI ═══ -->
+  <div class="card a-habits">
+    <div class="card-head"><span class="card-label">Habits</span></div>
+    <div class="habits-rings" id="habitFullWidget"></div>
+    <button class="view-habits" data-tab="habits">View habits →</button>
+  </div>
+
+  <!-- ═══ CALENDAR CARD ═══ -->
+  <div class="card a-calendar">
+    <div class="cal-head">
+      <span class="cal-month" id="calMonthLabel">May 2026</span>
+      <div class="cal-nav">
+        <button id="calPrev">‹</button>
+        <button id="calNext">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- ═══ ACTIVITY HEATMAP ═══ -->
+  <div class="card a-activity">
+    <div class="card-head"><span class="card-label">Activity</span></div>
+    <div id="heatmapWidget"></div>
+  </div>
+
+  <!-- ═══ MOOD CARD ═══ -->
+  <div class="card a-mood">
+    <div class="card-head"><span class="card-label">Mood</span></div>
+    <div id="moodWidget"></div>
+  </div>
+
+  <!-- ═══ WEATHER CARD ═══ -->
+  <div class="card a-weather">
+    <div class="card-head"><span class="card-label">Weather</span></div>
+    <div id="weatherWidget"></div>
+  </div>
+
+  <!-- ═══ QUOTE CARD ═══ -->
+  <div class="card a-quote">
+    <div class="quote-body">
+      <span class="quote-mark">"</span>
+      <div>
+        <div class="quote-text" id="quoteText">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NOTE BAR ═══ -->
+  <div class="a-notebar">
+    <div class="note-bar">
+      <svg class="nb-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <input type="text" id="quickNotesInput" placeholder="Quick note...">
+      <button class="nb-add" id="quickNotesAddBtn">+</button>
+    </div>
+  </div>
+
+</div><!-- /home-grid -->
+
+<!-- ═══ HOME WIDGET INIT ═══ -->
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+
+  /* Timeline */
+  function renderTimeline() {
+    const el = $('timelineWidget');
+    if (!el) return;
+    const now = new Date();
+    const h = now.getHours();
+    const blocks = [
+      { t: '6:00', label: 'Morning routine', sub: 'Wake up, stretch, coffee' },
+      { t: '7:00', label: 'Deep work', sub: 'Focus session' },
+      { t: '9:00', label: 'Team sync', sub: 'Standup' },
+      { t: '10:00', label: 'Project work', sub: 'Main task block' },
+      { t: '12:00', label: 'Lunch', sub: 'Break' },
+      { t: '13:00', label: 'Deep work II', sub: 'Second session' },
+      { t: '15:00', label: 'Admin', sub: 'Email, planning' },
+      { t: '17:00', label: 'Wind down', sub: 'Review, plan tomorrow' },
+    ];
+    el.innerHTML = blocks.map((b, i) => {
+      const active = i === Math.min(h - 6, blocks.length - 1) && h >= 6 && h < 17;
+      return '<div class="tl-row">' +
+        '<div class="tl-time' + (active ? ' active' : '') + '">' + b.t + '</div>' +
+        '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (active ? ' active' : '') + '"></div></div>' +
+        '<div class="tl-content' + (active ? ' active' : '') + '"><div class="tl-title">' + b.label + '</div><div class="tl-sub">' + b.sub + '</div></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  /* Heatmap */
+  function renderHeatmap() {
+    const el = $('heatmapWidget');
+    if (!el) return;
+    const WEEKS = 22, DAYS = 7;
+    const today = new Date();
+    const todayDow = today.getDay();
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - (WEEKS * 7 - 1) - todayDow);
+
+    const goalMap = {};
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (/^goals:\d{4}-\d{2}-\d{2}$/.test(k)) {
+          const arr = JSON.parse(localStorage.getItem(k) || '[]');
+          if (arr.length > 0) {
+            const done = arr.filter(function(g) { return g.done; }).length;
+            goalMap[k.slice(6)] = done / arr.length;
+          }
+        }
+      }
+    } catch(e) {}
+
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let lastMonth = -1;
+    let monthHtml = '<div class="hm-act-month-lbl">';
+    for (let w = 0; w < WEEKS; w++) {
+      const colDate = new Date(startDate);
+      colDate.setDate(colDate.getDate() + w * 7);
+      const m = colDate.getMonth();
+      if (m !== lastMonth) {
+        monthHtml += '<span style="margin-left:' + (w * 12) + 'px">' + MONTHS[m] + '</span>';
+        lastMonth = m;
+      }
+    }
+    monthHtml += '</div>';
+
+    let gridHtml = '<div class="hm-act-grid">';
+    for (let w = 0; w < WEEKS; w++) {
+      for (let d = 0; d < DAYS; d++) {
+        const cellDate = new Date(startDate);
+        cellDate.setDate(cellDate.getDate() + w * 7 + d);
+        const ymd = cellDate.getFullYear() + '-' + String(cellDate.getMonth()+1).padStart(2,'0') + '-' + String(cellDate.getDate()).padStart(2,'0');
+        const ratio = goalMap[ymd];
+        let lvl = '';
+        if (ratio != null) {
+          if (ratio > 0 && ratio < 0.34) lvl = 'l1';
+          else if (ratio < 0.67) lvl = 'l2';
+          else if (ratio < 1) lvl = 'l3';
+          else lvl = 'l4';
+        }
+        const isFuture = cellDate > today;
+        gridHtml += '<div class="hm-cell ' + lvl + (isFuture ? ' hm-act-future' : '') + '" title="' + ymd + '"></div>';
+      }
+    }
+    gridHtml += '</div>';
+
+    const dayLabels = '<div class="hm-act-days"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>';
+    const legend = '<div class="hm-act-legend"><div class="hm-act-legend-cells"><span>Less</span><span class="hm-act-cell"></span><span class="hm-act-cell l1"></span><span class="hm-act-cell l2"></span><span class="hm-act-cell l3"></span><span class="hm-act-cell l4"></span><span>More</span></div><button class="hm-act-view-link">View full activity →</button></div>';
+
+    el.innerHTML = monthHtml + '<div class="hm-act-body">' + dayLabels + gridHtml + '</div>' + legend;
+  }
+
+  /* Mood */
+  const HOME_MOODS = [
+    { key: 'bad',   emoji: '😤', label: 'Tough day',    desc: 'Hang in there.' },
+    { key: 'meh',   emoji: '😕', label: 'Meh',          desc: 'Just getting by.' },
+    { key: 'ok',    emoji: '😐', label: 'Okay',         desc: 'Normal day.' },
+    { key: 'good',  emoji: '🙂', label: 'Good',         desc: 'Productive day!' },
+    { key: 'great', emoji: '😄', label: 'Great',        desc: 'Crushing it!' },
+  ];
+  function getMoodToday() {
+    const d = new Date();
+    if (d.getHours() < 6) d.setDate(d.getDate() - 1);
+    const ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    return { ymd, key: localStorage.getItem('mood_home:' + ymd) };
+  }
+  function renderMood() {
+    const el = $('moodWidget');
+    if (!el) return;
+    const { ymd, key: currentKey } = getMoodToday();
+    const current = HOME_MOODS.find(function(m) { return m.key === currentKey; }) || null;
+
+    const hero = current
+      ? '<div class="mood-current"><div class="mood-emoji-lg">' + current.emoji + '</div><div class="mood-info"><div class="mood-name">' + current.label + '</div><div class="mood-note">' + current.desc + '</div></div></div>'
+      : '<div class="mood-current"><div class="mood-emoji-lg">😶</div><div class="mood-info"><div class="mood-name">—</div><div class="mood-note">How are you feeling?</div></div></div>';
+
+    const strip = '<div class="mood-picker">' + HOME_MOODS.map(function(m) {
+      return '<button class="mood-pick' + (m.key === currentKey ? ' active' : '') + '" data-mood-key="' + m.key + '" title="' + m.label + '">' + m.emoji + '</button>';
+    }).join('') + '</div>';
+
+    el.innerHTML = hero + strip;
+
+    el.querySelectorAll('.mood-pick').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const k = btn.getAttribute('data-mood-key');
+        if (k === currentKey) localStorage.removeItem('mood_home:' + ymd);
+        else localStorage.setItem('mood_home:' + ymd, k);
+        renderMood();
+      });
+    });
+  }
+
+  /* Weather */
+  const WEATHER_CONFIG_KEY = 'weather_config_v1';
+  const WEATHER_CACHE_KEY = 'weather_cache_v1';
+  const OWM_ICON_MAP = { '01':'☀️','02':'🌤️','03':'⛅','04':'☁️','09':'🌧️','10':'🌦️','11':'⛈️','13':'❄️','50':'🌫️' };
+  function owmIcon(icon) { return OWM_ICON_MAP[icon.slice(0,2)] || '🌡️'; }
+  function renderWeatherData(data) {
+    const el = $('weatherWidget');
+    if (!el || !data) return;
+    const temp = Math.round(data.main.temp);
+    const hi = Math.round(data.main.temp_max);
+    const lo = Math.round(data.main.temp_min);
+    const icon = owmIcon(data.weather[0].icon);
+    const desc = data.weather[0].description.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    el.innerHTML =
+      '<div class="weather-row"><span class="weather-icon">' + icon + '</span><span class="weather-temp">' + temp + '°C</span></div>' +
+      '<div class="weather-cond">' + desc + '</div>' +
+      '<div class="weather-hl"><span>↑ ' + hi + '°</span><span>↓ ' + lo + '°</span></div>' +
+      '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>';
+  }
+  function renderWeatherSetup(forceShow) {
+    const el = $('weatherWidget');
+    if (!el) return;
+    el.innerHTML =
+      '<form class="weather-form" onsubmit="saveWeatherConfig(event)">' +
+        '<input id="wxApiKey" type="text" placeholder="OpenWeatherMap API key" autocomplete="off">' +
+        '<input id="wxCity" type="text" placeholder="City (e.g. San Francisco)">' +
+        '<button type="submit" class="weather-save-btn">Save</button>' +
+      '</form>';
+    const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
+    if (cfg.apiKey) el.querySelector('#wxApiKey').value = cfg.apiKey;
+    if (cfg.city) el.querySelector('#wxCity').value = cfg.city;
+  }
+  function saveWeatherConfig(e) {
+    e.preventDefault();
+    const apiKey = document.getElementById('wxApiKey').value.trim();
+    const city = document.getElementById('wxCity').value.trim();
+    if (!apiKey || !city) return;
+    localStorage.setItem(WEATHER_CONFIG_KEY, JSON.stringify({ apiKey, city }));
+    localStorage.removeItem(WEATHER_CACHE_KEY);
+    renderWeather();
+  }
+  window.renderWeatherSetup = renderWeatherSetup;
+  window.saveWeatherConfig = saveWeatherConfig;
+  function renderWeather() {
+    const el = $('weatherWidget');
+    if (!el) return;
+    const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
+    if (!cfg.apiKey || !cfg.city) { renderWeatherSetup(); return; }
+    const cache = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null');
+    if (cache && cache.fetchedAt && (Date.now() - cache.fetchedAt) < 30 * 60 * 1000) {
+      renderWeatherData(cache.data);
+      return;
+    }
+    const url = 'https://api.openweathermap.org/data/2.5/weather?q=' + encodeURIComponent(cfg.city) + '&appid=' + cfg.apiKey + '&units=metric';
+    el.innerHTML = '<div class="weather-loading">Loading…</div>';
+    fetch(url).then(function(r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function(data) {
+      localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify({ data, fetchedAt: Date.now() }));
+      renderWeatherData(data);
+    }).catch(function() {
+      if (cache) { renderWeatherData(cache.data); return; }
+      el.innerHTML = '<div class="weather-error">Weather unavailable. <button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">Configure →</button></div>';
+    });
+  }
+
+  /* Quote */
+  const QUOTES = [
+    { text: 'Discipline is choosing between what you want now and what you want most.', author: 'Abraham Lincoln' },
+    { text: 'Small daily improvements over time lead to stunning results.', author: 'Robin Sharma' },
+    { text: "Don't count the days, make the days count.", author: 'Muhammad Ali' },
+    { text: 'Progress is progress, no matter how small.', author: '' },
+    { text: 'Be the hardest worker in the room.', author: '' },
+    { text: 'Your future is created by what you do today, not tomorrow.', author: '' },
+    { text: 'The secret of getting ahead is getting started.', author: 'Mark Twain' },
+    { text: 'Do something today that your future self will thank you for.', author: '' },
+  ];
+  function renderQuote() {
+    const el = $('quoteText');
+    if (!el) return;
+    const idx = parseInt(localStorage.getItem('tweak_quoteIdx') || '') || Math.random() * QUOTES.length | 0;
+    const item = QUOTES[idx];
+    el.innerHTML = item.text + (item.author ? '<span class="quote-author">— ' + item.author + '</span>' : '');
+  }
+
+  /* Quick notes */
+  const notesIn = $('quickNotesInput');
+  if (notesIn) {
+    notesIn.value = localStorage.getItem('quick_notes_v1') || '';
+    notesIn.addEventListener('input', function() { localStorage.setItem('quick_notes_v1', notesIn.value); });
+    notesIn.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); notesIn.blur(); } });
+  }
+
+  /* Next up */
+  function updateHeroNextUp() {
+    var hero = $('priorityPillTextHero');
+    if (!hero) return;
+    try {
+      var key = 'goals:' + new Date().toISOString().slice(0,10);
+      var data = JSON.parse(localStorage.getItem(key) || '[]');
+      var q = data.find(function(g) { return g.queued && !g.done; });
+      hero.textContent = q ? q.text : 'No focus item queued';
+    } catch(e) { hero.textContent = ''; }
+  }
+
+  /* Home badge count */
+  function updateHomeBadge() {
+    const badge = $('homeBadge');
+    if (!badge) return;
+    try {
+      const key = 'goals:' + new Date().toISOString().slice(0,10);
+      const data = JSON.parse(localStorage.getItem(key) || '[]');
+      const undone = data.filter(function(g) { return !g.done; }).length;
+      badge.textContent = undone;
+    } catch(e) { badge.textContent = '0'; }
+  }
+
+  renderTimeline();
+  renderHeatmap();
+  renderMood();
+  renderWeather();
+  renderQuote();
+  updateHeroNextUp();
+  updateHomeBadge();
+  window.renderHomeHealthRings ? window.renderHomeHealthRings() : (window.renderHabitFullRings && window.renderHabitFullRings());
+
+  document.querySelectorAll('.view-habits').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tab = btn.getAttribute('data-tab');
+      if (tab) {
+        var navItem = document.querySelector('.nav-item[data-tab="' + tab + '"]');
+        if (navItem) navItem.click();
+      }
+    });
+  });
+
+  window.addEventListener('goals-changed', function() {
+    updateHeroNextUp();
+    updateHomeBadge();
+  });
+  window.addEventListener('focus-updated', function() {
+    window.renderHomeHealthRings && window.renderHomeHealthRings();
+  });
+
+  setInterval(renderTimeline, 60000);
+})();
+</script>
+
+<!-- Day Ring Settings Modal -->
+<div class="dr-modal-bg" id="drModalBg">
+  <div class="dr-modal glass">
+    <div class="dr-modal-h">
+      <div class="dr-modal-title">Day Ring Settings</div>
+      <button class="dr-modal-x" id="drModalX" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="dr-modal-sub">Edit the time range and color for each block of your day.</div>
+    <div class="dr-modal-body" id="drModalBody"></div>
+  </div>
+</div>
+
+</div><!-- /tab-main -->
+
+<!-- ═══ TAB: FINANCES ═══ -->
+<div id="tab-finances" class="tab-content">
+
+<div class="fin-sub-nav">
+  <button class="fin-sub-btn is-active" data-finview="overview">Overview</button>
+  <button class="fin-sub-btn" data-finview="goals">Goals</button>
+  <button class="fin-sub-btn" data-finview="data">Data</button>
+</div>
+
+<!-- Overview -->
+<div class="fin-view" id="finOverview">
+<div class="fin-period-bar" data-scope="finance-period" id="financePeriodBar">
+  <button class="fin-qbtn fin-qbtn-standalone" data-period="all">All Year</button>
+  <div class="fin-period-group">
+    <button class="fin-period-group-toggle">Quarter<span class="fin-period-group-arrow">▾</span></button>
+    <div class="fin-period-group-children">
+      <button class="fin-qbtn" data-period="q1">Q1</button>
+      <button class="fin-qbtn" data-period="q2">Q2</button>
+      <button class="fin-qbtn" data-period="q3">Q3</button>
+      <button class="fin-qbtn" data-period="q4">Q4</button>
+    </div>
+  </div>
+  <div class="fin-period-group">
+    <button class="fin-period-group-toggle">Months<span class="fin-period-group-arrow">▾</span></button>
+    <div class="fin-period-group-children">
+      <button class="fin-qbtn" data-period="m0">Jan</button>
+      <button class="fin-qbtn" data-period="m1">Feb</button>
+      <button class="fin-qbtn" data-period="m2">Mar</button>
+      <button class="fin-qbtn" data-period="m3">Apr</button>
+      <button class="fin-qbtn" data-period="m4">May</button>
+      <button class="fin-qbtn" data-period="m5">Jun</button>
+      <button class="fin-qbtn" data-period="m6">Jul</button>
+      <button class="fin-qbtn" data-period="m7">Aug</button>
+      <button class="fin-qbtn" data-period="m8">Sep</button>
+      <button class="fin-qbtn" data-period="m9">Oct</button>
+      <button class="fin-qbtn" data-period="m10">Nov</button>
+      <button class="fin-qbtn" data-period="m11">Dec</button>
+    </div>
+  </div>
+</div>
+
+<div class="finance-dashboard">
+  <div class="fin-card fin-card-chart">
+    <div class="fin-card-title" id="savingsCardTitle">Yearly Savings</div>
+    <div class="savings-total" id="savingsTotal"></div>
+    <div class="fin-card-subtitle" id="savingsSubtitle" hidden></div>
+    <div class="fin-chart-wrap savings-chart-wrap">
+      <svg id="yearlySavingsChart" viewBox="0 0 480 260" class="fin-line-chart" style="overflow: visible;"></svg>
+      <div id="savingsTooltip" class="savings-tooltip"></div>
+    </div>
+    <div id="savingsDetailPanel" class="savings-detail-panel"></div>
+  </div>
+  <div class="fin-donut-row">
+  <div class="fin-card fin-card-donut">
+    <div class="fin-card-title">Income Breakdown</div>
+    <div class="fin-card-subtitle" id="incomeSubtitle" hidden></div>
+    <div class="fin-donut-wrap">
+      <svg id="incomeDonut" viewBox="0 0 260 260" class="fin-donut"></svg>
+    </div>
+    <div id="incomeDonutLegend" class="fin-donut-legend"></div>
+    <div id="incomeDonutDetail" class="fin-donut-detail" hidden></div>
+  </div>
+  <div class="fin-card fin-card-donut">
+    <div class="fin-card-title">Expense Breakdown</div>
+    <div class="fin-card-subtitle" id="expenseSubtitle" hidden></div>
+    <div class="fin-donut-wrap">
+      <svg id="expenseDonut" viewBox="0 0 260 260" class="fin-donut"></svg>
+    </div>
+    <div id="expenseDonutLegend" class="fin-donut-legend"></div>
+    <div id="expenseDonutDetail" class="fin-donut-detail" hidden></div>
+  </div>
+  </div>
+</div>
+</div>
+
+<!-- Goals -->
+<div class="fin-view" id="finGoals" style="display:none">
+<div class="section">
+  <div class="section-title">Financial Goals</div>
+  <div class="gt-wrap" id="gtRoot"></div>
+</div>
+</div>
+
+<!-- Data -->
+<div class="fin-view" id="finData" style="display:none">
+<div class="section fin-tables">
+  <div class="fin-table-col">
+    <div class="ps-section-head">
+      <div class="section-title">Income</div>
+      <button class="ps-import-btn" id="psImportBtn" title="Extract income from a paystub image or PDF"><svg class="ps-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="8" y1="9" x2="10" y2="9"/></svg>Import paystub</button>
+    </div>
+    <div class="fin-quarter-bar" data-scope="income" id="incomeQuarterBar">
+      <button class="fin-qbtn" data-q="q1">Q1</button>
+      <button class="fin-qbtn" data-q="q2">Q2</button>
+      <button class="fin-qbtn" data-q="q3">Q3</button>
+      <button class="fin-qbtn" data-q="q4">Q4</button>
+      <button class="fin-qbtn" data-q="all">All Months</button>
+    </div>
+    <div id="incomeTable"></div>
+  </div>
+  <div class="fin-table-col">
+    <div class="section-title">Expenses</div>
+    <div class="fin-quarter-bar" data-scope="expense" id="expenseQuarterBar">
+      <button class="fin-qbtn" data-q="q1">Q1</button>
+      <button class="fin-qbtn" data-q="q2">Q2</button>
+      <button class="fin-qbtn" data-q="q3">Q3</button>
+      <button class="fin-qbtn" data-q="q4">Q4</button>
+      <button class="fin-qbtn" data-q="all">All Months</button>
+    </div>
+    <div id="expenseTable"></div>
+  </div>
+</div>
+<div class="fin-tags-row"><button class="fin-tags-btn" id="finManageTagsBtn">⚙ Manage Tags</button></div>
+</div>
+
+<!-- Paystub Importer Modal -->
+<div class="ps-modal-bg" id="psModalBg" role="dialog" aria-modal="true" aria-labelledby="psModalTitle">
+  <div class="ps-modal glass">
+    <h3 id="psModalTitle">Import paystub</h3>
+    <p class="ps-modal-sub">Drop a paystub image or PDF. OCR runs locally in your browser — no API key, no upload, no AI service. You review before anything is saved.</p>
+    <input type="file" id="psFileInput" accept="image/*,application/pdf" hidden>
+    <div class="ps-drop" id="psDrop">
+      <div class="ps-drop-hint">Click to choose a file, or drop here</div>
+      <div class="ps-drop-sub">PNG, JPG, WebP, or PDF · max 8 MB</div>
+    </div>
+    <img id="psPreview" class="ps-preview" hidden alt="Preview">
+    <div class="ps-status" id="psStatus"></div>
+    <div class="ps-review" id="psReview"></div>
+    <div class="ps-actions">
+      <button class="ps-btn" id="psCancelBtn" type="button">Cancel</button>
+      <button class="ps-btn is-primary" id="psConfirmBtn" type="button" disabled>Import</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-finances -->
+
+<!-- ═══ TAB: HABITS ═══ -->
+<div id="tab-habits" class="tab-content">
+
+<div class="habit-sub-nav">
+  <button class="habit-sub-btn is-active" data-habitview="tracker">Habit Tracker</button>
+  <button class="habit-sub-btn" data-habitview="mood">Mood Tracker</button>
+</div>
+
+<div class="habit-view" id="habitTracker">
+<div class="section">
+  <div class="ht-motiv glass">
+    <div class="ht-motiv-tag">Progress. (Not Perfection.)</div>
+    <div class="ht-motiv-quote" id="htQuote"></div>
+  </div>
+  <div class="ht-prog-bar" id="htProgBar">
+    <div class="ht-prog-top" id="htProgTop">
+      <div class="ht-seg-row" id="htSegRow"></div>
+    <div class="ht-prog-foot">
+      <div class="ht-today-pct" id="htTodayPct">0%</div>
+    </div>
+    </div>
+  </div>
+  <div class="ht-panel" id="htWeekPanel">
+    <div class="ht-week-hdr" id="htWeekHdr"></div>
+    <div class="ht-week-body" id="htWeekBody"></div>
+    <div class="ht-notes-wrap">
+      <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+      <input type="text" class="ht-notes-input" id="htTodayNotes" placeholder="Add a note for today…" />
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="habit-view" id="moodTracker" style="display:none">
+<div class="section">
+  <div class="mt-today glass">
+    <div class="mt-today-head">
+      <div>
+        <div class="mt-eyebrow">HOW ARE YOU FEELING?</div>
+        <div class="mt-today-date" id="mtTodayDate">—</div>
+      </div>
+    </div>
+    <div class="mt-today-vis" id="mtTodayVis">
+      <span class="mt-today-em" id="mtTodayEm">—</span>
+      <span class="mt-today-lb" id="mtTodayLb">Tap to log</span>
+    </div>
+    <div class="mt-pills" id="mtPills"></div>
+  </div>
+  <div class="mt-cal glass">
+    <div class="mt-cal-hdr">
+      <button class="mt-cal-nav" id="mtPrevBtn">‹</button>
+      <div class="mt-cal-title" id="mtCalTitle">—</div>
+      <button class="mt-cal-nav" id="mtNextBtn">›</button>
+    </div>
+    <div class="mt-leg" id="mtLeg"></div>
+    <div class="mt-cal-hdr-row" id="mtCalHdr"></div>
+    <div class="mt-grid" id="mtGrid"></div>
+  </div>
+</div>
+</div>
+
+<!-- Habit Settings Modal -->
+<div class="ht-set-bg" id="htSetBg" role="dialog" aria-modal="true" aria-labelledby="htSetTitle">
+  <div class="ht-set glass">
+    <h3 id="htSetTitle" style="margin:0 0 16px;font-size:17px;font-weight:700;">Manage Habits</h3>
+    <div class="ht-set-list" id="htSetList"></div>
+    <div class="ht-set-add">
+      <input type="text" class="ht-set-add-in" id="htAddName" placeholder="New habit name…">
+      <button class="ht-set-add-emoji" id="htAddEmoji" title="Pick emoji">💤</button>
+      <button class="ht-set-add-go" id="htAddBtn">+ Add</button>
+    </div>
+    <div class="ht-set-done">
+      <button class="ht-set-done-btn" id="htCloseBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Emoji Picker -->
+<div class="ht-ep-bg" id="htEpBg" role="dialog" aria-modal="true" hidden>
+  <div class="ht-ep glass">
+    <div class="ht-ep-title">Pick an emoji</div>
+    <div class="ht-ep-grid" id="htEpGrid"></div>
+    <div class="ht-ep-done">
+      <button class="ht-ep-done-btn" id="htEpClose">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Combined Day Editor -->
+<div class="de-bg" id="deBg" role="dialog" aria-modal="true" hidden>
+  <div class="de glass">
+    <div class="de-title" id="deTitle">—</div>
+    <div class="de-label">Mood</div>
+    <div class="de-pills" id="dePills"></div>
+    <div class="de-divider"></div>
+    <div class="de-label">Habits</div>
+    <div class="de-habits" id="deHabits"></div>
+    <div class="de-divider"></div>
+    <div class="de-label">Notes</div>
+    <textarea class="de-notes" id="deNotes" rows="3" placeholder="Notes for this day…"></textarea>
+    <div class="de-foot">
+      <button class="de-done" id="deDone">Done</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-habits -->
+
+<!-- ═══ TAB: HEALTH ═══ -->
+<div id="tab-health" class="tab-content">
+
+<div class="section">
+  <div class="section-title">Today's Snapshot</div>
+  <div class="hl-snapshot" id="hlSnapshot"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quick Log</div>
+  <div class="ql-card" id="qlCard"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Recovery</div>
+  <div class="rc-card" id="rcCard"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Nutrition</div>
+  <div class="nt-card" id="ntCard"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Trends</div>
+  <div class="htrend-card" id="htrendCard"></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Insights</div>
+  <div class="hi-card" id="hiCard"></div>
+</div>
+
+<div id="ntModalBg" class="nt-modal-bg" hidden></div>
+<div id="sleepModalBg" class="nt-modal-bg" hidden></div>
+</div><!-- /tab-health -->
+
+<!-- ═══ TAB: GYM ═══ -->
+<div id="tab-gym" class="tab-content">
+<div class="po-shell">
+
+  <button class="po-day-pill" type="button" id="dayPill" title="Tap to switch the day filter to today's split">
+    <span class="po-day-date" id="dayPillDate">—</span>
+    <span class="po-day-sep">·</span>
+    <span class="po-day-split" id="dayPillSplit">—</span>
+  </button>
+
+  <!-- WEIGHT + PROGRESS PHOTOS -->
+  <div class="wt-section">
+    <div class="wt-divider"><span>WEIGHT</span></div>
+
+    <div class="wt-card">
+      <div class="wt-row">
+        <span class="wt-num" id="wtNum">—</span>
+        <span class="wt-unit" id="wtUnit">kg</span>
+      </div>
+      <div class="wt-delta" id="wtDelta" style="display:none"></div>
+      <div class="wt-streak" id="wtStreak" style="display:none">🔥<span id="wtStreakNum">0 day streak</span></div>
+
+      <div class="wt-empty" id="wtEmpty">Log your first weight to start tracking.</div>
+
+      <div class="wt-chart-wrap" id="wtChartWrap" style="display:none">
+        <div class="wt-chart-yaxis">
+          <span id="wtYAxisMax">—</span>
+          <span id="wtYAxisMin">—</span>
+        </div>
+        <svg class="wt-chart" viewBox="0 0 320 130" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="wtFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6BE3A4" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#6BE3A4" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="wtGlow"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <line class="wt-grid" x1="0" y1="20" x2="320" y2="20"></line>
+          <line class="wt-grid" x1="0" y1="65" x2="320" y2="65"></line>
+          <line class="wt-grid" x1="0" y1="110" x2="320" y2="110"></line>
+          <g id="wtChartContent"></g>
+        </svg>
+        <div class="wt-meta" id="wtMeta">0 entries</div>
+      </div>
+
+      <div class="wt-legend" id="wtLegend" style="display:none">
+        <span class="wt-legend-item"><span class="wt-legend-dot"></span>DAILY</span>
+        <span class="wt-legend-item"><span class="wt-legend-dot-avg"></span>7-DAY AVG</span>
+      </div>
+
+      <div class="wt-comp" id="wtComp" style="display:none">
+        <div class="wt-comp-h">
+          <span class="wt-comp-label">Composition estimate</span>
+          <span class="wt-comp-window" id="wtCompWindow">last 30d</span>
+        </div>
+        <div class="wt-comp-headline" id="wtCompHeadline">—</div>
+        <div class="wt-comp-bars" id="wtCompBars"></div>
+        <div class="wt-comp-foot" id="wtCompFoot">—</div>
+      </div>
+
+      <div class="wt-locked" id="wtLocked" style="display:none">
+        <div class="wt-locked-info">
+          <span class="wt-locked-check">✓</span>
+          <div>
+            <div class="wt-locked-label">LOGGED TODAY</div>
+            <div class="wt-locked-value" id="wtLockedValue">— kg</div>
+          </div>
+        </div>
+        <button class="wt-edit-btn" id="wtEditBtn">Edit</button>
+      </div>
+
+      <div class="wt-input-row" id="wtInputRow">
+        <div class="wt-input-top">
+          <input type="number" step="0.1" class="wt-input" id="wtInput" placeholder="Enter weight" inputmode="decimal" aria-label="Today's weight">
+          <span class="wt-unit-static" id="wtUnitStatic">kg</span>
+          <button class="wt-save-btn" id="wtSaveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="wt-progress-link" id="wtProgressLink" type="button" aria-label="Open progress photos">
+      <div>
+        <div class="wt-progress-label">PROGRESS PHOTOS</div>
+        <div class="wt-progress-count" id="wtProgressCount">0 photos</div>
+      </div>
+      <span class="wt-progress-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- Progress photos overlay -->
+  <div class="wt-overlay" id="wtOverlay" aria-hidden="true">
+    <div class="wt-overlay-inner">
+      <div class="wt-overlay-h">
+        <button class="wt-back" id="wtBack" aria-label="Back">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="wt-overlay-title">Progress</div>
+      </div>
+      <div class="wt-overlay-actions">
+        <button class="wt-overlay-action wt-overlay-primary" id="wtTakePhotoBtn">Take Photo</button>
+        <button class="wt-overlay-action wt-overlay-secondary" id="wtFromLibraryBtn">From Library</button>
+      </div>
+      <input type="file" id="wtFileCamera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="wtFileLibrary" accept="image/*" style="display:none">
+      <div class="wt-photo-grid" id="wtPhotoGrid">
+        <div class="wt-photo-empty">No photos yet · tap Take Photo to start</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera modal -->
+  <div class="wt-cam" id="wtCam" aria-hidden="true">
+    <div class="wt-cam-stage">
+      <video class="wt-cam-video" id="wtCamVideo" autoplay playsinline muted></video>
+      <canvas id="wtCamCanvas" style="display:none"></canvas>
+    </div>
+    <div class="wt-cam-actions">
+      <button class="wt-cam-btn" id="wtCamCancel">Cancel</button>
+      <button class="wt-cam-shutter" id="wtCamShutter" aria-label="Capture"></button>
+      <button class="wt-cam-btn" id="wtCamFlip" aria-label="Flip camera">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Photo viewer -->
+  <div class="wt-viewer" id="wtViewer" data-mode="single" aria-hidden="true">
+    <div class="wt-viewer-single">
+      <div class="wt-viewer-stage">
+        <img id="wtViewerImg" alt="" style="max-width:100%; max-height:100%; object-fit:contain;">
+      </div>
+      <div class="wt-viewer-meta">
+        <div class="wt-viewer-date" id="wtViewerDate">—</div>
+        <div class="wt-viewer-weight" id="wtViewerWeight">—</div>
+      </div>
+      <div class="wt-viewer-actions">
+        <button class="wt-viewer-btn wt-viewer-compare" id="wtViewerCompare">Compare</button>
+        <button class="wt-viewer-btn wt-viewer-close" id="wtViewerClose">Close</button>
+        <button class="wt-viewer-btn wt-viewer-delete" id="wtViewerDelete">Delete</button>
+      </div>
+    </div>
+
+    <div class="wt-viewer-compare-view">
+      <div class="wt-compare-stage">
+        <div class="wt-compare-side" id="wtCmpSideA">
+          <img id="wtCmpImgA" alt="">
+          <div class="wt-compare-meta-line" id="wtCmpMetaA">—</div>
+        </div>
+        <button type="button" class="wt-compare-side wt-compare-other" id="wtCmpSideB" title="Tap to compare to a different photo" aria-label="Compare to a different photo">
+          <img id="wtCmpImgB" alt="">
+          <div class="wt-compare-meta-line" id="wtCmpMetaB">—</div>
+        </button>
+      </div>
+      <div class="wt-compare-headline" id="wtCompareHeadline">—</div>
+      <div class="wt-viewer-actions">
+        <button class="wt-viewer-btn wt-viewer-back" id="wtCompareBack">← Back</button>
+        <button class="wt-viewer-btn wt-viewer-close" id="wtCompareClose">Close</button>
+        <button class="wt-viewer-btn wt-viewer-delete" id="wtCompareDelete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="po-header">
+    <button class="po-icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <div class="po-card">
+    <div class="po-filters">
+      <div class="po-seg-row">
+        <span class="po-seg-label">Gym</span>
+        <div class="po-seg-control" id="gymSeg"></div>
+      </div>
+      <div class="po-seg-row">
+        <span class="po-seg-label">Day</span>
+        <div class="po-seg-control" id="daySeg"></div>
+      </div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Exercise</div>
+      <div class="po-exercise-bar">
+        <select class="po-ex-select" id="exSelect"></select>
+        <button class="po-btn-icon" id="addExBtn" title="Add exercise" aria-label="Add">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="po-btn-icon" id="editExBtn" title="Edit / delete" aria-label="Edit">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </button>
+      </div>
+      <div class="po-no-ex" id="noExMsg" style="display:none">No exercises here yet. Tap <strong>+</strong> to add one.</div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Log today's top set</div>
+      <div class="po-bw-banner" id="bwBanner" style="display:none">Bodyweight — log reps only</div>
+      <div class="po-last-set" id="lastSet">
+        <span class="po-last-label">Last time</span>
+        <span class="po-last-value" id="lastSetValue"></span>
+        <span class="po-last-meta" id="lastSetMeta"></span>
+      </div>
+      <div class="po-log-grid" id="logGrid">
+        <div class="po-field" id="weightField">
+          <label id="weightLabel">Weight (kg)</label>
+          <div class="po-weight-row">
+            <button class="po-w-btn" id="weightDownBtn" type="button">−</button>
+            <input type="number" id="weightInput" step="0.5" inputmode="decimal" placeholder="0">
+            <button class="po-w-btn" id="weightUpBtn" type="button">+</button>
+          </div>
+        </div>
+        <div class="po-field">
+          <label>Reps</label>
+          <div class="po-reps-row" id="repsRow" data-value="8">
+            <button type="button" class="po-reps-pill" data-v="4">4</button>
+            <button type="button" class="po-reps-pill" data-v="5">5</button>
+            <button type="button" class="po-reps-pill" data-v="6">6</button>
+            <button type="button" class="po-reps-pill" data-v="7">7</button>
+            <button type="button" class="po-reps-pill active" data-v="8">8</button>
+            <button type="button" class="po-reps-pill" data-v="9">9</button>
+            <button type="button" class="po-reps-pill" data-v="10">10</button>
+            <button type="button" class="po-reps-pill" data-v="11">11</button>
+            <button type="button" class="po-reps-pill" data-v="12">12</button>
+          </div>
+        </div>
+      </div>
+      <button class="po-btn-primary" id="logBtn">Log set</button>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Next session</div>
+      <div id="rxWrap"></div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Stats</div>
+      <div class="po-stats-row">
+        <div class="po-stat-box">
+          <div class="po-stat-label" id="oneRmLabel">Est. 1RM</div>
+          <div class="po-stat-val" id="oneRm">—<span class="po-unit" id="oneRmUnit">kg</span></div>
+        </div>
+        <div class="po-stat-box">
+          <div class="po-stat-label">Best set</div>
+          <div class="po-stat-val" id="bestSet">—</div>
+        </div>
+        <div class="po-stat-box">
+          <div class="po-stat-label">Sessions</div>
+          <div class="po-stat-val" id="sessionCount">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Trend (last 10 sessions)</div>
+      <div class="po-spark-wrap">
+        <svg class="po-spark-svg" id="sparkline" viewBox="0 0 300 60" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sparkGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.18)"/>
+              <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="po-spark-empty" id="sparkEmpty">Need 2+ sessions for trend</div>
+      </div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">History</div>
+      <div id="historyCard">
+        <div class="po-empty">No logs yet.</div>
+      </div>
+    </div>
+
+    <div class="po-sub-section">
+      <div class="po-sub-title">Today's workout</div>
+      <div class="po-tw" id="poTw">
+        <div class="po-tw-head">
+          <div>
+            <div class="po-tw-eyebrow" id="poTwDateLabel">TODAY</div>
+            <div class="po-tw-summary">
+              <span class="po-tw-summary-num" id="poTwSetCount">0</span>
+              <span class="po-tw-summary-label">sets</span>
+              <span class="po-tw-summary-sep">·</span>
+              <span class="po-tw-summary-vol" id="poTwTotalVol">0 kg lifted</span>
+            </div>
+          </div>
+          <button class="po-tw-done-btn" id="poTwDoneBtn" type="button">Mark workout done</button>
+        </div>
+        <ul class="po-tw-list" id="poTwList"></ul>
+        <div class="po-tw-empty" id="poTwEmpty">No sets logged today — log one above and it'll appear here.</div>
+      </div>
+
+      <button type="button" class="po-tw-past-toggle" id="poTwPastToggle" aria-expanded="false">
+        <span>Past workouts <span class="po-tw-past-count" id="poTwPastCount">0</span></span>
+        <span class="po-tw-past-arrow" id="poTwPastArrow">▾</span>
+      </button>
+      <div class="po-tw-past-body" id="poTwPastBody" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Exercise Modal -->
+  <div class="po-modal-bg" id="exModalBg">
+    <div class="po-modal glass">
+      <h3 id="exModalTitle">Add exercise</h3>
+      <div class="po-field">
+        <label class="po-modal-label">Name</label>
+        <input type="text" id="exName" placeholder="e.g. Incline DB press">
+      </div>
+      <div class="po-field">
+        <label class="po-modal-label">Gym</label>
+        <div class="po-modal-seg" id="exGymSeg"></div>
+      </div>
+      <div class="po-field">
+        <label class="po-modal-label">Day</label>
+        <div class="po-modal-seg" id="exDaySeg"></div>
+      </div>
+      <label class="po-bw-toggle">
+        <input type="checkbox" id="exBw">
+        Bodyweight (track reps only, no weight)
+      </label>
+      <div class="po-field" id="exStartWeightField">
+        <label class="po-modal-label">Starting weight</label>
+        <input type="number" id="exStartWeight" step="0.5" placeholder="20" value="20">
+      </div>
+      <div class="po-log-grid" id="exNumFields">
+        <div class="po-field">
+          <label class="po-modal-label">Reps min</label>
+          <input type="number" id="exRepMin" value="6">
+        </div>
+        <div class="po-field">
+          <label class="po-modal-label">Reps max</label>
+          <input type="number" id="exRepMax" value="8">
+        </div>
+      </div>
+      <div class="po-field" id="exStepField">
+        <label class="po-modal-label">Increment</label>
+        <input type="number" id="exStep" step="0.5" value="2.5">
+      </div>
+      <div class="po-modal-actions">
+        <button class="po-btn-secondary" id="exModalCancel">Cancel</button>
+        <button class="po-btn-primary" id="exModalSave">Save</button>
+      </div>
+      <span class="po-delete-link" id="exDelete" style="display:none">Delete this exercise</span>
+    </div>
+  </div>
+
+  <!-- Rotation editor modal -->
+  <div class="po-modal-bg" id="rotModalBg">
+    <div class="po-modal glass">
+      <h3>Edit split rotation</h3>
+      <p style="font-size:12px;color:var(--muted-2);margin:-6px 0 14px;line-height:1.45;">
+        Set your daily workout type for each day of the week.
+      </p>
+      <div class="rot-today-picker">
+        <span style="font-size:12px;color:var(--muted-2);margin-right:8px;">Today is</span>
+        <div class="rot-day-seg" id="rotDaySeg"></div>
+      </div>
+      <div class="rot-list" id="rotList"></div>
+      <div class="po-modal-actions">
+        <button class="po-btn-secondary" id="rotCancel">Cancel</button>
+        <button class="po-btn-primary" id="rotSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="po-modal-bg" id="setModalBg">
+    <div class="po-modal glass" style="max-width:480px;">
+      <h3>Settings</h3>
+
+      <div class="po-set-section">
+        <h4>Units</h4>
+        <div class="po-modal-seg" id="setUnitsSeg">
+          <button data-u="kg">kg</button>
+          <button data-u="lb">lb</button>
+        </div>
+      </div>
+
+      <div class="po-set-section">
+        <h4>Gyms</h4>
+        <div class="po-set-list" id="setGyms"></div>
+        <button class="po-add-row-btn" id="setAddGym">+ Add gym</button>
+      </div>
+
+      <div class="po-set-section">
+        <h4>Days</h4>
+        <div class="po-set-list" id="setDays"></div>
+        <button class="po-add-row-btn" id="setAddDay">+ Add day</button>
+      </div>
+
+      <div class="po-set-section">
+        <h4>Data</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="po-btn-secondary" id="setExport">Export JSON</button>
+          <button class="po-btn-secondary" id="setImport">Import JSON</button>
+          <button class="po-btn-secondary" id="setReset" style="color:var(--danger);border-color:rgba(255,107,107,0.3)">Reset all</button>
+        </div>
+        <input type="file" id="setImportFile" accept=".json" style="display:none">
+      </div>
+
+      <div class="po-modal-actions">
+        <button class="po-btn-primary" id="setModalClose">Done</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /po-shell -->
+</div><!-- /tab-gym -->
+
+</main>
+</div><!-- /app -->
+
+<!-- ═══ TWEAKS PANEL ═══ -->
+<div class="tweaks-overlay" id="tweaksOverlay">
+  <div class="tweaks-panel">
+    <div class="tweaks-h">
+      <h2>Preferences</h2>
+      <button class="tweaks-close" id="tweaksCloseBtn">×</button>
+    </div>
+
+    <div class="tweaks-section">
+      <div class="tweaks-section-label">Accent Color</div>
+      <div class="tweaks-colors" id="tweaksColors">
+        <button class="tweaks-color active" style="background:#F2587A" data-color="#F2587A" title="Coral"></button>
+        <button class="tweaks-color" style="background:#a78bfa" data-color="#a78bfa" title="Violet"></button>
+        <button class="tweaks-color" style="background:#5fd687" data-color="#5fd687" title="Green"></button>
+        <button class="tweaks-color" style="background:#5ba8f7" data-color="#5ba8f7" title="Blue"></button>
+        <button class="tweaks-color" style="background:#e8a345" data-color="#e8a345" title="Amber"></button>
+      </div>
+    </div>
+
+    <div class="tweaks-section">
+      <div class="tweaks-section-label">Clock</div>
+      <div class="tweaks-toggle">
+        <span class="tweaks-toggle-label">Show seconds</span>
+        <button class="pill" id="tweaksSecondsToggle" style="cursor:pointer;color:var(--accent);background:var(--accent-soft);border:0;">On</button>
+      </div>
+    </div>
+
+    <div class="tweaks-section">
+      <div class="tweaks-section-label">Quote</div>
+      <div class="tweaks-select" id="tweaksQuoteSelect"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Tag picker (floats outside main flow) -->
+<div id="finTagPicker" class="fin-tag-picker"></div>
+
+<!-- Tag Manager Modal -->
+<div class="fin-tm-bg" id="finTmBg" role="dialog" aria-modal="true" aria-labelledby="finTmTitle">
+  <div class="fin-tm glass">
+    <h3 id="finTmTitle" style="margin:0 0 16px;font-size:17px;font-weight:700;">Manage Tags</h3>
+    <div class="fin-tm-seg" id="finTmScopeSeg">
+      <button class="fin-tm-scope-btn is-active" data-scope="income">Income</button>
+      <button class="fin-tm-scope-btn" data-scope="expense">Expenses</button>
+    </div>
+    <div class="fin-tm-list" id="finTmList"></div>
+    <div class="fin-tm-add-row" id="finTmAddRow">
+      <input type="text" class="fin-tm-add-input" id="finTmAddInput" placeholder="New tag name…">
+      <button class="fin-tm-add-btn" id="finTmAddBtn">+ Add</button>
+    </div>
+    <div class="fin-tm-actions">
+      <button class="fin-tm-close-btn" id="finTmCloseBtn">Done</button>
+    </div>
+  </div>
+  <div class="fin-tm-toast" id="finTmToast"></div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-modal">
+    <p class="confirm-message" id="confirmMessage"></p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" id="confirmCancel">Cancel</button>
+      <button class="confirm-ok" id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script src="js/shared.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/finances.js"></script>
+<script src="js/habits.js"></script>
+<script src="js/health.js"></script>
+<script src="js/tabs.js"></script>
+<script src="js/gym.js"></script>
+
+<!-- ═══ TWEAKS INIT ═══ -->
+<script>
+(function(){
+  const overlay = document.getElementById('tweaksOverlay');
+  const toggleBtn = document.getElementById('tweaksToggleBtn');
+  const closeBtn = document.getElementById('tweaksCloseBtn');
+
+  toggleBtn.addEventListener('click', function() { overlay.classList.add('open'); });
+  closeBtn.addEventListener('click', function() { overlay.classList.remove('open'); });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+
+  /* Accent colors */
+  const root = document.documentElement;
+  const savedColor = localStorage.getItem('tweak_accent');
+  if (savedColor) {
+    root.style.setProperty('--accent', savedColor);
+    root.style.setProperty('--accent-soft', savedColor + '24');
+  }
+
+  document.getElementById('tweaksColors').querySelectorAll('.tweaks-color').forEach(function(btn) {
+    if (savedColor && btn.dataset.color === savedColor) {
+      document.querySelectorAll('.tweaks-color').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+    btn.addEventListener('click', function() {
+      const color = btn.dataset.color;
+      document.querySelectorAll('.tweaks-color').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      root.style.setProperty('--accent', color);
+      root.style.setProperty('--accent-soft', color + '24');
+      localStorage.setItem('tweak_accent', color);
+    });
+  });
+
+  /* Seconds toggle (uses clock_format_v1 from goals.js: 0=12h+sec, 1=12h, 2=24h+sec, 3=24h) */
+  const secBtn = document.getElementById('tweaksSecondsToggle');
+  var cf = parseInt(localStorage.getItem('clock_format_v1')) || 0;
+  var hasSec = cf === 0 || cf === 2;
+  var is24h = cf === 2 || cf === 3;
+  if (!hasSec) {
+    secBtn.textContent = 'Off';
+    secBtn.style.color = 'var(--muted)';
+    secBtn.style.background = 'transparent';
+  }
+  secBtn.addEventListener('click', function() {
+    var cf = parseInt(localStorage.getItem('clock_format_v1')) || 0;
+    var is24h = cf === 2 || cf === 3;
+    var hasSec = cf === 0 || cf === 2;
+    var newVal = hasSec ? (is24h ? 3 : 1) : (is24h ? 2 : 0);
+    localStorage.setItem('clock_format_v1', String(newVal));
+    secBtn.textContent = newVal === 0 || newVal === 2 ? 'On' : 'Off';
+    secBtn.style.color = (newVal === 0 || newVal === 2) ? 'var(--accent)' : 'var(--muted)';
+    secBtn.style.background = (newVal === 0 || newVal === 2) ? 'var(--accent-soft)' : 'transparent';
+  });
+
+  /* Quote select */
+  const QUOTES = [
+    'Discipline is choosing between what you want now and what you want most.',
+    'Small daily improvements over time lead to stunning results.',
+    "Don't count the days, make the days count.",
+    'Progress is progress, no matter how small.',
+    'Be the hardest worker in the room.',
+    'Your future is created by what you do today, not tomorrow.',
+    'The secret of getting ahead is getting started.',
+    'Do something today that your future self will thank you for.',
+  ];
+  const qs = document.getElementById('tweaksQuoteSelect');
+  QUOTES.forEach(function(q, i) {
+    const btn = document.createElement('button');
+    btn.className = 'tweaks-select-item';
+    btn.textContent = q.slice(0, 40) + '…';
+    btn.dataset.idx = i;
+    if (String(i) === (localStorage.getItem('tweak_quoteIdx') || '0')) btn.classList.add('active');
+    btn.addEventListener('click', function() {
+      qs.querySelectorAll('.tweaks-select-item').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      localStorage.setItem('tweak_quoteIdx', String(i));
+      const qel = document.getElementById('quoteText');
+      if (qel) qel.textContent = q;
+    });
+    qs.appendChild(btn);
+  });
+})();
+</script>
+
+</body>
+</html>
