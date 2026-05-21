@@ -85,7 +85,6 @@
   <!-- ═══ SESSION CARD ═══ -->
   <div class="card a-session">
     <div class="card-head">
-      <span class="pill pill-live"><span class="dot"></span>Live</span>
       <button class="hm-settings-btn" id="drSettingsBtn" type="button" aria-label="Day Ring Settings">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -101,13 +100,9 @@
           <span class="pct-lbl" id="dayRingPhase">MORNING</span>
         </div>
       </div>
-      <div>
-        <div class="session-title">
-          <span id="sessionPhaseIcon">🔥</span>
-          <span id="sessionPhaseName">Deep Focus</span>
-        </div>
-        <p class="session-sub" id="dayRingRange">—</p>
-        <div class="session-sub" id="dayRingStatus" style="font-size:11px;"></div>
+      <div class="session-info">
+        <div class="session-status" id="dayRingStatus">☀️ Morning — fresh start</div>
+        <p class="session-range" id="dayRingRange">—</p>
         <div class="next-up">
           <span class="next-up-label">Next up</span>
           <div class="next-up-row">
@@ -115,22 +110,6 @@
             <span class="nu-text" id="priorityPillTextHero">No focus item queued</span>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="session-foot">
-      <span class="foot-now-label">Now</span>
-      <div class="digital-clock" id="digitalClock" tabindex="0" role="button" aria-label="Toggle clock format">12:00:00</div>
-      <div class="stat-mini">
-        <div class="v focus-time" id="focusStatTime">0m</div>
-        <div class="l">focus</div>
-      </div>
-      <div class="stat-mini">
-        <div class="v done-count" id="focusStatDone">0</div>
-        <div class="l">done</div>
-      </div>
-      <div class="stat-mini">
-        <div class="v" id="focusStatStreak">0</div>
-        <div class="l">streak</div>
       </div>
     </div>
   </div>
@@ -213,8 +192,8 @@
 
   <!-- ═══ HABITS MINI ═══ -->
   <div class="card a-habits">
-    <div class="card-head"><span class="card-label">Habits</span></div>
-    <div class="habits-rings" id="habitFullWidget"></div>
+    <div class="card-head"><span class="card-label">Readiness Monitor</span></div>
+    <div class="readiness-rings" id="habitFullWidget"></div>
     <button class="view-habits" data-tab="habits">View habits →</button>
   </div>
 
@@ -1282,14 +1261,6 @@
     </div>
 
     <div class="tweaks-section">
-      <div class="tweaks-section-label">Clock</div>
-      <div class="tweaks-toggle">
-        <span class="tweaks-toggle-label">Show seconds</span>
-        <button class="pill" id="tweaksSecondsToggle" style="cursor:pointer;color:var(--accent);background:var(--accent-soft);border:0;">On</button>
-      </div>
-    </div>
-
-    <div class="tweaks-section">
       <div class="tweaks-section-label">Quote</div>
       <div class="tweaks-select" id="tweaksQuoteSelect"></div>
     </div>
@@ -1373,27 +1344,6 @@
       root.style.setProperty('--accent-soft', color + '24');
       localStorage.setItem('tweak_accent', color);
     });
-  });
-
-  /* Seconds toggle (uses clock_format_v1 from goals.js: 0=12h+sec, 1=12h, 2=24h+sec, 3=24h) */
-  const secBtn = document.getElementById('tweaksSecondsToggle');
-  var cf = parseInt(localStorage.getItem('clock_format_v1')) || 0;
-  var hasSec = cf === 0 || cf === 2;
-  var is24h = cf === 2 || cf === 3;
-  if (!hasSec) {
-    secBtn.textContent = 'Off';
-    secBtn.style.color = 'var(--muted)';
-    secBtn.style.background = 'transparent';
-  }
-  secBtn.addEventListener('click', function() {
-    var cf = parseInt(localStorage.getItem('clock_format_v1')) || 0;
-    var is24h = cf === 2 || cf === 3;
-    var hasSec = cf === 0 || cf === 2;
-    var newVal = hasSec ? (is24h ? 3 : 1) : (is24h ? 2 : 0);
-    localStorage.setItem('clock_format_v1', String(newVal));
-    secBtn.textContent = newVal === 0 || newVal === 2 ? 'On' : 'Off';
-    secBtn.style.color = (newVal === 0 || newVal === 2) ? 'var(--accent)' : 'var(--muted)';
-    secBtn.style.background = (newVal === 0 || newVal === 2) ? 'var(--accent-soft)' : 'transparent';
   });
 
   /* Quote select */

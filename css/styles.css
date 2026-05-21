@@ -319,9 +319,9 @@ body {
    ═══════════════════════════════════════════════════════════════ */
 
 /* ─── Session Card ─── */
-.session-body { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; }
+.session-body { display: flex; align-items: center; justify-content: center; gap: 36px; flex: 1; }
 
-.ring-wrap { position: relative; width: 124px; height: 124px; }
+.ring-wrap { position: relative; width: 170px; height: 170px; }
 .ring-wrap svg { width: 100%; height: 100%; }
 .ring-wrap .pct {
   position: absolute;
@@ -331,41 +331,18 @@ body {
   align-items: center;
   justify-content: center;
 }
-.ring-wrap .pct-num { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
-.ring-wrap .pct-lbl { font-size: 9px; font-weight: 600; color: var(--muted); letter-spacing: 0.18em; margin-top: 2px; text-transform: uppercase; }
+.ring-wrap .pct-num { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+.ring-wrap .pct-lbl { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.18em; margin-top: 2px; text-transform: uppercase; }
 
-.session-title { font-size: 17px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 6px; }
-.session-sub { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+.session-info { display: flex; flex-direction: column; }
+.session-status { font-size: 20px; font-weight: 700; margin: 0 0 6px; color: var(--text); }
+.session-range { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
 
-.next-up { display: flex; flex-direction: column; gap: 5px; margin-top: auto; }
+.next-up { display: flex; flex-direction: column; gap: 5px; }
 .next-up-label { font-size: 11px; color: var(--muted); }
 .next-up-row { display: flex; align-items: center; gap: 8px; }
 .next-up-row .nu-dot { width: 6px; height: 6px; border-radius: 99px; background: var(--accent); flex: 0 0 6px; }
-.next-up-row .nu-text { font-size: 13.5px; font-weight: 500; }
-
-.session-foot {
-  display: grid;
-  grid-template-columns: auto 1fr 1fr 1fr;
-  gap: 18px;
-  align-items: center;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  margin-top: auto;
-}
-.foot-now-label { font-size: 10px; font-weight: 600; color: var(--muted-2); letter-spacing: 0.18em; text-transform: uppercase; }
-
-.digital-clock {
-  font-family: var(--font-mono);
-  font-size: 38px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 0.01em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-}
-.stat-mini .v { font-size: 16px; font-weight: 600; line-height: 1.1; }
-.stat-mini .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+.next-up-row .nu-text { font-size: 15px; font-weight: 500; }
 
 
 
@@ -585,6 +562,15 @@ body {
 .hfr-fill { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 36px 36px; }
 .view-habits { color: var(--muted); font-size: 12px; background: transparent; border: 0; padding: 0; cursor: pointer; margin-top: auto; text-align: left; }
 .view-habits:hover { color: var(--text); }
+
+/* ─── Readiness Monitor (Home) ─── */
+.readiness-rings { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.rm-item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.rm-ring-wrap { position: relative; width: 110px; height: 110px; flex-shrink: 0; }
+.rm-ring-wrap svg { width: 100%; height: 100%; }
+.rm-pct { position: absolute; bottom: 16px; left: 0; right: 0; text-align: center; font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--text); }
+.rm-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.rm-sub { font-size: 11px; color: var(--muted); }
 
 /* ─── Calendar Card ─── */
 .cal-head { display: flex; align-items: center; justify-content: space-between; }

@@ -857,6 +857,7 @@
     renderHabitsView();
     renderTodayMood();
     renderMoodCalendar();
+    renderHomeHealthRings();
 
     // Trigger entrance animation on initial view
     var initView = $('habitTracker');
@@ -970,21 +971,30 @@
       }
     ];
 
-    var r = 31;
+    var icons = [
+      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></g>',
+      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>',
+      '<circle cx="60" cy="38" r="9" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="60" cy="38" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="60" cy="38" r="1.5" fill="var(--muted)"/>'
+    ];
+
+    var r = 52;
     var c = 2 * Math.PI * r;
     var html = '';
-    rings.forEach(function(ring) {
+    rings.forEach(function(ring, i) {
       var offset = c * (1 - ring.pct / 100);
-      html += '<div class="hfr-item">';
-      html += '<div class="hfr-ring">';
-      html += '<svg viewBox="0 0 72 72">';
-      html += '<circle class="hfr-track" cx="36" cy="36" r="' + r + '"/>';
-      html += '<circle class="hfr-fill" cx="36" cy="36" r="' + r + '" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" style="stroke:' + ring.color + '"/>';
+      html += '<div class="rm-item">';
+      html += '<div class="rm-ring-wrap">';
+      html += '<svg viewBox="0 0 120 120">';
+      html += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="var(--surface-2)" stroke-width="8" stroke-linecap="round"/>';
+      html += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + ring.color + '" stroke-width="8" stroke-linecap="round"';
+      html += ' stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"';
+      html += ' transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 0.6s ease"/>';
+      html += icons[i];
       html += '</svg>';
-      html += '<span class="hfr-pct">' + ring.pct + '%</span>';
+      html += '<span class="rm-pct">' + ring.pct + '%</span>';
       html += '</div>';
-      html += '<span class="hfr-name">' + ring.label + '</span>';
-      html += '<span class="hfr-sublabel">' + ring.sub + '</span>';
+      html += '<span class="rm-name">' + ring.label + '</span>';
+      html += '<span class="rm-sub">' + ring.sub + '</span>';
       html += '</div>';
     });
     el.innerHTML = html;
