@@ -261,8 +261,7 @@ body {
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   calendar"
-    "activity activity mood      weather  quote"
-    "notebar  notebar  notebar   notebar  notebar";
+    "activity activity mood      weather  quote";
 }
 
 /* ─── Card Base ─── */
@@ -312,7 +311,7 @@ body {
 .a-mood { grid-area: mood; }
 .a-weather { grid-area: weather; }
 .a-quote { grid-area: quote; }
-.a-notebar { grid-area: notebar; }
+
 
 /* ═══════════════════════════════════════════════════════════════
    HOME WIDGETS
@@ -695,38 +694,7 @@ body {
 .quote-author { font-size: 12px; color: var(--muted); margin-top: 8px; display: block; }
 
 /* ─── Note Bar ─── */
-.note-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r);
-  background: var(--surface);
-}
-.nb-icon { color: var(--muted); flex: 0 0 auto; }
-.note-bar input {
-  flex: 1;
-  background: transparent;
-  border: 0;
-  outline: none;
-  font-size: 13.5px;
-  color: var(--text);
-  font-family: inherit;
-}
-.note-bar input::placeholder { color: var(--muted-2); }
-.nb-add {
-  width: 30px; height: 30px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: #ffffff;
-  border: 0;
-  font-size: 17px;
-  font-weight: 600;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
+
 
 /* ═══════════════════════════════════════════════════════════════
    TWEAKS PANEL
@@ -1954,8 +1922,7 @@ body {
       "tomorrow timeline habits"
       "calendar calendar habits"
       "activity activity activity"
-      "mood weather quote"
-      "notebar notebar notebar";
+      "mood weather quote";
   }
   .fin-donut-row { grid-template-columns: 1fr; }
   .fin-tables { grid-template-columns: 1fr; }
@@ -1977,8 +1944,7 @@ body {
       "activity"
       "mood"
       "weather"
-      "quote"
-      "notebar";
+      "quote";
   }
   .po-log-grid { grid-template-columns: 1fr; }
   .po-stats-row { grid-template-columns: 1fr; }

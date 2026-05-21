@@ -965,7 +965,7 @@
       },
       {
         label: 'Focus',
-        color: '#f59e0b',
+        color: 'var(--accent)',
         pct: Math.min(100, Math.round(focusMin / settings.focus_goal_min * 100)),
         sub: focusMin > 0 ? (Math.floor(focusMin / 60) + 'h ' + Math.round(focusMin % 60) + 'm') : '—'
       }
