@@ -150,7 +150,7 @@
       <button id="gmPushBtn" class="push-tomorrow" style="display:none;">Push remaining to tomorrow →</button>
     </div>
     <div class="add-goal">
-      <input type="text" id="goalInput" placeholder="Add a goal...">
+      <input type="text" id="goalInput" placeholder="Add a task...">
       <button id="goalAddBtn" class="add-btn">+</button>
     </div>
     <div id="todayLabel" style="display:none;"></div>
@@ -192,9 +192,11 @@
       <span class="card-label">Tomorrow</span>
       <span class="pill" style="color:var(--muted-2);background:transparent;font-size:11px;" id="gmTomorrowCount">0 planned</span>
     </div>
-    <ul id="tomorrowList" class="tomorrow-list"></ul>
-    <div id="tomorrowEmpty" class="hm-empty"><span>Nothing planned for tomorrow yet.</span></div>
-    <div class="add-goal" style="margin-top:auto;">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;">
+      <ul id="tomorrowList" class="tomorrow-list"></ul>
+      <div id="tomorrowEmpty" class="hm-empty"><span>Nothing planned for tomorrow yet.</span></div>
+    </div>
+    <div class="add-goal">
       <input type="text" id="tomorrowInput" placeholder="Plan ahead...">
       <button id="tomorrowAddBtn" class="add-btn">+</button>
     </div>

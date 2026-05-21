@@ -11,6 +11,9 @@
     } catch (e) { return null; }
   }
   function storeSet(key, value) {
+    if (Array.isArray(value)) {
+      value = value.filter(function(g) { return g && typeof g === 'object'; });
+    }
     localStorage.setItem(key, JSON.stringify(value));
     if (typeof key === 'string' && key.startsWith('goals:')) {
       window.dispatchEvent(new CustomEvent('goals-changed'));
@@ -182,13 +185,21 @@
     });
   }
 
-  // ----------- Drag reorder -----------
+  // ----------- Drag (reorder + cross-list) -----------
+  function getDragData(e) {
+    try {
+      const raw = e.dataTransfer.getData('text/plain');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_) { return null; }
+  }
+
   function wireDragReorder(li, dragHandle, idx, key, reload) {
     li.draggable = false;
     dragHandle.addEventListener('mousedown', () => { li.draggable = true; });
     dragHandle.addEventListener('mouseup', () => { li.draggable = false; });
     li.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', String(idx));
+      e.dataTransfer.setData('text/plain', JSON.stringify({ key, idx }));
       e.dataTransfer.effectAllowed = 'move';
       li.style.opacity = '0.1';
     });
@@ -206,16 +217,53 @@
     });
     li.addEventListener('drop', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       li.classList.remove('is-dragover');
-      const from = parseInt(e.dataTransfer.getData('text/plain'), 10);
-      const to = idx;
-      if (isNaN(from) || from === to) return;
-      const goals = storeGet(key) || [];
-      const [moved] = goals.splice(from, 1);
-      goals.splice(to, 0, moved);
-      storeSet(key, goals);
-      reload();
+      const data = getDragData(e);
+      if (!data) return;
+      const fromKey = data.key;
+      const fromIdx = data.idx;
+      const toKey = key;
+      const toIdx = idx;
+      if (fromKey === toKey && fromIdx === toIdx) return;
+      const fromGoals = storeGet(fromKey) || [];
+      if (!fromGoals[fromIdx]) return;
+      const [moved] = fromGoals.splice(fromIdx, 1);
+      storeSet(fromKey, fromGoals);
+      const toGoals = storeGet(toKey) || [];
+      toGoals.splice(toIdx, 0, moved);
+      storeSet(toKey, toGoals);
+      loadToday();
+      loadTomorrow();
     });
+  }
+
+  // ----------- Container drop (for drops on empty list area) -----------
+  function initDragContainers() {
+    try {
+      [goalList, tomorrowList].forEach(function(list) {
+        if (!list) return;
+        list.addEventListener('dragover', function(e) { e.preventDefault(); });
+        list.addEventListener('drop', function(e) {
+          e.preventDefault();
+          var data = getDragData(e);
+          if (!data) return;
+          var targetKey = list.id === 'goalList'
+            ? 'goals:' + getActiveDateString()
+            : 'goals:' + getTomorrowDateString();
+          if (data.key === targetKey) return;
+          var fromGoals = storeGet(data.key) || [];
+          if (!fromGoals[data.idx]) return;
+          var moved = fromGoals.splice(data.idx, 1)[0];
+          storeSet(data.key, fromGoals);
+          var toGoals = storeGet(targetKey) || [];
+          toGoals.push(moved);
+          storeSet(targetKey, toGoals);
+          loadToday();
+          loadTomorrow();
+        });
+      });
+    } catch (e) { /* drag containers not available */ }
   }
 
   // ----------- Build a goal row -----------
@@ -397,14 +445,17 @@
     else renderTodayHeader();
   }
 
+  function cleanGoals(arr) {
+    return (arr || []).filter(function(g) { return g && typeof g === 'object'; });
+  }
   function loadToday() {
     const key = 'goals:' + getActiveDateString();
-    const goals = storeGet(key) || [];
+    const goals = cleanGoals(storeGet(key));
     renderListInto(goals, goalList, emptyState, key, false);
   }
   function loadTomorrow() {
     const key = 'goals:' + getTomorrowDateString();
-    const goals = storeGet(key) || [];
+    const goals = cleanGoals(storeGet(key));
     renderListInto(goals, tomorrowList, tomorrowEmpty, key, true);
   }
 
@@ -1054,6 +1105,7 @@
   checkStreak();
   loadToday();
   loadTomorrow();
+  initDragContainers();
   renderStreak();
   updateDayBar();
   updateGreeting();
