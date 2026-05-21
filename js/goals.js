@@ -109,7 +109,7 @@
         last = d;
         continue;
       }
-      const allDone = arr.every(g => g.done);
+      const allDone = arr.every(g => g && typeof g === 'object' && g.done);
       count = allDone ? count + 1 : 0;
       last = d;
     }
@@ -291,6 +291,8 @@
       else delete goals[idx].doneAt;
       storeSet(key, goals);
       reload();
+      checkStreak();
+      renderStreak();
     });
     li.appendChild(cb);
 
@@ -396,8 +398,12 @@
 
   function renderStreak() {
     const state = storeGet(STREAK_KEY) || { count: 0 };
-    gmStreakNum.textContent = String(state.count || 0);
-    if (state.count > 0) gmStreak.classList.add('gm-streak-active');
+    const todayKey = 'goals:' + getActiveDateString();
+    const today = storeGet(todayKey) || [];
+    const todayAllDone = today.length > 0 && today.every(g => g && typeof g === 'object' && g.done);
+    const streak = state.count + (todayAllDone ? 1 : 0);
+    gmStreakNum.textContent = String(streak);
+    if (streak > 0) gmStreak.classList.add('gm-streak-active');
     else gmStreak.classList.remove('gm-streak-active');
   }
 
@@ -693,46 +699,7 @@
     dayRingStatus.textContent = meta[0] + ' ' + meta[1];
 
     dayRingRange.textContent = formatBlockTime(block.start) + ' – ' + formatBlockTime(block.end);
-    updateDigitalClock();
   }
-
-  // ============ DIGITAL TIME CLOCK ============
-  const digitalClock = $('digitalClock');
-  let clockFormat = storeGet('clock_format_v1') ?? 0;
-
-  function formatDigitalClock(now, f) {
-    const h = now.getHours();
-    const m = now.getMinutes();
-    const s = now.getSeconds();
-    if (f === 2 || f === 3) {
-      const hh = pad2(h);
-      return f === 2 ? hh + ':' + pad2(m) + ':' + pad2(s) : hh + ':' + pad2(m);
-    }
-    const amp = h >= 12 ? 'PM' : 'AM';
-    let h12 = h % 12;
-    if (h12 === 0) h12 = 12;
-    return f === 0
-      ? h12 + ':' + pad2(m) + ':' + pad2(s) + ' ' + amp
-      : h12 + ':' + pad2(m) + ' ' + amp;
-  }
-
-  function updateDigitalClock() {
-    const now = new Date();
-    const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-    const blocks = loadBlocks();
-    const block = findCurrentBlock(blocks, hours);
-    digitalClock.style.color = block.color;
-    digitalClock.textContent = formatDigitalClock(now, clockFormat);
-  }
-
-  digitalClock.addEventListener('click', function onClockClick() {
-    clockFormat = (clockFormat + 1) % 4;
-    storeSet('clock_format_v1', clockFormat);
-    updateDigitalClock();
-    digitalClock.classList.remove('is-switching');
-    void digitalClock.offsetWidth;
-    digitalClock.classList.add('is-switching');
-  });
 
   // ============ DAY RING SETTINGS MODAL ============
   const drModalBg = $('drModalBg');
@@ -879,7 +846,10 @@
     });
 
     const streakState = storeGet(STREAK_KEY) || { count: 0, best: 0 };
-    const streak = streakState.count || 0;
+    const spTodayKey = 'goals:' + getActiveDateString();
+    const spToday = storeGet(spTodayKey) || [];
+    const spTodayAllDone = spToday.length > 0 && spToday.every(g => g && typeof g === 'object' && g.done);
+    const streak = streakState.count + (spTodayAllDone ? 1 : 0);
     const best = streakState.best || 0;
 
     // Build sparkline polylines
@@ -1033,24 +1003,11 @@
 
   function saveFocusSession(s) { localStorage.setItem(FOCUS_SESSION_KEY, JSON.stringify(s)); }
 
-  function _fmtFocusStat(totalMin) {
-    return totalMin >= 60 ? Math.floor(totalMin / 60) + 'h ' + (totalMin % 60) + 'm' : totalMin + 'm';
-  }
-
-  function _focusElapsedMin(session) {
-    var acc = session.accumulatedMin || 0;
-    if (session.running && session.startedAt) acc += (Date.now() - session.startedAt) / 60000;
-    return acc;
-  }
-
   function _updateFocusStatUI() {
     var toggle = $('focusStatToggle');
-    var timeEl = $('focusStatTime');
     var dot = $('focusRunningDot');
-    if (!toggle || !timeEl) return;
+    if (!toggle) return;
     var session = getFocusSession();
-    var totalMin = Math.round(_focusElapsedMin(session));
-    timeEl.textContent = _fmtFocusStat(totalMin);
     if (session.running) {
       toggle.classList.add('is-running');
       if (dot) dot.style.display = '';
@@ -1120,7 +1077,7 @@
   initCalendar();
   initFocusTimer();
   setInterval(updateDayBar, 60 * 1000);
-  setInterval(updateDigitalClock, 1000);
+
   startTicker();
 
 })();
