@@ -1024,7 +1024,7 @@
   }
 
   // ============ FOCUS TIMER ============
-  var focusTimerInterval = null;
+  var _focusTimerInterval = null;
 
   function getFocusSession() {
     try { return JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY)) || { running: false, startedAt: null, accumulatedMin: 0 }; }
@@ -1033,71 +1033,77 @@
 
   function saveFocusSession(s) { localStorage.setItem(FOCUS_SESSION_KEY, JSON.stringify(s)); }
 
-  function formatFocusTime(totalSec) {
-    var m = Math.floor(totalSec / 60);
-    var s = totalSec % 60;
-    return m + ':' + (s < 10 ? '0' : '') + s;
+  function _fmtFocusStat(totalMin) {
+    return totalMin >= 60 ? Math.floor(totalMin / 60) + 'h ' + (totalMin % 60) + 'm' : totalMin + 'm';
   }
 
-  function focusElapsedSec(session) {
-    var acc = (session.accumulatedMin || 0) * 60;
-    if (session.running && session.startedAt) acc += Math.floor((Date.now() - session.startedAt) / 1000);
+  function _focusElapsedMin(session) {
+    var acc = session.accumulatedMin || 0;
+    if (session.running && session.startedAt) acc += (Date.now() - session.startedAt) / 60000;
     return acc;
   }
 
-  function updateFocusTimerUI() {
-    var btn = $('focusTimerBtn');
-    var disp = $('focusTimerDisplay');
-    if (!btn) return;
+  function _updateFocusStatUI() {
+    var toggle = $('focusStatToggle');
+    var timeEl = $('focusStatTime');
+    var dot = $('focusRunningDot');
+    if (!toggle || !timeEl) return;
     var session = getFocusSession();
-    var elapsed = focusElapsedSec(session);
+    var totalMin = Math.round(_focusElapsedMin(session));
+    timeEl.textContent = _fmtFocusStat(totalMin);
     if (session.running) {
-      btn.textContent = '⏹ Stop Focus';
-      btn.classList.add('is-running');
-      if (disp) { disp.style.display = ''; disp.textContent = formatFocusTime(elapsed); }
+      toggle.classList.add('is-running');
+      if (dot) dot.style.display = '';
     } else {
-      btn.textContent = '▶ Start Focus';
-      btn.classList.remove('is-running');
-      if (disp) { disp.style.display = elapsed > 0 ? '' : 'none'; disp.textContent = formatFocusTime(elapsed); }
+      toggle.classList.remove('is-running');
+      if (dot) dot.style.display = 'none';
     }
   }
 
+  function _stopFocusSession() {
+    clearInterval(_focusTimerInterval);
+    var s = getFocusSession();
+    s.accumulatedMin = (s.accumulatedMin || 0) + (Date.now() - s.startedAt) / 60000;
+    s.running = false;
+    s.startedAt = null;
+    saveFocusSession(s);
+    var totalMin = Math.round(s.accumulatedMin);
+    var td = new Date();
+    if (td.getHours() < 6) td.setDate(td.getDate() - 1);
+    var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+    try {
+      var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
+      health.focus_min = totalMin;
+      localStorage.setItem('health:' + ymd, JSON.stringify(health));
+    } catch(e) {}
+    window.dispatchEvent(new CustomEvent('focus-updated'));
+    renderStatsPanel();
+    _updateFocusStatUI();
+  }
+
+  function _startFocusSession() {
+    var s = getFocusSession();
+    s.running = true;
+    s.startedAt = Date.now();
+    saveFocusSession(s);
+    _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
+    _updateFocusStatUI();
+  }
+
   function initFocusTimer() {
-    var btn = $('focusTimerBtn');
-    if (!btn) return;
+    var toggle = $('focusStatToggle');
+    if (!toggle) return;
 
     var session = getFocusSession();
     if (session.running) {
-      focusTimerInterval = setInterval(function() { updateFocusTimerUI(); }, 1000);
+      _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
     }
-    updateFocusTimerUI();
+    _updateFocusStatUI();
 
-    btn.addEventListener('click', function() {
+    toggle.addEventListener('click', function() {
       var s = getFocusSession();
-      if (!s.running) {
-        s.running = true;
-        s.startedAt = Date.now();
-        saveFocusSession(s);
-        focusTimerInterval = setInterval(function() { updateFocusTimerUI(); }, 1000);
-      } else {
-        clearInterval(focusTimerInterval);
-        s.accumulatedMin = (s.accumulatedMin || 0) + (Date.now() - s.startedAt) / 60000;
-        s.running = false;
-        s.startedAt = null;
-        saveFocusSession(s);
-        var totalMin = Math.round(s.accumulatedMin);
-        var td = new Date();
-        if (td.getHours() < 6) td.setDate(td.getDate() - 1);
-        var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
-        try {
-          var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
-          health.focus_min = totalMin;
-          localStorage.setItem('health:' + ymd, JSON.stringify(health));
-        } catch(e) {}
-        window.dispatchEvent(new CustomEvent('focus-updated'));
-        renderStatsPanel();
-      }
-      updateFocusTimerUI();
+      if (s.running) _stopFocusSession();
+      else _startFocusSession();
     });
   }
 

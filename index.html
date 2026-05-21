@@ -49,7 +49,13 @@
     <div class="su-avatar"></div>
     <div class="su-info">
       <span class="su-name">Tristen</span>
-      <span class="su-status">● Focus mode</span>
+      <div class="su-status-group" id="focusStatToggle">
+        <span class="su-online-status"><span class="su-online-dot">●</span> Online</span>
+        <span class="su-focus-status">
+          <span class="su-focus-dot" id="focusRunningDot" style="display:none"></span>
+          Focus
+        </span>
+      </div>
     </div>
   </div>
 </aside>
@@ -109,10 +115,6 @@
             <span class="nu-text" id="priorityPillTextHero">No focus item queued</span>
           </div>
         </div>
-        <div class="focus-timer-row">
-          <button id="focusTimerBtn" class="focus-timer-btn">▶ Start Focus</button>
-          <span id="focusTimerDisplay" class="focus-timer-display" style="display:none">0:00</span>
-        </div>
       </div>
     </div>
     <div class="session-foot">
@@ -150,7 +152,7 @@
       <button id="gmPushBtn" class="push-tomorrow" style="display:none;">Push remaining to tomorrow →</button>
     </div>
     <div class="add-goal">
-      <input type="text" id="goalInput" placeholder="Add a task...">
+      <input type="text" id="goalInput" placeholder="Add a goal...">
       <button id="goalAddBtn" class="add-btn">+</button>
     </div>
     <div id="todayLabel" style="display:none;"></div>
