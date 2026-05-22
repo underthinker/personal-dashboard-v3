@@ -481,7 +481,9 @@
     var hero = $('priorityPillTextHero');
     if (!hero) return;
     try {
-      var key = 'goals:' + new Date().toISOString().slice(0,10);
+      var now = new Date();
+      var p2 = function(n) { return String(n).padStart(2,'0'); };
+      var key = 'goals:' + now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate());
       var data = JSON.parse(localStorage.getItem(key) || '[]');
       var q = data.find(function(g) { return g.queued && !g.done; });
       hero.textContent = q ? q.text : 'No focus item queued';
@@ -493,7 +495,9 @@
     const badge = $('homeBadge');
     if (!badge) return;
     try {
-      const key = 'goals:' + new Date().toISOString().slice(0,10);
+      const now = new Date();
+      const p2 = n => String(n).padStart(2,'0');
+      const key = 'goals:' + now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate());
       const data = JSON.parse(localStorage.getItem(key) || '[]');
       const undone = data.filter(function(g) { return !g.done; }).length;
       badge.textContent = undone;

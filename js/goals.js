@@ -347,8 +347,18 @@
       if (!goals[idx]) return;
       goals[idx].queued = !goals[idx].queued;
       storeSet(key, goals);
-      li.classList.add('is-queue-flashing');
-      setTimeout(() => { reload(); }, 480);
+      queueBtn.classList.remove('is-popping');
+      void queueBtn.offsetWidth;
+      queueBtn.classList.add('is-popping');
+      queueBtn.addEventListener('animationend', () => queueBtn.classList.remove('is-popping'), { once: true });
+      const heroEl = document.getElementById('priorityPillTextHero');
+      if (heroEl) {
+        heroEl.classList.remove('is-flashing');
+        void heroEl.offsetWidth;
+        heroEl.classList.add('is-flashing');
+        heroEl.addEventListener('animationend', () => heroEl.classList.remove('is-flashing'), { once: true });
+      }
+      setTimeout(() => { reload(); }, 460);
     });
     li.appendChild(queueBtn);
 
@@ -358,10 +368,13 @@
     del.textContent = '×';
     del.title = 'Delete';
     del.addEventListener('click', () => {
-      const goals = storeGet(key) || [];
-      goals.splice(idx, 1);
-      storeSet(key, goals);
-      reload();
+      li.classList.add('is-removing');
+      setTimeout(() => {
+        const goals = storeGet(key) || [];
+        goals.splice(idx, 1);
+        storeSet(key, goals);
+        reload();
+      }, 280);
     });
     li.appendChild(del);
 

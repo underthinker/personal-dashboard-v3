@@ -370,8 +370,17 @@ body {
   gap: 10px;
   padding: 6px 4px;
   border-radius: 8px;
+  border-left: 2px solid transparent;
+  transition: background var(--dur-normal) var(--ease-smooth),
+              transform var(--dur-normal) var(--ease-smooth),
+              box-shadow var(--dur-normal) var(--ease-smooth),
+              border-left-color var(--dur-normal) var(--ease-smooth);
 }
-.goal-item:hover { background: var(--surface-2); }
+.goal-item:hover {
+  background: var(--surface-2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+}
 
 .goal-item input[type="checkbox"] {
   appearance: none;
@@ -397,53 +406,94 @@ body {
   margin-top: -2px;
 }
 .goal-item.is-done .goal-text { color: var(--muted); text-decoration: line-through; }
-.goal-item.is-queued .goal-text::after {
-  content: ' ⚡';
-  font-size: 11px;
+.goal-item.is-queued {
+  background: rgba(var(--accent-rgb), 0.06);
+  border-left-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.10), 0 4px 16px rgba(var(--accent-rgb), 0.08);
+}
+.goal-item.is-queued:hover {
+  background: rgba(var(--accent-rgb), 0.10);
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 6px 20px rgba(var(--accent-rgb), 0.12);
 }
 
 .goal-text { flex: 1; font-size: 13.5px; outline: none; }
 .goal-drag { color: var(--muted-2); font-size: 12px; cursor: grab; padding: 2px; user-select: none; }
 .goal-kw-icon { font-size: 14px; flex: 0 0 18px; text-align: center; }
 
-.gm-queue-btn { background: transparent; border: 0; font-size: 14px; cursor: pointer; padding: 2px; opacity: 0.4; }
-.gm-queue-btn.is-active { opacity: 1; }
+.gm-queue-btn {
+  background: transparent;
+  border: 0;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.4;
+  border-radius: 4px;
+  transition: opacity var(--dur-fast) var(--ease-smooth),
+              background var(--dur-fast) var(--ease-smooth),
+              transform var(--dur-fast) var(--ease-bounce);
+}
+.gm-queue-btn.is-active {
+  opacity: 1;
+  color: var(--accent);
+}
+.gm-queue-btn:hover {
+  opacity: 1;
+  background: rgba(var(--accent-rgb), 0.15);
+  transform: scale(1.18);
+}
 
 .goal-delete {
   background: transparent;
   border: 0;
   font-size: 16px;
   cursor: pointer;
-  padding: 2px;
-  opacity: 0.4;
+  padding: 4px;
+  opacity: 0;
   color: var(--danger);
   line-height: 1;
-  transition: opacity var(--dur-normal) var(--ease-smooth);
-}
-
-.gm-queue-btn,
-.goal-delete {
   border-radius: 4px;
+  transition: opacity var(--dur-fast) var(--ease-smooth),
+              background var(--dur-fast) var(--ease-smooth),
+              transform var(--dur-fast) var(--ease-bounce);
 }
-
-.gm-queue-btn:hover {
-  opacity: 1;
-  animation: glow-accent 1.2s ease-in-out infinite;
-}
-
+.goal-item:hover .goal-delete { opacity: 0.45; }
 .goal-delete:hover {
-  opacity: 1;
-  animation: glow-danger 1.2s ease-in-out infinite;
+  opacity: 1 !important;
+  background: rgba(255, 107, 107, 0.15);
+  transform: scale(1.18);
 }
 
-@keyframes glow-accent {
-  0%, 100% { box-shadow: 0 0 4px rgba(242,88,122,0.25); }
-  50% { box-shadow: 0 0 14px rgba(242,88,122,0.55); }
+@keyframes queueBtnPop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.7) rotate(-10deg); }
+  65%  { transform: scale(0.82) rotate(5deg); }
+  85%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.gm-queue-btn.is-popping {
+  animation: queueBtnPop 0.45s var(--ease-bounce) forwards;
 }
 
-@keyframes glow-danger {
-  0%, 100% { box-shadow: 0 0 4px rgba(255,107,107,0.25); }
-  50% { box-shadow: 0 0 14px rgba(255,107,107,0.55); }
+@keyframes rowSlideOut {
+  0%   { opacity: 1; transform: translateX(0);    max-height: 48px; padding-top: 6px; padding-bottom: 6px; }
+  55%  { opacity: 0; transform: translateX(-20px); max-height: 48px; }
+  100% { opacity: 0; transform: translateX(-20px); max-height: 0;  padding-top: 0; padding-bottom: 0; }
+}
+.goal-item.is-removing {
+  animation: rowSlideOut 0.28s var(--ease-smooth) forwards;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes heroFlash {
+  0%   { opacity: 1; transform: translateY(0); }
+  25%  { opacity: 0; transform: translateY(-5px); }
+  50%  { opacity: 0; transform: translateY(5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.nu-text.is-flashing {
+  animation: heroFlash 0.38s var(--ease-smooth) forwards;
 }
 
 .goal-item.is-dragover { border-top: 2px solid var(--accent); }
