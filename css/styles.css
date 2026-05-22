@@ -315,6 +315,30 @@ body {
 .a-weather { grid-area: weather; }
 .a-quote { grid-area: quote; }
 
+/* ─── Second-row always-on compact sizing ─── */
+/* Timeline */
+.home-grid .timeline { gap: 6px; }
+.home-grid .tl-row { gap: 8px; }
+.home-grid .tl-time { font-size: 10.5px; }
+.home-grid .tl-content { font-size: 12px; }
+.home-grid .tl-sub { font-size: 10.5px; margin-top: 1px; }
+/* Tomorrow */
+.home-grid .tom-text { font-size: 12px; }
+.home-grid .tom-item { padding: 3px 0; }
+.home-grid .tom-icon { width: 18px; height: 18px; font-size: 10px; flex: 0 0 18px; }
+.home-grid .tomorrow-list { gap: 4px; max-height: 100px; overflow-y: auto; }
+/* Readiness */
+.home-grid .rm-name { font-size: 12px; }
+.home-grid .rm-sub { font-size: 11px; }
+.home-grid .rm-pct { font-size: 20px; }
+.home-grid .readiness-rings { gap: 8px; }
+.home-grid .rm-item { gap: 5px; }
+/* Calendar */
+.home-grid .cal-month { font-size: 13px; }
+.home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
+.home-grid .cal-head { padding-bottom: 8px; }
+.home-grid .cal-day { font-size: 11px; }
+.home-grid .cal-dow { font-size: 9px; }
 
 /* ═══════════════════════════════════════════════════════════════
    HOME WIDGETS
@@ -680,7 +704,7 @@ body {
 /* ─── Readiness Monitor (Home) ─── */
 .readiness-rings { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; flex: 1; align-content: center; }
 .rm-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
-.rm-ring-wrap { position: relative; width: 100%; aspect-ratio: 1; flex-shrink: 0; }
+.rm-ring-wrap { position: relative; width: 100%; aspect-ratio: 1; flex-shrink: 0; max-width: 90px; }
 .rm-ring-wrap svg { width: 100%; height: 100%; }
 .rm-pct { position: absolute; bottom: 28%; left: 0; right: 0; text-align: center; font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--text); }
 .rm-name { font-size: 14px; font-weight: 500; color: var(--text); }
@@ -732,7 +756,7 @@ body {
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px 2px;
+  gap: 3px 1px;
 }
 .cal-grid.anim-next { animation: cal-enter-right 0.22s var(--ease-out) both; }
 .cal-grid.anim-prev { animation: cal-enter-left  0.22s var(--ease-out) both; }
@@ -747,7 +771,7 @@ body {
   text-transform: uppercase;
 }
 .cal-day {
-  aspect-ratio: 1;
+  aspect-ratio: 0.8;
   display: flex;
   flex-direction: column;
   align-items: center;
