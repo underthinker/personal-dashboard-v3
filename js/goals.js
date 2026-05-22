@@ -921,17 +921,7 @@
       }).join('');
     }
 
-    var copyEl = $('perfMicrocopy');
-    if (copyEl) {
-      var remaining = 7 - consistencyCount;
-      copyEl.textContent = consistencyCount === 7 ? 'Perfect week. That\'s elite.'
-        : consistencyCount >= 5 ? 'Keep it up! You\'re building momentum.'
-        : consistencyCount >= 3 ? (remaining === 1 ? 'One more day to close the week strong.' : remaining + ' days left to build a strong week.')
-        : consistencyCount >= 1 ? 'You\'re building momentum. Keep going.'
-        : 'Start building momentum today.';
-    }
-
-    // ── Legacy optional refs (health tab hero display) ──
+// ── Legacy optional refs (health tab hero display) ──
     var heroTime = $('focusStatTime'); if (heroTime) heroTime.textContent = focusStr;
     var heroDone = $('focusStatDone'); if (heroDone) heroDone.textContent = String(doneTasks);
     var heroStreak = $('focusStatStreak');

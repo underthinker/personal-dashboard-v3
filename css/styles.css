@@ -88,7 +88,7 @@
 /* ─── Reset ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { -webkit-font-smoothing: antialiased; }
+html { -webkit-font-smoothing: antialiased; height: 100%; }
 
 body {
   background: var(--bg);
@@ -102,7 +102,8 @@ body {
 .app {
   display: grid;
   grid-template-columns: 210px 1fr;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ─── Sidebar ─── */
@@ -214,8 +215,12 @@ body {
 
 /* ─── Main Area ─── */
 .main {
-  padding: 22px 28px 28px;
+  padding: 22px 28px 20px;
   max-width: 1700px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ─── Topbar ─── */
@@ -224,7 +229,7 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 22px;
+  margin-bottom: 14px;
 }
 .greeting { display: flex; flex-direction: column; gap: 4px; }
 .greeting h1 {
@@ -260,7 +265,9 @@ body {
 .home-grid {
   display: grid;
   gap: 14px;
+  height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
+  grid-template-rows: minmax(0, 2.1fr) minmax(0, 1.8fr) minmax(0, 1.1fr);
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   calendar"
@@ -315,6 +322,20 @@ body {
 .a-mood { grid-area: mood; }
 .a-weather { grid-area: weather; }
 .a-quote { grid-area: quote; }
+
+/* ─── Home grid card containment ─── */
+.home-grid .card { overflow: hidden; min-height: 0; }
+/* Performance Overview: compact to fit row 1 */
+.home-grid .a-stats { gap: 8px; padding: 14px; }
+.home-grid .po-week-bars { height: 42px; }
+.home-grid .po-week { margin-top: 0; }
+.home-grid .po-dot { max-width: 28px; }
+/* Calendar: fixed cell height instead of width-proportional aspect-ratio */
+.home-grid .cal-day { aspect-ratio: unset; height: 30px; }
+.home-grid .ring-wrap {
+  width: clamp(90px, 13.5vh, 150px);
+  height: clamp(90px, 13.5vh, 150px);
+}
 
 /* ─── Second-row always-on compact sizing ─── */
 /* Timeline */
@@ -2118,6 +2139,8 @@ body {
 @media (max-width: 1400px) {
   .home-grid {
     grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    height: auto;
     grid-template-areas:
       "session session goals"
       "stats stats stats"
@@ -2135,6 +2158,8 @@ body {
   .sidebar { display: none; }
   .home-grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    height: auto;
     grid-template-areas:
       "session"
       "goals"
@@ -5541,8 +5566,12 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-#tab-main.is-visible {
-  overflow-y: auto;
+@media (min-width: 1401px) {
+  #tab-main.is-visible {
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 #tab-finances.is-visible {
