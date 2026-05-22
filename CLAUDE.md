@@ -22,7 +22,8 @@ Vanilla HTML/CSS/JS — no framework, no build tool, no package manager.
 - **`index.html`** — the entire app. All tab HTML lives here; scripts are loaded at the bottom in a specific order that must be preserved (`index.html:1331–1337`).
 - **`css/styles.css`** — ~7.6K lines. Single file. CSS custom properties drive theming; `--accent` and `--accent-soft` are the two live-overridden vars.
 - **`js/*.js`** — each file is an IIFE that writes to `window.*` for cross-module calls.
-- **`vendor/`** — Tesseract.js (OCR) and PDF.js, bundled locally, no CDN.
+- **`vendor/`** — Tesseract.js (OCR) and PDF.js, bundled locally, no CDN. Paystub import runs OCR entirely client-side in a WebWorker; max file size 8 MB.
+- **Google Fonts** (Inter, JetBrains Mono, Cormorant Garamond) — loaded from CDN, requires internet for correct rendering.
 
 ## Script load order (must not change)
 

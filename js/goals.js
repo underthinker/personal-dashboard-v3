@@ -924,7 +924,7 @@
   window.renderStatsPanel = renderStatsPanel;
 
   // ============ CALENDAR ============
-  var calState = (function() { var d = new Date(); return { year: d.getFullYear(), month: d.getMonth() }; })();
+  var calState = (function() { var d = new Date(); return { year: d.getFullYear(), month: d.getMonth(), dir: null }; })();
 
   function renderCalendar(year, month) {
     year = year || calState.year;
@@ -932,10 +932,18 @@
     calState.year = year;
     calState.month = month;
 
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     var labelEl = $('calMonthLabel');
     if (labelEl) {
-      var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-      labelEl.textContent = months[month] + ' ' + year;
+      if (calState.dir) {
+        labelEl.classList.add('is-changing');
+        setTimeout(function() {
+          labelEl.textContent = months[month] + ' ' + year;
+          labelEl.classList.remove('is-changing');
+        }, 80);
+      } else {
+        labelEl.textContent = months[month] + ' ' + year;
+      }
     }
 
     var grid = $('calGrid');
@@ -950,19 +958,16 @@
 
     var html = '';
 
-    // Day headers
     var dayHeaders = ['Mo','Tu','We','Th','Fr','Sa','Su'];
     dayHeaders.forEach(function(d) {
       html += '<div class="cal-dow">' + d + '</div>';
     });
 
-    // Previous month overflow
     var prevMonthDays = new Date(year, month, 0).getDate();
     for (var i = offset - 1; i >= 0; i--) {
       html += '<div class="cal-day out">' + (prevMonthDays - i) + '</div>';
     }
 
-    // Current month days
     for (var day = 1; day <= daysInMonth; day++) {
       var ymd = year + '-' + pad2(month + 1) + '-' + pad2(day);
       var isToday = ymd === todayYMD;
@@ -974,7 +979,6 @@
       html += '</div>';
     }
 
-    // Fill remaining cells to fill 7 rows total (49 cells)
     var remaining = 49 - 7 - offset - daysInMonth;
     var nextMonthDay = 1;
     for (var i = 0; i < remaining; i++) {
@@ -982,7 +986,13 @@
       nextMonthDay++;
     }
 
+    grid.classList.remove('anim-next', 'anim-prev');
     grid.innerHTML = html;
+
+    if (calState.dir) {
+      var animClass = calState.dir === 'next' ? 'anim-next' : 'anim-prev';
+      requestAnimationFrame(function() { grid.classList.add(animClass); });
+    }
   }
   window.renderCalendar = renderCalendar;
 
@@ -991,6 +1001,7 @@
     var nextBtn = $('calNext');
     if (prevBtn) {
       prevBtn.addEventListener('click', function() {
+        calState.dir = 'prev';
         calState.month--;
         if (calState.month < 0) { calState.month = 11; calState.year--; }
         renderCalendar(calState.year, calState.month);
@@ -998,6 +1009,7 @@
     }
     if (nextBtn) {
       nextBtn.addEventListener('click', function() {
+        calState.dir = 'next';
         calState.month++;
         if (calState.month > 11) { calState.month = 0; calState.year++; }
         renderCalendar(calState.year, calState.month);
