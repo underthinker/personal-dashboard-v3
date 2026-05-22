@@ -207,7 +207,7 @@
     const R = 40, CX = 52, CY = 52, CIRC = 2 * Math.PI * R;
     const pct = readiness != null ? readiness / 100 : 0;
     const ringColor = readiness == null ? 'rgba(255,255,255,0.06)'
-      : readiness >= 80 ? '#6BE3A4'
+      : readiness >= 80 ? '#5fd687'
       : readiness >= 60 ? '#F2C063'
       : '#FF6B6B';
     const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 104 104" aria-hidden="true">
@@ -807,7 +807,7 @@
     // Dots + value labels
     readinessVals.forEach((v, i) => {
       if (v == null) return;
-      const color = v >= 80 ? '#6BE3A4' : v >= 60 ? '#F2C063' : '#FF6B6B';
+      const color = v >= 80 ? '#5fd687' : v >= 60 ? '#F2C063' : '#FF6B6B';
       const cy = yScale(v);
       html += `<circle cx="${pointX[i]}" cy="${cy}" r="4" fill="${color}" stroke="rgba(0,0,0,0.6)" stroke-width="1.5"/>`;
       html += `<text x="${pointX[i]}" y="${cy - 8}" class="htrend-dot-val">${v}</text>`;

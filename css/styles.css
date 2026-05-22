@@ -300,6 +300,7 @@ body {
 .pill .dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; }
 .pill-live { color: var(--accent); background: var(--accent-soft); }
 .pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
+.pill-streak.gm-streak-active { color: var(--accent); background: var(--accent-soft); }
 .pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(91,168,247,0.18); color: #80bcfa; font-weight: 500; }
 
 /* ─── Grid Areas ─── */
@@ -360,7 +361,7 @@ body {
 .ring-wrap .pct-num { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
 .ring-wrap .pct-lbl { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.18em; margin-top: 2px; text-transform: uppercase; }
 
-.session-info { display: flex; flex-direction: column; }
+.session-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .session-status { font-size: 20px; font-weight: 700; margin: 0 0 6px; color: var(--text); }
 .session-range { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
 
@@ -368,7 +369,7 @@ body {
 .next-up-label { font-size: 11px; color: var(--muted); }
 .next-up-row { display: flex; align-items: center; gap: 8px; }
 .next-up-row .nu-dot { width: 6px; height: 6px; border-radius: 99px; background: var(--accent); flex: 0 0 6px; }
-.next-up-row .nu-text { font-size: 15px; font-weight: 500; }
+.next-up-row .nu-text { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 
 
@@ -382,10 +383,7 @@ body {
 .hm-settings-btn:hover { color: var(--text); }
 
 /* ─── Goals Card ─── */
-.gc-head { display: flex; align-items: baseline; gap: 8px; }
-.gc-count { font-family: var(--font-mono); font-size: 28px; font-weight: 700; letter-spacing: -0.01em; }
-.gc-total { color: var(--muted); font-size: 14px; }
-.gc-today { color: var(--muted); font-size: 11px; letter-spacing: 0.16em; font-weight: 600; text-transform: uppercase; }
+
 
 .goal-list { display: flex; flex-direction: column; gap: 4px; }
 .goal-list:empty { display: none; }
@@ -420,8 +418,8 @@ body {
   cursor: pointer;
 }
 .goal-item input[type="checkbox"]:checked {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .goal-item input[type="checkbox"]:checked::after {
   content: '';
@@ -572,9 +570,7 @@ body {
 
 .hm-empty { color: var(--muted-2); font-size: 12.5px; padding: 10px 4px; text-align: center; }
 
-.goal-progress-bar { display: flex; gap: 3px; align-items: center; }
-.gm-bar-seg { height: 6px; border-radius: 99px; flex: 1; background: var(--surface-2); }
-.gm-bar-seg-done { background: var(--green); }
+
 
 /* ─── Performance Overview Panel ─── */
 

@@ -121,12 +121,8 @@
   const $ = (id) => document.getElementById(id);
   const todayLabel = $('todayLabel');
   const tomorrowLabel = $('tomorrowLabel');
-  const gmProgressNum = $('gmProgressNum');
-  const gmProgressTotal = $('gmProgressTotal');
-  const gmProgressLabel = $('gmProgressLabel');
   const gmStreak = $('gmStreak');
   const gmStreakNum = $('gmStreakNum');
-  const gmBar = $('gmBar');
   const goalList = $('goalList');
   const emptyState = $('emptyState');
   const goalInput = $('goalInput');
@@ -387,29 +383,9 @@
   function renderTodayHeader() {
     const key = 'goals:' + getActiveDateString();
     const goals = storeGet(key) || [];
-    const total = goals.length;
-    const done = goals.filter(g => g.done).length;
-
-    gmProgressNum.textContent = String(done);
-    gmProgressTotal.textContent = '/ ' + total;
-    if (total === 0) gmProgressLabel.textContent = 'no goals yet';
-    else gmProgressLabel.textContent = 'today';
-
-    // segmented bar
-    gmBar.innerHTML = '';
-    for (let i = 0; i < total; i++) {
-      const seg = document.createElement('div');
-      seg.className = 'gm-bar-seg' + (goals[i].done ? ' gm-bar-seg-done' : '');
-      gmBar.appendChild(seg);
-    }
-
-    if (total > 0 && done === total) gmCardToday.classList.add('gm-all-done');
-    else gmCardToday.classList.remove('gm-all-done');
 
     const undone = goals.filter(g => !g.done).length;
     gmPushBtn.style.display = undone > 0 ? 'block' : 'none';
-
-    todayLabel.textContent = 'Today — ' + formatDate(getActiveDateString());
   }
 
   function renderStreak() {
@@ -619,6 +595,7 @@
   window.addEventListener('goals-changed', () => {
     cycleIdx = 0;
     tick();
+    updateDayBar();
   });
 
   // ============ DAY RING ============
