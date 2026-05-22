@@ -120,11 +120,13 @@ body {
 .brand {
   font-family: var(--font-serif);
   font-style: italic;
-  font-weight: 500;
-  font-size: 19px;
-  padding: 0 8px;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
+  font-weight: 600;
+  font-size: 28px;
+  padding: 8px 0 16px;
+  letter-spacing: 0.6px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 4px;
 }
 .brand .b1 { color: var(--text); }
 .brand .b2 { color: var(--muted); margin-left: 2px; }
@@ -869,7 +871,7 @@ body {
 .tweaks-section { display: flex; flex-direction: column; gap: 8px; }
 .tweaks-section-label { font-size: 10px; font-weight: 600; color: var(--muted-2); letter-spacing: 0.12em; text-transform: uppercase; }
 
-.tweaks-colors { display: flex; gap: 8px; }
+.tweaks-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-items: center; }
 .tweaks-color {
   width: 32px; height: 32px;
   border-radius: 50%;
