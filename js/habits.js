@@ -972,9 +972,9 @@
     ];
 
     var icons = [
-      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></g>',
-      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>',
-      '<circle cx="60" cy="38" r="9" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="60" cy="38" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5"/><circle cx="60" cy="38" r="1.5" fill="var(--muted)"/>'
+      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></g>',
+      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>',
+      '<circle cx="60" cy="38" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="60" cy="38" r="4.5" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="60" cy="38" r="1.5" fill="var(--accent)"/>'
     ];
 
     var r = 52;

@@ -275,7 +275,7 @@
   function renderHeatmap() {
     const el = $('heatmapWidget');
     if (!el) return;
-    const DAYS = 7, gap = 2;
+    const DAYS = 7, gap = 3;
 
     const goalMap = {};
     try {
@@ -291,17 +291,15 @@
       }
     } catch(e) {}
 
-    const YEAR = 2026;
-    const jan1 = new Date(YEAR, 0, 1);
-    const dec31 = new Date(YEAR, 11, 31);
-    const startDate = new Date(jan1);
-    startDate.setDate(jan1.getDate() - jan1.getDay());
-    const endDate = new Date(dec31);
-    endDate.setDate(dec31.getDate() + (6 - dec31.getDay()));
-    const WEEKS = Math.round((endDate - startDate) / 6048e5);
+    // Rolling 52-week window ending at today's week (today always in last column)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const WEEKS = 52;
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - startDate.getDay() - 51 * 7);
 
-    const availWidth = el.clientWidth - 26;
-    const cellSize = Math.max(4, Math.floor((availWidth - (WEEKS - 1) * gap) / WEEKS));
+    const availWidth = el.clientWidth - 34;
+    const cellSize = Math.max(6, Math.floor((availWidth - (WEEKS - 1) * gap) / WEEKS));
     const gridCols = 'repeat(' + WEEKS + ', ' + cellSize + 'px)';
     const gridRows = 'repeat(7, ' + cellSize + 'px)';
 
@@ -311,18 +309,20 @@
       for (let d = 0; d < DAYS; d++) {
         const cd = new Date(startDate);
         cd.setDate(cd.getDate() + w * 7 + d);
-        if (cd.getFullYear() === YEAR && firstWeekOf[cd.getMonth()] == null)
-          firstWeekOf[cd.getMonth()] = w;
+        const key = cd.getFullYear() + '-' + String(cd.getMonth()).padStart(2, '0');
+        if (firstWeekOf[key] == null) firstWeekOf[key] = w;
       }
     }
-    let monthHtml = '';
-    for (let m = 0; m < 12; m++) {
-      if (firstWeekOf[m] != null)
-        monthHtml += '<span style="grid-column: ' + (firstWeekOf[m] + 1) + '">' + MONTHS[m] + '</span>';
-    }
+    let monthHtml = '', lastLabelCol = -99;
+    Object.keys(firstWeekOf).sort().forEach(function(key) {
+      const col = firstWeekOf[key];
+      if (col - lastLabelCol < 4) return;
+      const mo = parseInt(key.split('-')[1]);
+      monthHtml += '<span style="grid-column: ' + (col + 1) + '">' + MONTHS[mo] + '</span>';
+      lastLabelCol = col;
+    });
 
     let cellHtml = '';
-    const today = new Date();
     for (let w = 0; w < WEEKS; w++) {
       for (let d = 0; d < DAYS; d++) {
         const cellDate = new Date(startDate);
@@ -337,15 +337,14 @@
           else lvl = 'l4';
         }
         const isFuture = cellDate > today;
-        const outOfYear = cellDate < jan1 || cellDate > dec31;
         const isToday = cellDate.toDateString() === today.toDateString();
-        cellHtml += '<div class="hm-cell ' + lvl + (isFuture ? ' hm-act-future' : '') + (outOfYear ? ' hm-act-out' : '') + (isToday ? ' hm-today' : '') + '" title="' + ymd + '"></div>';
+        cellHtml += '<div class="hm-cell ' + lvl + (isFuture ? ' hm-act-future' : '') + (isToday ? ' hm-today' : '') + '" title="' + ymd + '"></div>';
       }
     }
 
     const monthBar = '<div class="hm-act-month-lbl" style="grid-template-columns:' + gridCols + '">' + monthHtml + '</div>';
     const grid = '<div class="hm-act-grid" style="grid-template-columns:' + gridCols + ';grid-template-rows:' + gridRows + '">' + cellHtml + '</div>';
-    const dow = '<div class="hm-act-days" style="grid-template-rows:' + gridRows + '"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>';
+    const dow = '<div class="hm-act-days" style="grid-template-rows:' + gridRows + '"><span style="grid-row:2">Mon</span><span style="grid-row:4">Wed</span><span style="grid-row:6">Fri</span></div>';
     const legend = '<div class="hm-act-legend"><div class="hm-act-legend-cells"><span>Less</span><span class="hm-act-cell"></span><span class="hm-act-cell l1"></span><span class="hm-act-cell l2"></span><span class="hm-act-cell l3"></span><span class="hm-act-cell l4"></span><span>More</span></div><button class="hm-act-view-link">View full activity →</button></div>';
 
     el.innerHTML = '<div class="hm-act-outer"><div></div>' + monthBar + dow + grid + '</div>' + legend;

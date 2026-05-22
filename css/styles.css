@@ -568,7 +568,7 @@ body {
 .rm-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .rm-ring-wrap { position: relative; width: 100%; aspect-ratio: 1; flex-shrink: 0; }
 .rm-ring-wrap svg { width: 100%; height: 100%; }
-.rm-pct { position: absolute; bottom: 14%; left: 0; right: 0; text-align: center; font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--text); }
+.rm-pct { position: absolute; bottom: 28%; left: 0; right: 0; text-align: center; font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--text); }
 .rm-name { font-size: 14px; font-weight: 500; color: var(--text); }
 .rm-sub { font-size: 12px; color: var(--muted); }
 
@@ -688,10 +688,10 @@ body {
 .view-full button { background: transparent; border: 0; color: var(--muted); font-size: 12px; padding: 0; cursor: pointer; }
 .view-full button:hover { color: var(--text); }
 
-.hm-act-month-lbl { display: grid; gap: 2px; margin-bottom: 4px; font-size: 10px; color: var(--muted-2); min-width: 0; overflow: hidden; }
-.hm-act-outer { display: grid; grid-template-columns: 20px 1fr; column-gap: 6px; row-gap: 0; }
-.hm-act-days { display: grid; gap: 2px; font-size: 10px; color: var(--muted-2); justify-items: center; align-items: center; }
-.hm-act-grid { display: grid; gap: 2px; min-width: 0; overflow: hidden; }
+.hm-act-month-lbl { display: grid; gap: 3px; margin-bottom: 6px; font-size: 10px; color: var(--muted-2); min-width: 0; overflow: hidden; }
+.hm-act-outer { display: grid; grid-template-columns: 28px 1fr; column-gap: 6px; row-gap: 0; }
+.hm-act-days { display: grid; gap: 3px; font-size: 10px; color: var(--muted-2); justify-items: end; align-items: center; }
+.hm-act-grid { display: grid; gap: 3px; min-width: 0; overflow: hidden; grid-auto-flow: column; }
 .hm-act-legend { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
 .hm-act-legend-cells { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted-2); }
 .hm-act-legend-cells .hm-act-cell { width: 10px; height: 10px; border-radius: 2px; background: var(--surface-2); }
