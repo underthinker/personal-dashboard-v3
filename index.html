@@ -122,7 +122,7 @@
         <span class="gc-total" id="gmProgressTotal">/ 0</span>
         <span class="gc-today" id="gmProgressLabel">TODAY</span>
       </div>
-      <span class="pill pill-streak" id="gmStreak">🔥 <span id="gmStreakNum">0</span> day streak</span>
+      <span class="pill pill-streak" id="gmStreak"><span id="gmStreakNum">0</span> day streak</span>
     </div>
     <div id="gmBar" class="goal-progress-bar"></div>
     <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
@@ -141,7 +141,7 @@
   <div class="card a-stats">
     <div class="stats-grid">
       <div class="sp-cell">
-        <span class="sp-label">FOCUS TIME</span>
+        <span class="sp-label">FOCUS TIME<button class="sp-edit-btn" id="focusEditBtn" type="button" aria-label="Edit focus minutes"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button></span>
         <span class="sp-val coral" id="spFocusTime">0m</span>
         <span class="sp-sub">Today</span>
         <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkFocus" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg>
@@ -192,7 +192,7 @@
 
   <!-- ═══ HABITS MINI ═══ -->
   <div class="card a-habits">
-    <div class="card-head"><span class="card-label">Readiness Monitor</span></div>
+    <div class="card-head"><span class="card-label">Readiness Monitors</span></div>
     <div class="readiness-rings" id="habitFullWidget"></div>
     <button class="view-habits" data-tab="health">View health →</button>
   </div>
@@ -527,6 +527,7 @@
     renderHeatmap();
     updateHeroNextUp();
     updateHomeBadge();
+    window.renderStatsPanel && window.renderStatsPanel();
   });
   window.addEventListener('focus-updated', function() {
     window.renderHomeHealthRings && window.renderHomeHealthRings();

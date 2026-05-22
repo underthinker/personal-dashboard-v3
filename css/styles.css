@@ -230,11 +230,11 @@ body {
 .greeting h1 {
   margin: 0;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: -0.01em;
 }
 .greeting h1 .name { color: var(--accent); }
-.greeting p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.greeting p { margin: 0; color: #acacb5; font-size: 13.5px; }
 .topbar-right {
   display: flex;
   align-items: center;
@@ -299,7 +299,7 @@ body {
 }
 .pill .dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; }
 .pill-live { color: var(--accent); background: var(--accent-soft); }
-.pill-streak { color: var(--amber); background: var(--amber-soft); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
+.pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
 .pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(91,168,247,0.18); color: #80bcfa; font-weight: 500; }
 
 /* ─── Grid Areas ─── */
@@ -514,23 +514,26 @@ body {
 }
 .push-tomorrow:hover { color: var(--text); border-color: var(--accent); }
 
-.add-goal { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+.add-goal { display: flex; gap: 0; align-items: stretch; margin-top: 6px; }
 .add-goal input {
   flex: 1;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: none;
+  border-radius: 8px 0 0 8px;
   padding: 9px 12px;
   font-size: 13px;
   color: var(--text);
   outline: none;
   font-family: inherit;
 }
-.add-goal input:focus { border-color: var(--line-2); }
+.add-goal input:focus { border-color: rgba(255, 255, 255, 0.15); }
 .add-goal input::placeholder { color: var(--muted-2); }
 .add-goal .add-btn {
-  width: 32px; height: 32px;
-  border-radius: 8px;
+  width: 32px;
+  border-radius: 0 8px 8px 0;
   background: var(--accent);
   border: 0;
   color: #ffffff;
@@ -559,8 +562,11 @@ body {
 .sp-val.amber { color: var(--amber); }
 .sp-val.blue { color: var(--blue); }
 .sp-val .unit { font-size: 14px; font-weight: 600; margin-left: 2px; opacity: 0.7; }
-.sp-sub { font-size: 11.5px; color: var(--muted); }
-.sp-spark { margin-top: 6px; height: 26px; width: 100%; }
+.sp-sub { font-size: 10px; color: #acacb5; text-transform: uppercase; letter-spacing: 0.1em; }
+.sp-spark { margin-top: 6px; height: 26px; width: 100%; filter: saturate(0.72) brightness(0.88); }
+.sp-edit-btn { display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-left: 4px; padding: 1px; border: none; background: none; color: var(--muted); cursor: pointer; border-radius: 3px; opacity: 0; transition: opacity 0.15s; }
+.sp-cell:hover .sp-edit-btn { opacity: 1; }
+.sp-edit-btn:hover { color: var(--text); background: var(--line-2); }
 
 /* ─── Tomorrow Card ─── */
 .tomorrow-list { display: flex; flex-direction: column; gap: 6px; }
@@ -584,7 +590,7 @@ body {
 /* ─── Timeline Card ─── */
 .timeline { display: flex; flex-direction: column; gap: 12px; position: relative; }
 .tl-row { display: grid; grid-template-columns: 56px auto 1fr; gap: 10px; align-items: start; }
-.tl-time { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); padding-top: 1px; }
+.tl-time { font-family: var(--font-mono); font-size: 11.5px; color: #acacb5; padding-top: 1px; }
 .tl-time.active { color: var(--accent); }
 .tl-dot-col { display: grid; place-items: center; position: relative; width: 8px; padding-top: 6px; }
 .tl-dot { width: 7px; height: 7px; border-radius: 99px; background: var(--line-2); transition: background 200ms, box-shadow 200ms; }
@@ -593,7 +599,7 @@ body {
 .tl-row:last-child .tl-line { display: none; }
 .tl-content { font-size: 13px; }
 .tl-content.active .tl-title { color: var(--accent); font-weight: 600; }
-.tl-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.tl-sub { font-size: 11.5px; color: #acacb5; margin-top: 2px; }
 
 /* ─── Habits Mini Rings ─── */
 .habits-rings,
@@ -607,7 +613,7 @@ body {
 .hr-name,
 .hfr-name { font-size: 13px; font-weight: 500; }
 .hr-sub,
-.hfr-sublabel { font-size: 11px; color: var(--muted); }
+.hfr-sublabel { font-size: 11px; color: #acacb5; }
 .hfr-ring { position: relative; width: 72px; height: 72px; }
 .hfr-ring svg { width: 100%; height: 100%; }
 .hfr-track { fill: none; stroke: var(--surface-2); stroke-width: 5; }

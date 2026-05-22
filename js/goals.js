@@ -1057,17 +1057,16 @@
   function _stopFocusSession() {
     clearInterval(_focusTimerInterval);
     var s = getFocusSession();
-    s.accumulatedMin = (s.accumulatedMin || 0) + (Date.now() - s.startedAt) / 60000;
+    var sessionMin = (Date.now() - s.startedAt) / 60000;
     s.running = false;
     s.startedAt = null;
     saveFocusSession(s);
-    var totalMin = Math.round(s.accumulatedMin);
     var td = new Date();
     if (td.getHours() < 6) td.setDate(td.getDate() - 1);
     var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
     try {
       var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
-      health.focus_min = totalMin;
+      health.focus_min = (health.focus_min || 0) + Math.round(sessionMin);
       localStorage.setItem('health:' + ymd, JSON.stringify(health));
     } catch(e) {}
     window.dispatchEvent(new CustomEvent('focus-updated'));
@@ -1101,7 +1100,53 @@
     });
   }
 
+  // ============ FOCUS DATA FIX + EDIT ============
+  function _migrateFocusCarryover() {
+    if (localStorage.getItem('focus_migrated_v1')) return;
+    var td = new Date();
+    if (td.getHours() < 6) td.setDate(td.getDate() - 1);
+    var todayYmd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+    var yd = new Date(td);
+    yd.setDate(yd.getDate() - 1);
+    var yesterdayYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    try {
+      var todayHealth = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}');
+      var carryover = Math.round(todayHealth.focus_min || 0);
+      if (carryover > 0) {
+        var yesterdayHealth = JSON.parse(localStorage.getItem('health:' + yesterdayYmd) || '{}');
+        yesterdayHealth.focus_min = (yesterdayHealth.focus_min || 0) + carryover;
+        localStorage.setItem('health:' + yesterdayYmd, JSON.stringify(yesterdayHealth));
+        todayHealth.focus_min = 0;
+        localStorage.setItem('health:' + todayYmd, JSON.stringify(todayHealth));
+      }
+    } catch(e) {}
+    localStorage.setItem('focus_migrated_v1', '1');
+  }
+
+  function _initFocusEdit() {
+    var btn = $('focusEditBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      var td = new Date();
+      if (td.getHours() < 6) td.setDate(td.getDate() - 1);
+      var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+      try {
+        var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
+        var current = Math.round(health.focus_min || 0);
+        var input = prompt('Edit focus minutes for today:', current);
+        if (input === null) return;
+        var val = parseInt(input, 10);
+        if (isNaN(val) || val < 0) return;
+        health.focus_min = val;
+        localStorage.setItem('health:' + ymd, JSON.stringify(health));
+        renderStatsPanel();
+        window.dispatchEvent(new CustomEvent('focus-updated'));
+      } catch(e) {}
+    });
+  }
+
   // ============ INIT ============
+  _migrateFocusCarryover();
   checkStreak();
   loadToday();
   loadTomorrow();
@@ -1113,6 +1158,7 @@
   renderCalendar();
   initCalendar();
   initFocusTimer();
+  _initFocusEdit();
   setInterval(updateDayBar, 60 * 1000);
 
   startTicker();
