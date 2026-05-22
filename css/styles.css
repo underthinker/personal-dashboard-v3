@@ -404,7 +404,7 @@ body {
 .goal-text { flex: 1; font-size: 13.5px; outline: none; }
 .goal-drag { color: var(--muted-2); font-size: 12px; cursor: grab; padding: 2px; user-select: none; }
 .goal-kw-icon { font-size: 14px; flex: 0 0 18px; text-align: center; }
-.goal-done-tag { font-size: 10px; color: var(--green); background: var(--green-soft); padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+
 .gm-queue-btn { background: transparent; border: 0; font-size: 14px; cursor: pointer; padding: 2px; opacity: 0.4; }
 .gm-queue-btn.is-active { opacity: 1; }
 

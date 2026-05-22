@@ -334,13 +334,6 @@
     li.appendChild(text);
     makeInlineEdit(text, () => storeGet(key) || [], idx, key, reload);
 
-    if (goal.done) {
-      const tag = document.createElement('span');
-      tag.className = 'goal-done-tag';
-      tag.textContent = 'done';
-      li.appendChild(tag);
-    }
-
     const queueBtn = document.createElement('button');
     queueBtn.className = 'gm-queue-btn';
     queueBtn.type = 'button';
@@ -960,15 +953,16 @@
     // Day headers
     var dayHeaders = ['Mo','Tu','We','Th','Fr','Sa','Su'];
     dayHeaders.forEach(function(d) {
-      html += '<div class="cal-day-header">' + d + '</div>';
+      html += '<div class="cal-dow">' + d + '</div>';
     });
 
-    // Empty cells
-    for (var i = 0; i < offset; i++) {
-      html += '<div></div>';
+    // Previous month overflow
+    var prevMonthDays = new Date(year, month, 0).getDate();
+    for (var i = offset - 1; i >= 0; i--) {
+      html += '<div class="cal-day out">' + (prevMonthDays - i) + '</div>';
     }
 
-    // Day cells
+    // Current month days
     for (var day = 1; day <= daysInMonth; day++) {
       var ymd = year + '-' + pad2(month + 1) + '-' + pad2(day);
       var isToday = ymd === todayYMD;
@@ -978,6 +972,14 @@
       html += '<div class="cal-day' + (isToday ? ' is-today' : '') + '">' + day;
       if (hasGoals) html += '<span class="cal-dot"></span>';
       html += '</div>';
+    }
+
+    // Fill remaining cells to fill 7 rows total (49 cells)
+    var remaining = 49 - 7 - offset - daysInMonth;
+    var nextMonthDay = 1;
+    for (var i = 0; i < remaining; i++) {
+      html += '<div class="cal-day out">' + nextMonthDay + '</div>';
+      nextMonthDay++;
     }
 
     grid.innerHTML = html;
