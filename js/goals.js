@@ -840,98 +840,128 @@
   }
   window.updateGreeting = updateGreeting;
 
-  // ============ STATS PANEL ============
+  // ============ PERFORMANCE OVERVIEW PANEL ============
   function renderStatsPanel() {
-    const today = new Date();
-    const days = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(d.getDate() - i);
-      days.push(d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()));
+    var now = new Date();
+    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
+    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+
+    // ── Focus time (today + live session) ──
+    var health = {};
+    try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
+    var focusMin = Math.round(health.focus_min || 0);
+    try {
+      var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
+      if (fs.running && fs.startedAt) focusMin += Math.floor((Date.now() - fs.startedAt) / 60000);
+    } catch(e) {}
+    var focusStr = focusMin >= 60 ? Math.floor(focusMin/60) + 'h ' + (focusMin%60) + 'm' : focusMin + 'm';
+
+    var focusEl = $('perfFocusTime');
+    if (focusEl) focusEl.textContent = focusStr;
+
+    // ── Trend vs yesterday ──
+    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
+    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    var ydHealth = {};
+    try { ydHealth = JSON.parse(localStorage.getItem('health:' + ydYmd) || '{}'); } catch(e) {}
+    var ydMin = Math.round(ydHealth.focus_min || 0);
+    var trendEl = $('perfTrend');
+    if (trendEl) {
+      if (ydMin === 0 || focusMin === 0) {
+        trendEl.textContent = '';
+        trendEl.className = 'po-trend-val';
+      } else {
+        var diff = focusMin - ydMin;
+        var pct = Math.abs(Math.round((diff / ydMin) * 100));
+        trendEl.textContent = (diff >= 0 ? '↑ ' : '↓ ') + pct + '%';
+        trendEl.className = diff >= 0 ? 'po-trend-val' : 'po-trend-val negative';
+      }
     }
 
-    const doneCounts = [];
-    const focusHours = [];
-    let totalDone = 0;
+    // ── Weekly bars: Mon–Sun of current week ──
+    var dow = now.getDay(); // 0=Sun
+    var mondayOffset = dow === 0 ? -6 : 1 - dow;
+    var monday = new Date(now); monday.setDate(monday.getDate() + mondayOffset);
+    var todayWeekIdx = dow === 0 ? 6 : dow - 1; // 0=Mon, 6=Sun
 
-    days.forEach(function(ymd) {
-      const goals = storeGet('goals:' + ymd) || [];
-      const done = goals.filter(function(g) { return g.done; }).length;
-      doneCounts.push(done);
-      totalDone += done;
+    var weekFocusMins = [];
+    var weekDoneFlags = [];
+    for (var wi = 0; wi < 7; wi++) {
+      var wd = new Date(monday); wd.setDate(monday.getDate() + wi);
+      var wymd = wd.getFullYear() + '-' + pad2(wd.getMonth()+1) + '-' + pad2(wd.getDate());
+      var wh = {}; try { wh = JSON.parse(localStorage.getItem('health:' + wymd) || '{}'); } catch(e) {}
+      weekFocusMins.push(Math.round(wh.focus_min || 0));
+      var wg = storeGet('goals:' + wymd) || [];
+      weekDoneFlags.push(wg.length > 0 && wg.some(function(g) { return g && g.done; }));
+    }
+
+    var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
+    var barsEl = $('perfWeekBars');
+    if (barsEl) {
+      barsEl.innerHTML = weekFocusMins.map(function(min, i) {
+        var h = min > 0 ? Math.max(10, Math.round((min / maxFocus) * 46)) : 3;
+        var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
+        return '<div class="' + cls + '" style="height:' + h + 'px"></div>';
+      }).join('');
+    }
+    document.querySelectorAll('.po-week-labels span').forEach(function(s, i) {
+      s.classList.toggle('is-today', i === todayWeekIdx);
     });
 
-    const streakState = storeGet(STREAK_KEY) || { count: 0, best: 0 };
-    const spTodayKey = 'goals:' + getActiveDateString();
-    const spToday = storeGet(spTodayKey) || [];
-    const spTodayAllDone = spToday.length > 0 && spToday.every(g => g && typeof g === 'object' && g.done);
-    const streak = streakState.count + (spTodayAllDone ? 1 : 0);
-    const best = streakState.best || 0;
+    // ── Task completion ──
+    var todayGoals = storeGet('goals:' + todayYmd) || [];
+    var totalTasks = todayGoals.length;
+    var doneTasks = todayGoals.filter(function(g) { return g && g.done; }).length;
+    var taskRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-    // Build sparkline polylines
-    function makePolyline(data) {
-      if (!data || data.length === 0) return '';
-      const max = Math.max.apply(null, data);
-      if (max === 0) return '';
-      const w = 50, h = 20;
-      const pts = data.map(function(v, i) {
-        var x = (i / (data.length - 1)) * w;
-        var y = h - (v / max) * (h - 2) - 1;
-        return x.toFixed(1) + ',' + y.toFixed(1);
-      }).join(' ');
-      return pts;
-    }
+    var taskRateEl = $('perfTaskRate'); if (taskRateEl) taskRateEl.textContent = taskRate + '%';
+    var taskSubEl = $('perfTaskSub'); if (taskSubEl) taskSubEl.textContent = doneTasks + ' / ' + totalTasks + ' tasks';
+    var taskFillEl = $('perfTaskFill'); if (taskFillEl) taskFillEl.style.width = taskRate + '%';
 
-    var spFocus = $('spFocusTime');
-    if (spFocus) {
-      var today2 = new Date();
-      if (today2.getHours() < 6) today2.setDate(today2.getDate() - 1);
-      var todayYmd = today2.getFullYear() + '-' + pad2(today2.getMonth()+1) + '-' + pad2(today2.getDate());
-      var healthDay = {};
-      try { healthDay = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
-      var focusMin = Math.round(healthDay.focus_min || 0);
-      // Add any running session time
-      try {
-        var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
-        if (fs.running && fs.startedAt) focusMin += Math.floor((Date.now() - fs.startedAt) / 60000);
-      } catch(e) {}
-      spFocus.textContent = focusMin >= 60 ? Math.floor(focusMin / 60) + 'h ' + (focusMin % 60) + 'm' : focusMin + 'm';
-      var fp = $('spSparkFocus');
-      if (fp) fp.setAttribute('points', makePolyline(doneCounts));
+    // ── Readiness (derived from logged health data) ──
+    var settings = {}; try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
+    var sleepGoal = settings.sleep_goal_hours || 8;
+    var factors = [];
+    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
+    if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
+    var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+    var readinessLabel = readinessScore == null ? '—' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
+
+    var readEl = $('perfReadiness'); if (readEl) readEl.textContent = readinessScore != null ? readinessScore : '—';
+    var readSubEl = $('perfReadinessSub'); if (readSubEl) readSubEl.textContent = readinessLabel;
+    var readFillEl = $('perfReadinessFill'); if (readFillEl) readFillEl.style.width = (readinessScore || 0) + '%';
+
+    // ── Weekly consistency dots ──
+    var consistencyCount = weekDoneFlags.filter(Boolean).length;
+    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days';
+
+    var DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    var dotsEl = $('perfDots');
+    if (dotsEl) {
+      dotsEl.innerHTML = weekDoneFlags.map(function(done, i) {
+        var wrapCls = 'po-dot-wrap' + (done ? ' done' : '') + (i === todayWeekIdx ? ' today' : '');
+        return '<div class="' + wrapCls + '"><div class="po-dot"></div><span class="po-dot-label">' + DAY_LABELS[i] + '</span></div>';
+      }).join('');
     }
 
-    var spDone = $('spCompleted');
-    if (spDone) {
-      spDone.textContent = totalDone;
-      var dp = $('spSparkDone');
-      if (dp) dp.setAttribute('points', makePolyline(doneCounts));
+    var copyEl = $('perfMicrocopy');
+    if (copyEl) {
+      var remaining = 7 - consistencyCount;
+      copyEl.textContent = consistencyCount === 7 ? 'Perfect week. That\'s elite.'
+        : consistencyCount >= 5 ? 'Keep it up! You\'re building momentum.'
+        : consistencyCount >= 3 ? (remaining === 1 ? 'One more day to close the week strong.' : remaining + ' days left to build a strong week.')
+        : consistencyCount >= 1 ? 'You\'re building momentum. Keep going.'
+        : 'Start building momentum today.';
     }
 
-    var spStreakEl = $('spStreak');
-    if (spStreakEl) {
-      spStreakEl.textContent = streak + 'd';
-      var sp = $('spSparkStreak');
-      if (sp) sp.setAttribute('points', makePolyline(doneCounts));
-    }
-
-    var spBestEl = $('spBest');
-    if (spBestEl) {
-      spBestEl.textContent = best + 'd';
-      var bp = $('spSparkBest');
-      if (bp) bp.setAttribute('points', makePolyline(doneCounts));
-    }
-
-    var heroTime = $('focusStatTime');
-    if (heroTime) {
-      heroTime.textContent = spFocus ? spFocus.textContent : '0m';
-    }
-    var heroDone = $('focusStatDone');
-    if (heroDone) {
-      heroDone.textContent = spDone ? spDone.textContent : '0';
-    }
+    // ── Legacy optional refs (health tab hero display) ──
+    var heroTime = $('focusStatTime'); if (heroTime) heroTime.textContent = focusStr;
+    var heroDone = $('focusStatDone'); if (heroDone) heroDone.textContent = String(doneTasks);
     var heroStreak = $('focusStatStreak');
     if (heroStreak) {
-      heroStreak.textContent = streak;
+      var ss = storeGet(STREAK_KEY) || { count: 0 };
+      var todayAllDone = totalTasks > 0 && todayGoals.every(function(g) { return g && g.done; });
+      heroStreak.textContent = ss.count + (todayAllDone ? 1 : 0);
     }
   }
   window.renderStatsPanel = renderStatsPanel;

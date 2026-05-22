@@ -137,33 +137,67 @@
     <div id="todayLabel" style="display:none;"></div>
   </div>
 
-  <!-- ═══ STATS PANEL ═══ -->
+  <!-- ═══ PERFORMANCE OVERVIEW PANEL ═══ -->
   <div class="card a-stats">
-    <div class="stats-grid">
-      <div class="sp-cell">
-        <span class="sp-label">FOCUS TIME<button class="sp-edit-btn" id="focusEditBtn" type="button" aria-label="Edit focus minutes"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button></span>
-        <span class="sp-val coral" id="spFocusTime">0m</span>
-        <span class="sp-sub">Today</span>
-        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkFocus" fill="none" stroke="var(--accent)" stroke-width="1.5"/></svg>
+    <!-- Card Header -->
+    <div class="po-card-header">
+      <span class="po-card-title">Performance Overview</span>
+      <svg class="po-info-icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.5v3.5M8 5h.01"/></svg>
+    </div>
+    <!-- Section 1: Deep Work Time -->
+    <div class="po-hero">
+      <div class="po-hero-row">
+        <div class="po-hero-meta">
+          <span class="po-badge po-badge-amber"><svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5V7l1.5 1.5"/></svg></span>
+          <span class="po-hero-label">Deep Work Time</span>
+        </div>
+        <div class="po-trend-block">
+          <span class="po-trend-val" id="perfTrend"></span>
+          <span class="po-trend-sub">vs yesterday</span>
+        </div>
       </div>
-      <div class="sp-cell">
-        <span class="sp-label">COMPLETED</span>
-        <span class="sp-val green" id="spCompleted">0</span>
-        <span class="sp-sub">Tasks</span>
-        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkDone" fill="none" stroke="var(--green)" stroke-width="1.5"/></svg>
+      <div class="po-hero-val-row">
+        <span class="po-hero-value" id="perfFocusTime">0m</span>
+        <button class="po-edit-btn" id="focusEditBtn" type="button" aria-label="Edit focus minutes"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></button>
       </div>
-      <div class="sp-cell">
-        <span class="sp-label">STREAK</span>
-        <span class="sp-val amber" id="spStreak">0d</span>
-        <span class="sp-sub">Current</span>
-        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkStreak" fill="none" stroke="var(--amber)" stroke-width="1.5"/></svg>
+      <div class="po-week">
+        <div class="po-week-bars" id="perfWeekBars"></div>
+        <div class="po-week-labels"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
       </div>
-      <div class="sp-cell">
-        <span class="sp-label">BEST</span>
-        <span class="sp-val blue" id="spBest">0d</span>
-        <span class="sp-sub">Best streak</span>
-        <svg class="sp-spark" viewBox="0 0 50 20" preserveAspectRatio="none"><polyline id="spSparkBest" fill="none" stroke="var(--blue)" stroke-width="1.5"/></svg>
+    </div>
+    <!-- Section 2: Dual Metrics -->
+    <div class="po-dual">
+      <div class="po-metric">
+        <div class="po-metric-header">
+          <span class="po-badge po-badge-green"><svg viewBox="0 0 14 14" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 7l3.5 3.5 7.5-7.5"/></svg></span>
+          <span class="po-metric-title">Task Completion</span>
+        </div>
+        <div class="po-metric-val" id="perfTaskRate">0%</div>
+        <div class="po-metric-sub" id="perfTaskSub">0 / 0 tasks</div>
+        <div class="po-bar"><div class="po-bar-fill po-bar-green" id="perfTaskFill"></div></div>
       </div>
+      <div class="po-metric-sep"></div>
+      <div class="po-metric">
+        <div class="po-metric-header">
+          <span class="po-badge po-badge-blue"><svg viewBox="0 0 14 14" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11.5C7 11.5 1.5 8 1.5 4.5a2.5 2.5 0 0 1 5-0.3 2.5 2.5 0 0 1 5 0.3C12.5 8 7 11.5 7 11.5Z"/></svg></span>
+          <span class="po-metric-title">Readiness Score</span>
+        </div>
+        <div class="po-metric-val po-val-blue" id="perfReadiness">—</div>
+        <div class="po-metric-sub" id="perfReadinessSub">—</div>
+        <div class="po-bar"><div class="po-bar-fill po-bar-blue" id="perfReadinessFill"></div></div>
+      </div>
+    </div>
+    <!-- Section 3: Weekly Consistency -->
+    <div class="po-consistency">
+      <div class="po-consistency-header">
+        <div class="po-consistency-meta">
+          <span class="po-badge po-badge-amber"><svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor"><path d="M7 1C5.5 3 3.5 4.5 3.5 7a3.5 3.5 0 0 0 7 0C10.5 4.5 8.5 3 7 1Z" opacity=".9"/></svg></span>
+          <span class="po-consistency-label">Weekly Consistency</span>
+        </div>
+        <span class="po-consistency-count" id="perfConsistencyCount">0 of 7 days</span>
+      </div>
+      <div class="po-dots" id="perfDots"></div>
+      <div class="po-microcopy" id="perfMicrocopy">Start building momentum.</div>
     </div>
   </div>
 
