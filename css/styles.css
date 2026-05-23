@@ -359,6 +359,7 @@ body {
 .home-grid .rm-pct { font-size: 20px; }
 .home-grid .readiness-rings { gap: 8px; }
 .home-grid .rm-item { gap: 5px; }
+.home-grid .rm-ring-wrap { max-width: none; }
 /* Calendar */
 .home-grid .cal-month { font-size: 13px; }
 .home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
