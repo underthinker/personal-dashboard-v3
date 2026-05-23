@@ -363,6 +363,13 @@ body {
 .home-grid .cal-month { font-size: 13px; }
 .home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
 .home-grid .cal-head { padding-bottom: 8px; }
+/* Activity: compact card + stretch heatmap to fill vertical space */
+.home-grid .a-activity { padding: 12px; gap: 8px; }
+.home-grid .hm-act-month-lbl { margin-bottom: 3px; }
+.home-grid .hm-act-legend { margin-top: 16px; }
+.home-grid #heatmapWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.home-grid .hm-act-outer { min-height: 0; grid-template-rows: 18px auto; }
+.home-grid .hm-act-grid { overflow: visible; }
 .home-grid .cal-day { font-size: 11px; }
 .home-grid .cal-dow { font-size: 9px; }
 
