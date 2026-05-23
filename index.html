@@ -143,7 +143,7 @@
     <div class="po-hero">
       <div class="po-hero-row">
         <div class="po-hero-meta">
-          <span class="po-badge po-badge-amber"><svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5V7l1.5 1.5"/></svg></span>
+          <span class="po-badge po-badge-accent"><svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><path d="M7 4.5V7l1.5 1.5"/></svg></span>
           <span class="po-hero-label">Deep Work Time</span>
         </div>
         <div class="po-trend-block">
@@ -186,7 +186,7 @@
     <div class="po-consistency">
       <div class="po-consistency-header">
         <div class="po-consistency-meta">
-          <span class="po-badge po-badge-amber"><svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor"><path d="M7 1C5.5 3 3.5 4.5 3.5 7a3.5 3.5 0 0 0 7 0C10.5 4.5 8.5 3 7 1Z" opacity=".9"/></svg></span>
+          <span class="po-badge po-badge-accent"><svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor"><path d="M7 1C5.5 3 3.5 4.5 3.5 7a3.5 3.5 0 0 0 7 0C10.5 4.5 8.5 3 7 1Z" opacity=".9"/></svg></span>
           <span class="po-consistency-label">Weekly Consistency</span>
         </div>
         <span class="po-consistency-count" id="perfConsistencyCount">0 of 7 days</span>
@@ -558,6 +558,9 @@
     window.renderStatsPanel && window.renderStatsPanel();
   });
   window.addEventListener('focus-updated', function() {
+    window.renderHomeHealthRings && window.renderHomeHealthRings();
+  });
+  window.addEventListener('nutrition-updated', function() {
     window.renderHomeHealthRings && window.renderHomeHealthRings();
   });
 

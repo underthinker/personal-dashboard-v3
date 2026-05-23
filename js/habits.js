@@ -931,23 +931,17 @@
     var day = {};
     try { day = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) {}
 
-    var settings = { water_goal_oz: 64, sleep_goal_hours: 8, focus_goal_min: 240 };
+    var settings = { water_goal_oz: 64, sleep_goal_hours: 8, protein_goal_g: 118 };
     try {
       var s = JSON.parse(localStorage.getItem('health_settings') || '{}');
       if (s.water_goal_oz) settings.water_goal_oz = s.water_goal_oz;
       if (s.sleep_goal_hours) settings.sleep_goal_hours = s.sleep_goal_hours;
-      if (s.focus_goal_min) settings.focus_goal_min = s.focus_goal_min;
+      if (s.protein_goal_g) settings.protein_goal_g = s.protein_goal_g;
     } catch(e) {}
 
     var sleepH = day.sleep_hours || 0;
     var waterOz = day.water_oz || 0;
-    var focusMin = day.focus_min || 0;
-
-    // Add any running focus session time
-    try {
-      var fs = JSON.parse(localStorage.getItem('focus_session_v1') || '{}');
-      if (fs.running && fs.startedAt) focusMin += (Date.now() - fs.startedAt) / 60000;
-    } catch(e) {}
+    var proteinG = (day.nutrition_totals && day.nutrition_totals.protein_g) || 0;
 
     var rings = [
       {
@@ -963,17 +957,17 @@
         sub: waterOz > 0 ? ((waterOz / 33.814).toFixed(1) + ' / ' + (settings.water_goal_oz / 33.814).toFixed(1) + 'L') : '—'
       },
       {
-        label: 'Focus',
+        label: 'Protein',
         color: 'var(--accent)',
-        pct: Math.min(100, Math.round(focusMin / settings.focus_goal_min * 100)),
-        sub: focusMin > 0 ? (Math.floor(focusMin / 60) + 'h ' + Math.round(focusMin % 60) + 'm') : '—'
+        pct: Math.min(100, Math.round(proteinG / settings.protein_goal_g * 100)),
+        sub: proteinG > 0 ? (Math.round(proteinG) + 'g / ' + settings.protein_goal_g + 'g') : '—'
       }
     ];
 
     var icons = [
       '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></g>',
       '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>',
-      '<circle cx="60" cy="38" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="60" cy="38" r="4.5" fill="none" stroke="var(--accent)" stroke-width="2"/><circle cx="60" cy="38" r="1.5" fill="var(--accent)"/>'
+      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--accent)" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12" stroke-width="2.2"/><line x1="2.5" y1="7" x2="2.5" y2="17" stroke-width="4.5"/><line x1="21.5" y1="7" x2="21.5" y2="17" stroke-width="4.5"/></g>'
     ];
 
     var r = 52;

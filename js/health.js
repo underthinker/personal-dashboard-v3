@@ -17,7 +17,7 @@
     } catch (e) { return defaultSettings(); }
   }
   function defaultSettings() {
-    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, protein_goal_g: 150, carbs_goal_g: 250, fat_goal_g: 75, time_format_12h: false, focus_goal_min: 240 };
+    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, protein_goal_g: 118, carbs_goal_g: 250, fat_goal_g: 75, time_format_12h: false, focus_goal_min: 240 };
   }
 
   function getActiveDate() {
@@ -1001,6 +1001,7 @@
         day.meals = (day.meals || []).filter((_, i) => i !== idx);
         recalcTotals(day);
         saveDay(date, day);
+        window.dispatchEvent(new CustomEvent('nutrition-updated'));
         renderHealth();
       });
     });
@@ -1128,6 +1129,7 @@
       day.meals.push(meal);
       recalcTotals(day);
       saveDay(date, day);
+      window.dispatchEvent(new CustomEvent('nutrition-updated'));
       closeMealModal();
       renderHealth();
     });
