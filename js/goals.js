@@ -820,7 +820,6 @@
   // ============ PERFORMANCE OVERVIEW PANEL ============
   function renderStatsPanel() {
     var now = new Date();
-    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
     var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
 
     // ── Focus time (today + live session) ──
@@ -1059,7 +1058,6 @@
     s.startedAt = null;
     saveFocusSession(s);
     var td = new Date();
-    if (td.getHours() < 6) td.setDate(td.getDate() - 1);
     var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
     try {
       var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
@@ -1101,7 +1099,6 @@
   function _migrateFocusCarryover() {
     if (localStorage.getItem('focus_migrated_v1')) return;
     var td = new Date();
-    if (td.getHours() < 6) td.setDate(td.getDate() - 1);
     var todayYmd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
     var yd = new Date(td);
     yd.setDate(yd.getDate() - 1);
@@ -1125,7 +1122,6 @@
     if (!btn) return;
     btn.addEventListener('click', function() {
       var td = new Date();
-      if (td.getHours() < 6) td.setDate(td.getDate() - 1);
       var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
       try {
         var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
@@ -1156,7 +1152,12 @@
   initCalendar();
   initFocusTimer();
   _initFocusEdit();
-  setInterval(updateDayBar, 60 * 1000);
+  setInterval(function() {
+    updateDayBar();
+    renderStatsPanel();
+    var ringsFn = window.renderHomeHealthRings || window.renderHabitFullRings;
+    if (ringsFn) ringsFn();
+  }, 60 * 1000);
 
   startTicker();
 

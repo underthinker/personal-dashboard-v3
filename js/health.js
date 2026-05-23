@@ -22,7 +22,6 @@
 
   function getActiveDate() {
     const now = new Date();
-    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
     return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
   }
 
@@ -67,7 +66,6 @@
   function dateToYMD(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function getActiveDate() {
     const now = new Date();
-    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
     return dateToYMD(now);
   }
 

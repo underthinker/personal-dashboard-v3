@@ -306,7 +306,7 @@ body {
 }
 .pill .dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; }
 .pill-live { color: var(--accent); background: var(--accent-soft); }
-.pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
+.pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; }
 .pill-streak.gm-streak-active { color: var(--accent); background: var(--accent-soft); }
 .pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(91,168,247,0.18); color: #80bcfa; font-weight: 500; }
 
@@ -339,6 +339,7 @@ body {
 
 /* ─── Second-row always-on compact sizing ─── */
 /* Timeline */
+.home-grid .a-timeline #timelineWidget { overflow-y: auto; flex: 1; min-height: 0; }
 .home-grid .timeline { gap: 6px; }
 .home-grid .tl-row { gap: 8px; }
 .home-grid .tl-time { font-size: 10.5px; }
@@ -348,7 +349,10 @@ body {
 .home-grid .tom-text { font-size: 12px; }
 .home-grid .tom-item { padding: 3px 0; }
 .home-grid .tom-icon { width: 18px; height: 18px; font-size: 10px; flex: 0 0 18px; }
-.home-grid .tomorrow-list { gap: 4px; max-height: 100px; overflow-y: auto; }
+.home-grid .tomorrow-list { gap: 4px; flex: 1; min-height: 0; overflow-y: auto; }
+/* Today */
+.home-grid .a-goals > div:nth-child(2) { min-height: 0; }
+.home-grid #goalList { flex: 1; min-height: 0; overflow-y: auto; }
 /* Readiness */
 .home-grid .rm-name { font-size: 12px; }
 .home-grid .rm-sub { font-size: 11px; }
