@@ -267,11 +267,11 @@ body {
   gap: 14px;
   height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
-  grid-template-rows: minmax(0, 2.1fr) minmax(0, 1.8fr) minmax(0, 1.1fr);
+  grid-template-rows: minmax(0, 2.1fr) minmax(0, 1.8fr) minmax(0, 1.8fr);
   grid-template-areas:
     "session  session  goals     goals    stats"
-    "tomorrow timeline habits    habits   calendar"
-    "activity activity mood      weather  quote";
+    "tomorrow timeline habits    habits   stats"
+    "activity activity mood      weather  calendar";
 }
 
 /* ─── Card Base ─── */
@@ -321,17 +321,16 @@ body {
 .a-activity { grid-area: activity; }
 .a-mood { grid-area: mood; }
 .a-weather { grid-area: weather; }
-.a-quote { grid-area: quote; }
 
 /* ─── Home grid card containment ─── */
 .home-grid .card { overflow: hidden; min-height: 0; }
-/* Performance Overview: compact to fit row 1 */
-.home-grid .a-stats { gap: 8px; padding: 14px; }
-.home-grid .po-week-bars { height: 42px; }
-.home-grid .po-week { margin-top: 0; }
-.home-grid .po-dot { max-width: 28px; }
+/* Performance Overview: spans rows 1+2 — more room to breathe */
+.home-grid .a-stats { gap: 14px; padding: 18px; }
+.home-grid .po-week-bars { height: 64px; }
+.home-grid .po-week { margin-top: 4px; }
+.home-grid .po-dot { max-width: 34px; }
 /* Calendar: fixed cell height instead of width-proportional aspect-ratio */
-.home-grid .cal-day { aspect-ratio: unset; height: 30px; }
+.home-grid .cal-day { aspect-ratio: unset; height: 32px; }
 .home-grid .ring-wrap {
   width: clamp(90px, 13.5vh, 150px);
   height: clamp(90px, 13.5vh, 150px);
@@ -363,7 +362,7 @@ body {
 /* Calendar */
 .home-grid .cal-month { font-size: 13px; }
 .home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
-.home-grid .cal-head { padding-bottom: 8px; }
+.home-grid .cal-head { padding-bottom: 10px; }
 /* Activity: compact card + stretch heatmap to fill vertical space */
 .home-grid .a-activity { padding: 12px; gap: 8px; }
 .home-grid .hm-act-month-lbl { margin-bottom: 3px; }
@@ -923,11 +922,6 @@ body {
 }
 .weather-loading, .weather-error { color: var(--muted); font-size: 12px; }
 
-/* ─── Quote Widget ─── */
-.quote-body { display: flex; gap: 10px; flex: 1; }
-.quote-mark { font-size: 28px; color: var(--accent); line-height: 0.9; font-family: var(--font-serif); font-style: italic; flex: 0 0 auto; }
-.quote-text { font-size: 14.5px; line-height: 1.45; color: var(--text); font-weight: 400; }
-.quote-author { font-size: 12px; color: var(--muted); margin-top: 8px; display: block; }
 
 /* ─── Note Bar ─── */
 
@@ -2158,9 +2152,8 @@ body {
       "session session goals"
       "stats stats stats"
       "tomorrow timeline habits"
-      "calendar calendar habits"
       "activity activity activity"
-      "mood weather quote";
+      "mood weather calendar";
   }
   .fin-donut-row { grid-template-columns: 1fr; }
   .fin-tables { grid-template-columns: 1fr; }
@@ -2180,11 +2173,10 @@ body {
       "tomorrow"
       "timeline"
       "habits"
-      "calendar"
       "activity"
       "mood"
       "weather"
-      "quote";
+      "calendar";
   }
   .po-log-grid { grid-template-columns: 1fr; }
   .po-stats-row { grid-template-columns: 1fr; }

@@ -186,7 +186,7 @@
     <div class="po-consistency">
       <div class="po-consistency-header">
         <div class="po-consistency-meta">
-          <span class="po-badge po-badge-accent"><svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor"><path d="M7 1C5.5 3 3.5 4.5 3.5 7a3.5 3.5 0 0 0 7 0C10.5 4.5 8.5 3 7 1Z" opacity=".9"/></svg></span>
+          <span class="po-badge po-badge-accent"><svg viewBox="0 0 14 14" width="11" height="11" fill="currentColor"><path d="M7 1C4.5 4 2 6 2 9a5 5 0 0 0 10 0C12 6 9.5 4 7 1zm0 3.5c1 1.2 2.5 2.5 2.5 4a2.5 2.5 0 0 1-5 0c0-1.5 1.5-2.8 2.5-4z"/></svg></span>
           <span class="po-consistency-label">Weekly Consistency</span>
         </div>
         <span class="po-consistency-count" id="perfConsistencyCount">0 of 7 days</span>
@@ -253,16 +253,6 @@
   <div class="card a-weather">
     <div class="card-head"><span class="card-label">Weather</span></div>
     <div id="weatherWidget"></div>
-  </div>
-
-  <!-- ═══ QUOTE CARD ═══ -->
-  <div class="card a-quote">
-    <div class="quote-body">
-      <span class="quote-mark">"</span>
-      <div>
-        <div class="quote-text" id="quoteText">Loading...</div>
-      </div>
-    </div>
   </div>
 
 
@@ -485,25 +475,6 @@
     });
   }
 
-  /* Quote */
-  const QUOTES = [
-    { text: 'Discipline is choosing between what you want now and what you want most.', author: 'Abraham Lincoln' },
-    { text: 'Small daily improvements over time lead to stunning results.', author: 'Robin Sharma' },
-    { text: "Don't count the days, make the days count.", author: 'Muhammad Ali' },
-    { text: 'Progress is progress, no matter how small.', author: '' },
-    { text: 'Be the hardest worker in the room.', author: '' },
-    { text: 'Your future is created by what you do today, not tomorrow.', author: '' },
-    { text: 'The secret of getting ahead is getting started.', author: 'Mark Twain' },
-    { text: 'Do something today that your future self will thank you for.', author: '' },
-  ];
-  function renderQuote() {
-    const el = $('quoteText');
-    if (!el) return;
-    const idx = parseInt(localStorage.getItem('tweak_quoteIdx') || '') || Math.random() * QUOTES.length | 0;
-    const item = QUOTES[idx];
-    el.innerHTML = item.text + (item.author ? '<span class="quote-author">— ' + item.author + '</span>' : '');
-  }
-
   /* Next up */
   function updateHeroNextUp() {
     var hero = $('priorityPillTextHero');
@@ -536,7 +507,6 @@
   renderHeatmap();
   renderMood();
   renderWeather();
-  renderQuote();
   updateHeroNextUp();
   updateHomeBadge();
   window.renderHomeHealthRings ? window.renderHomeHealthRings() : (window.renderHabitFullRings && window.renderHabitFullRings());
@@ -1300,10 +1270,6 @@
       </div>
     </div>
 
-    <div class="tweaks-section">
-      <div class="tweaks-section-label">Quote</div>
-      <div class="tweaks-select" id="tweaksQuoteSelect"></div>
-    </div>
   </div>
 </div>
 
@@ -1394,33 +1360,6 @@
     });
   });
 
-  /* Quote select */
-  const QUOTES = [
-    'Discipline is choosing between what you want now and what you want most.',
-    'Small daily improvements over time lead to stunning results.',
-    "Don't count the days, make the days count.",
-    'Progress is progress, no matter how small.',
-    'Be the hardest worker in the room.',
-    'Your future is created by what you do today, not tomorrow.',
-    'The secret of getting ahead is getting started.',
-    'Do something today that your future self will thank you for.',
-  ];
-  const qs = document.getElementById('tweaksQuoteSelect');
-  QUOTES.forEach(function(q, i) {
-    const btn = document.createElement('button');
-    btn.className = 'tweaks-select-item';
-    btn.textContent = q.slice(0, 40) + '…';
-    btn.dataset.idx = i;
-    if (String(i) === (localStorage.getItem('tweak_quoteIdx') || '0')) btn.classList.add('active');
-    btn.addEventListener('click', function() {
-      qs.querySelectorAll('.tweaks-select-item').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      localStorage.setItem('tweak_quoteIdx', String(i));
-      const qel = document.getElementById('quoteText');
-      if (qel) qel.textContent = q;
-    });
-    qs.appendChild(btn);
-  });
 })();
 </script>
 
