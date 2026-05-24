@@ -7111,41 +7111,6 @@ body {
   cursor: pointer;
 }
 
-.dr-color-wrap {
-  position: relative;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-.dr-color-wrap input[type="color"] {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: 2px solid rgba(255,255,255,0.12);
-  padding: 0;
-  cursor: pointer;
-  background: none;
-  display: block;
-  transition: border-color var(--dur-fast) var(--ease-smooth),
-              transform var(--dur-fast) var(--ease-bounce);
-}
-
-.dr-color-wrap input[type="color"]:hover {
-  border-color: rgba(255,255,255,0.28);
-  transform: scale(1.08);
-}
-
-.dr-color-wrap input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.dr-color-wrap input[type="color"]::-webkit-color-swatch {
-  border: none;
-  border-radius: 6px;
-}
-
-
-
 /* ============================================================
    HEALTH TAB  (hl-* / ql-* / nt-*)
    ============================================================ */

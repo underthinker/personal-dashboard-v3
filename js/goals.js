@@ -604,11 +604,11 @@
   const BLOCKS_KEY = 'day_ring_blocks_v1';
 
   const BLOCKS_DEFAULT = [
-    { name: 'Morning',   start: 6,  end: 12, color: '#D4A373' },
-    { name: 'Afternoon', start: 12, end: 17, color: '#F2A65A' },
-    { name: 'Evening',   start: 17, end: 21, color: '#E25D7A' },
-    { name: 'Night',     start: 21, end: 24, color: '#7B5CB8' },
-    { name: 'Sleep',     start: 0,  end: 6,  color: '#5555AA' }
+    { name: 'Morning',   start: 6,  end: 12 },
+    { name: 'Afternoon', start: 12, end: 17 },
+    { name: 'Evening',   start: 17, end: 21 },
+    { name: 'Night',     start: 21, end: 24 },
+    { name: 'Sleep',     start: 0,  end: 6  }
   ];
 
   const BLOCK_STATUS = {
@@ -637,6 +637,11 @@
       blocks = BLOCKS_DEFAULT;
       storeSet(BLOCKS_KEY, blocks);
     }
+    let migrated = false;
+    for (const b of blocks) {
+      if (b.color) { delete b.color; migrated = true; }
+    }
+    if (migrated) storeSet(BLOCKS_KEY, blocks);
     _cachedBlocks = blocks;
     return blocks;
   }
@@ -684,7 +689,8 @@
     const percent = (hours / 24) * 100;
     const offset = RING_C * (1 - percent / 100);
     dayRingFill.setAttribute('stroke-dashoffset', String(offset));
-    dayRingFill.style.stroke = block.color;
+    const accent = localStorage.getItem('tweak_accent') || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#F2587A';
+    dayRingFill.style.stroke = accent;
     dayRingPercent.textContent = Math.floor(percent) + '%';
     dayRingPhase.textContent = 'COMPLETE';
 
@@ -747,20 +753,6 @@
         updateDayBar();
       });
       row.appendChild(endIn);
-
-      const colorWrap = document.createElement('div');
-      colorWrap.className = 'dr-color-wrap';
-      const colorIn = document.createElement('input');
-      colorIn.type = 'color';
-      colorIn.value = b.color;
-      colorIn.addEventListener('input', function onChange() {
-        const updated = loadBlocks();
-        updated[i].color = this.value;
-        saveBlocks(updated);
-        updateDayBar();
-      });
-      colorWrap.appendChild(colorIn);
-      row.appendChild(colorWrap);
 
       drModalBody.appendChild(row);
     });
@@ -1345,6 +1337,7 @@
   initDragContainers();
   renderStreak();
   updateDayBar();
+  document.addEventListener('accent-changed', updateDayBar);
   updateGreeting();
   renderStatsPanel();
   window.renderSidebarAtAGlance();

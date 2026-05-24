@@ -651,7 +651,7 @@
       <div class="dr-modal-title">Day Ring Settings</div>
       <button class="dr-modal-x" id="drModalX" type="button" aria-label="Close">×</button>
     </div>
-    <div class="dr-modal-sub">Edit the time range and color for each block of your day.</div>
+    <div class="dr-modal-sub">Edit the time range for each block of your day.</div>
     <div class="dr-modal-body" id="drModalBody"></div>
   </div>
 </div>
@@ -1471,6 +1471,7 @@
       root.style.setProperty('--accent-soft', color + '24');
       setAccentRGB(color);
       localStorage.setItem('tweak_accent', color);
+      document.dispatchEvent(new CustomEvent('accent-changed'));
     });
   });
 
