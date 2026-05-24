@@ -302,27 +302,6 @@
     });
     li.appendChild(cb);
 
-    const KEYWORD_ICONS = [
-      { keys: ['gym','workout','lift','chest','legs','arms','back','cardio','run','push','pull','squat'], icon: '💪' },
-      { keys: ['standup','meeting','call','sync','review','interview','zoom','teams','slack'], icon: '👥' },
-      { keys: ['budget','report','finance','invoice','billing','expense','tax','accounting'], icon: '📋' },
-      { keys: ['grocery','shopping','store','market','buy','costco','trader'], icon: '🛒' },
-      { keys: ['read','book','study','learn','course','lecture','class'], icon: '📚' },
-      { keys: ['doctor','dentist','appointment','health','clinic','pharmacy'], icon: '🏥' },
-      { keys: ['code','deploy','pr','commit','ticket','jira','debug','fix'], icon: '💻' },
-      { keys: ['cook','meal','dinner','lunch','breakfast','recipe'], icon: '🍳' },
-    ];
-    var goalIconEl = null;
-    var lowerText = (goal.text || '').toLowerCase();
-    for (var ki = 0; ki < KEYWORD_ICONS.length; ki++) {
-      if (KEYWORD_ICONS[ki].keys.some(function(k) { return lowerText.indexOf(k) !== -1; })) {
-        goalIconEl = document.createElement('span');
-        goalIconEl.className = 'goal-kw-icon';
-        goalIconEl.textContent = KEYWORD_ICONS[ki].icon;
-        li.appendChild(goalIconEl);
-        break;
-      }
-    }
 
     const text = document.createElement('div');
     text.className = 'goal-text';
@@ -782,8 +761,7 @@
   // ============ GREETING ============
   function updateGreeting() {
     const periodEl = $('greetPeriod');
-    const subtitleEl = $('greetSubtitle');
-    if (!periodEl && !subtitleEl) return;
+    if (!periodEl) return;
 
     const now = new Date();
     const h = now.getHours();
@@ -794,39 +772,6 @@
     else period = 'night';
 
     if (periodEl) periodEl.textContent = period;
-
-    if (subtitleEl) {
-      const todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
-      var health = {};
-      try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
-      var settings = {};
-      try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
-      var sleepGoal = settings.sleep_goal_hours || 8;
-      var factors = [];
-      if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-      if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
-      var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
-
-      var streakData = storeGet(STREAK_KEY) || { count: 0 };
-      var todayGoals = storeGet('goals:' + todayYmd) || [];
-      var todayAllDone = todayGoals.length > 0 && todayGoals.every(function(g) { return g && g.done; });
-      var streak = streakData.count + (todayAllDone ? 1 : 0);
-
-      var isMorning = h >= 5 && h < 12;
-      var text;
-      if (readinessScore != null && readinessScore >= 80 && isMorning) {
-        text = 'Strong momentum this morning. You\'re on track for a highly productive day.';
-      } else if (streak >= 7) {
-        text = 'Day ' + streak + ' of your streak. Keep it going.';
-      } else if (readinessScore != null && readinessScore < 40) {
-        text = 'Recovery looks low. Consider a lighter focus load.';
-      } else if (readinessScore != null && readinessScore >= 80) {
-        text = 'Recovery looks strong. Push today.';
-      } else {
-        text = 'Things look balanced. Keep building momentum.';
-      }
-      subtitleEl.innerHTML = '<span class="greet-dot"></span> ' + text;
-    }
   }
   window.updateGreeting = updateGreeting;
 
@@ -993,17 +938,6 @@
     if (tasksEl) tasksEl.textContent = total > 0 ? done + '/' + total : '—';
     if (streakEl) streakEl.textContent = streak > 0 ? streak + ' days' : '—';
     if (recoveryEl) recoveryEl.textContent = readinessScore != null ? (readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low') : '—';
-
-    // Adaptive insight
-    var insightEl = $('sidebarInsightText');
-    if (insightEl) {
-      var text;
-      if (streak >= 7) text = 'You\'re in a deep work rhythm this week.';
-      else if (readinessScore != null && readinessScore >= 80) text = 'Recovery looks strong. Push today.';
-      else if (readinessScore != null && readinessScore < 40) text = 'Recovery looks low. Take it easy.';
-      else text = 'Things look balanced. Keep building.';
-      insightEl.textContent = text;
-    }
   };
 
   // ============ HOME INSIGHTS PANEL ============
