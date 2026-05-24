@@ -758,22 +758,11 @@
     }
   });
 
-  // ============ GREETING ============
-  function updateGreeting() {
-    const periodEl = $('greetPeriod');
-    if (!periodEl) return;
-
-    const now = new Date();
-    const h = now.getHours();
-    let period;
-    if (h >= 5 && h < 12) period = 'morning';
-    else if (h >= 12 && h < 17) period = 'afternoon';
-    else if (h >= 17 && h < 21) period = 'evening';
-    else period = 'night';
-
-    if (periodEl) periodEl.textContent = period;
+  // ============ TOPBAR STATUS ============
+  function updateTopbarStatus() {
+    // Placeholder for future status bar logic
   }
-  window.updateGreeting = updateGreeting;
+  window.updateGreeting = updateTopbarStatus; // Keep alias for tab switching compatibility
 
   // ============ PERFORMANCE OVERVIEW PANEL ============
   function renderStatsPanel() {

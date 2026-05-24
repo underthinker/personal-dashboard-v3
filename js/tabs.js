@@ -7,7 +7,6 @@
     dateEl.textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
   }
 
-  var originalGreeting = document.querySelector('.greeting h1')?.innerHTML;
   var tabs = document.querySelectorAll('.nav-item');
   var contents = document.querySelectorAll('.tab-content');
   tabs.forEach(function (tab) {
@@ -20,8 +19,9 @@
       if (el) el.classList.add('is-visible');
 
       if (contentId === 'tab-main') {
-        var greetTitle = document.querySelector('.greeting h1');
-        if (greetTitle && originalGreeting) greetTitle.innerHTML = originalGreeting;
+        var statusEl = document.getElementById('topbarStatus');
+        if (statusEl) statusEl.innerHTML = ''; 
+        
         window.updateGreeting && window.updateGreeting();
         window.renderStatsPanel && window.renderStatsPanel();
         window.renderCalendar && window.renderCalendar();
@@ -30,9 +30,9 @@
       }
       var tabNames = { main:'Home', finances:'Finances', habits:'Habits', health:'Health', gym:'Gym' };
       var name = tabNames[tab.getAttribute('data-tab')] || tab.textContent.trim();
-      var greetTitle = document.querySelector('.greeting h1');
-      if (greetTitle && contentId !== 'tab-main') {
-        greetTitle.innerHTML = '<strong>' + name + '</strong>';
+      var statusEl = document.getElementById('topbarStatus');
+      if (statusEl && contentId !== 'tab-main') {
+        statusEl.innerHTML = '<strong>' + name + '</strong>';
       }
 
       if (contentId === 'tab-finances') {
