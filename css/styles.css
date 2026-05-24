@@ -277,12 +277,11 @@ body {
   gap: 14px;
   height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
-  grid-template-rows: minmax(0, 2.5fr) minmax(0, 2.3fr) minmax(0, 2.5fr) 56px;
+  grid-template-rows: minmax(0, 3.2fr) minmax(0, 2.3fr) minmax(0, 2.5fr);
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   stats"
-    "activity activity mood      weather  calendar"
-    "connect  connect  connect   connect  connect";
+    "activity activity mood      weather  calendar";
 }
 
 /* ─── Card Base ─── */
@@ -412,6 +411,7 @@ body {
 .rm-h-sub { font-size: 11px; color: var(--muted); }
 .rm-h-tip { font-size: 11px; color: var(--muted-2); }
 /* Calendar */
+.home-grid .a-calendar { overflow: visible; }
 .home-grid .cal-month { font-size: 13px; }
 .home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
 .home-grid .cal-head { padding-bottom: 6px; }
@@ -5633,8 +5633,10 @@ body {
 
 .tab-content { display: none !important; }
 .tab-content.is-visible {
-  display: block !important;
-  height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   background: var(--bg-home-deep);
 }
