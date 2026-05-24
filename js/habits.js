@@ -1000,6 +1000,86 @@
   }
   window.renderHomeHealthRings = renderHomeHealthRings;
 
+  function renderHomeMood() {
+    var el = document.getElementById('moodWidget');
+    if (!el) return;
+
+    var now = new Date();
+    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
+    var p2 = function(n) { return String(n).padStart(2, '0'); };
+    var ymd = now.getFullYear() + '-' + p2(now.getMonth()+1) + '-' + p2(now.getDate());
+    var currentKey = getMood(ymd);
+    var def = currentKey ? getMoodDef(currentKey) : null;
+
+    var MOOD_NOTES = {
+      happy: 'Riding high today.', calm: 'Steady and balanced.',
+      motivated: 'Crushing it!', tired: 'Rest when you can.',
+      anxious: 'Take a breath.', frustrated: 'Hang in there.',
+      sad: 'Be kind to yourself.', numb: 'Just getting through it.'
+    };
+
+    var heroHtml = def
+      ? '<div class="mood-current">' +
+          '<img class="mood-svg-lg" src="' + moodSvgUri(def.key) + '" alt="' + def.label + '">' +
+          '<div class="mood-info"><div class="mood-name">' + def.label + '</div><div class="mood-note">' + (MOOD_NOTES[def.key] || '') + '</div></div>' +
+        '</div>'
+      : '<div class="mood-current">' +
+          '<div class="mood-svg-placeholder">·</div>' +
+          '<div class="mood-info"><div class="mood-name">—</div><div class="mood-note">How are you feeling?</div></div>' +
+        '</div>';
+
+    var pickerHtml = '<div class="mood-picker">' +
+      MOOD_DEFS.map(function(m) {
+        return '<button class="mood-pick' + (m.key === currentKey ? ' active' : '') +
+          '" data-mood-key="' + m.key + '" title="' + m.label + '">' + m.emoji + '</button>';
+      }).join('') +
+    '</div>';
+
+    el.innerHTML = heroHtml + pickerHtml;
+
+    el.querySelectorAll('.mood-pick').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var k = btn.getAttribute('data-mood-key');
+        if (k === currentKey) deleteMood(ymd);
+        else setMood(ymd, k);
+        renderHomeMood();
+      });
+    });
+
+    // Sparkline
+    var sparkEl = document.getElementById('moodSparkline');
+    var trendEl = document.getElementById('moodTrendLabel');
+    if (sparkEl) {
+      var MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
+      var vals = [];
+      for (var i = 6; i >= 0; i--) {
+        var d = new Date(now);
+        d.setDate(d.getDate() - i);
+        var dk = d.getFullYear() + '-' + p2(d.getMonth()+1) + '-' + p2(d.getDate());
+        var mk = getMood(dk);
+        vals.push(mk && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1);
+      }
+      var hasData = vals.some(function(v) { return v >= 0; });
+      if (hasData) {
+        var w = 120, h = 32, padX = 2, padY = 4;
+        var pts = vals.map(function(v, vi) {
+          if (v < 0) return '';
+          var x = padX + (vi / (vals.length - 1)) * (w - 2*padX);
+          var y = h - padY - ((v - 1) / 4) * (h - 2*padY);
+          return Math.round(x) + ',' + Math.round(y);
+        }).filter(Boolean);
+        sparkEl.innerHTML = '<polyline points="' + pts.join(' ') + '"/>';
+        var validVals = vals.filter(function(v) { return v >= 0; });
+        var avg = validVals.reduce(function(a,b){return a+b;},0) / validVals.length;
+        if (trendEl) trendEl.textContent = avg >= 4.5 ? 'Great week' : avg >= 3.5 ? 'Good week' : avg >= 2.5 ? 'Okay week' : 'Tough week';
+      } else {
+        sparkEl.innerHTML = '';
+        if (trendEl) trendEl.textContent = '';
+      }
+    }
+  }
+  window.renderHomeMood = renderHomeMood;
+
   function render() {
     renderQuote();
     renderHabitsView();

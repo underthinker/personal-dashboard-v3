@@ -390,81 +390,6 @@
   };
 
   /* Mood */
-  const HOME_MOODS = [
-    { key: 'bad',   emoji: '😤', label: 'Tough day',    desc: 'Hang in there.' },
-    { key: 'meh',   emoji: '😕', label: 'Meh',          desc: 'Just getting by.' },
-    { key: 'ok',    emoji: '😐', label: 'Okay',         desc: 'Normal day.' },
-    { key: 'good',  emoji: '🙂', label: 'Good',         desc: 'Productive day!' },
-    { key: 'great', emoji: '😄', label: 'Great',        desc: 'Crushing it!' },
-  ];
-  function getMoodToday() {
-    const d = new Date();
-    if (d.getHours() < 6) d.setDate(d.getDate() - 1);
-    const ymd = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    return { ymd, key: localStorage.getItem('mood_home:' + ymd) };
-  }
-  function renderMood() {
-    const el = $('moodWidget');
-    if (!el) return;
-    const { ymd, key: currentKey } = getMoodToday();
-    const current = HOME_MOODS.find(function(m) { return m.key === currentKey; }) || null;
-
-    const hero = current
-      ? '<div class="mood-current"><div class="mood-emoji-lg">' + current.emoji + '</div><div class="mood-info"><div class="mood-name">' + current.label + '</div><div class="mood-note">' + current.desc + '</div></div></div>'
-      : '<div class="mood-current"><div class="mood-emoji-lg">😶</div><div class="mood-info"><div class="mood-name">—</div><div class="mood-note">How are you feeling?</div></div></div>';
-
-    const strip = '<div class="mood-picker">' + HOME_MOODS.map(function(m) {
-      return '<button class="mood-pick' + (m.key === currentKey ? ' active' : '') + '" data-mood-key="' + m.key + '" title="' + m.label + '">' + m.emoji + '</button>';
-    }).join('') + '</div>';
-
-    el.innerHTML = hero + strip;
-
-    el.querySelectorAll('.mood-pick').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        const k = btn.getAttribute('data-mood-key');
-        if (k === currentKey) localStorage.removeItem('mood_home:' + ymd);
-        else localStorage.setItem('mood_home:' + ymd, k);
-        renderMood();
-      });
-    });
-
-    // Sparkline
-    var sparkEl = $('moodSparkline');
-    var trendEl = $('moodTrendLabel');
-    if (sparkEl) {
-      var MOOD_SCALE = { bad:0, meh:1, ok:2, good:3, great:4 };
-      var now = new Date();
-      var vals = [];
-      for (var mi = 6; mi >= 0; mi--) {
-        var md = new Date(now); md.setDate(md.getDate() - mi);
-        if (md.getHours() < 6) md.setDate(md.getDate() - 1);
-        var mymd = md.getFullYear() + '-' + String(md.getMonth()+1).padStart(2,'0') + '-' + String(md.getDate()).padStart(2,'0');
-        var mk = localStorage.getItem('mood_home:' + mymd);
-        var score = mk != null && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1;
-        vals.push(score);
-      }
-      var hasData = vals.some(function(v) { return v >= 0; });
-      if (hasData) {
-        var w = 120, h = 32, padX = 2, padY = 4;
-        var maxV = 4, minV = 0;
-        var range = maxV - minV || 1;
-        var pts = vals.map(function(v, vi) {
-          if (v < 0) return '';
-          var x = padX + (vi / (vals.length - 1)) * (w - 2 * padX);
-          var y = h - padY - ((v - minV) / range) * (h - 2 * padY);
-          return Math.round(x) + ',' + Math.round(y);
-        }).filter(function(p) { return p; });
-        sparkEl.innerHTML = '<polyline points="' + pts.join(' ') + '"/>';
-
-        var avg = vals.filter(function(v) { return v >= 0; }).reduce(function(a,b){return a+b;},0) / Math.max(vals.filter(function(v){return v>=0;}).length, 1);
-        var avgLabel = avg >= 3 ? 'Good week' : avg >= 2 ? 'Okay week' : avg >= 1 ? 'Tough week' : '';
-        if (trendEl) trendEl.textContent = avgLabel;
-      } else {
-        sparkEl.innerHTML = '';
-        if (trendEl) trendEl.textContent = '';
-      }
-    }
-  }
 
   /* Weather */
   const WEATHER_CONFIG_KEY = 'weather_config_v1';
@@ -475,6 +400,8 @@
     const el = $('weatherWidget');
     if (!el || !data) return;
     const temp = Math.round(data.main.temp);
+    const feelsLike = Math.round(data.main.feels_like);
+    const humidity = data.main.humidity;
     const hi = Math.round(data.main.temp_max);
     const lo = Math.round(data.main.temp_min);
     const icon = owmIcon(data.weather[0].icon);
@@ -482,6 +409,13 @@
     const cond = data.weather[0].main;
     const now = new Date();
     const h = now.getHours();
+    var sunHtml = '';
+    if (data.sys && data.sys.sunrise && data.sys.sunset) {
+      var sr = new Date(data.sys.sunrise * 1000);
+      var ss = new Date(data.sys.sunset * 1000);
+      var fmt = function(d) { return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); };
+      sunHtml = '<div class="weather-sun-row"><span>↑ ' + fmt(sr) + '</span><span>↓ ' + fmt(ss) + '</span></div>';
+    }
     var rec;
     if (cond === 'Clear' && temp > 20) rec = 'Great conditions for an outdoor break.';
     else if (cond === 'Clear' && h >= 17 && h < 21) rec = 'Evening walk recommended.';
@@ -492,7 +426,9 @@
     el.innerHTML =
       '<div class="weather-row"><span class="weather-icon">' + icon + '</span><span class="weather-temp">' + temp + '°C</span></div>' +
       '<div class="weather-cond">' + desc + '</div>' +
+      '<div class="weather-meta-row"><span>Feels like ' + feelsLike + '°C</span><span>' + humidity + '% humidity</span></div>' +
       '<div class="weather-hl"><span>↑ ' + hi + '°</span><span>↓ ' + lo + '°</span></div>' +
+      sunHtml +
       '<div class="weather-rec">' + rec + '</div>' +
       '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>';
   }
@@ -605,7 +541,6 @@
 
   renderTimeline();
   window.renderHomeInsights && window.renderHomeInsights();
-  renderMood();
   renderWeather();
   updateHeroNextUp();
   updateHomeBadge();
@@ -1430,6 +1365,7 @@
 (function() {
   if (document.getElementById('tab-main')?.classList.contains('is-visible')) {
     window.renderHomeInsights && window.renderHomeInsights();
+    window.renderHomeMood && window.renderHomeMood();
   }
 })();
 </script>

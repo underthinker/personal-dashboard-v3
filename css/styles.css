@@ -428,8 +428,8 @@ body {
 .home-grid .cal-head { padding-bottom: 6px; }
 /* Activity: compact card + stretch heatmap to fill vertical space */
 .home-grid .a-activity { padding: 12px; gap: 8px; }
-.insights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; flex: 1; }
-.ins-card { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; }
+.insights-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; flex: 1; min-height: 0; }
+.ins-card { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; align-self: stretch; }
 .ins-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ins-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; }
 .ins-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -954,20 +954,21 @@ body {
 
 /* ─── Mood Widget ─── */
 .mood-current { display: flex; align-items: center; gap: 12px; }
-.mood-emoji-lg { width: 36px; height: 36px; border-radius: 50%; background: rgba(167,139,250,0.2); display: grid; place-items: center; font-size: 18px; }
+.mood-svg-lg { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; }
+.mood-svg-placeholder { width: 42px; height: 42px; border-radius: 50%; background: var(--surface-2); border: 1px dashed var(--line-2); display: grid; place-items: center; font-size: 18px; color: var(--muted); flex-shrink: 0; }
 .mood-info .mood-name { font-size: 14px; font-weight: 600; }
 .mood-info .mood-note { font-size: 11.5px; color: var(--muted); }
-.mood-picker { display: flex; gap: 6px; margin-top: auto; }
+.mood-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: auto; }
 .mood-pick {
-  width: 30px; height: 30px;
-  border-radius: 50%;
+  height: 28px;
+  border-radius: 6px;
   background: var(--surface-2);
   border: 1px solid var(--line);
   display: grid;
   place-items: center;
   padding: 0;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
 }
 .mood-pick:hover { background: var(--surface); border-color: var(--line-2); }
 .mood-pick.active { border-color: var(--accent); background: var(--accent-soft); }
@@ -977,8 +978,10 @@ body {
 .weather-icon { font-size: 28px; color: var(--muted); }
 .weather-temp { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
 .weather-cond { font-size: 12px; color: var(--muted); }
-.weather-hl { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: auto; font-family: var(--font-mono); }
-.weather-rec { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 4px; }
+.weather-hl { display: flex; gap: 14px; font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+.weather-meta-row { display: flex; gap: 10px; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
+.weather-sun-row { display: flex; gap: 14px; font-size: 11.5px; color: var(--muted); font-family: var(--font-mono); }
+.weather-rec { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: auto; }
 
 .weather-cfg-btn { background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 2px; font-size: 12px; }
 .weather-cfg-btn:hover { color: var(--text); }
