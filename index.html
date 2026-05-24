@@ -300,14 +300,20 @@
       { t: '15:00', label: 'Admin', sub: 'Email, planning' },
       { t: '17:00', label: 'Wind down', sub: 'Review, plan tomorrow' },
     ];
+    const blockHours = blocks.map(b => parseInt(b.t));
+    const activeIdx = h >= 6 && h < 17
+      ? blockHours.filter(bh => bh <= h).length - 1
+      : -1;
     el.innerHTML = blocks.map((b, i) => {
-      const active = i === Math.min(h - 6, blocks.length - 1) && h >= 6 && h < 17;
-      return '<div class="tl-row">' +
+      const active = i === activeIdx;
+      return '<div class="tl-row' + (active ? ' tl-row-active' : '') + '">' +
         '<div class="tl-time' + (active ? ' active' : '') + '">' + b.t + '</div>' +
         '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (active ? ' active' : '') + '"></div></div>' +
         '<div class="tl-content' + (active ? ' active' : '') + '"><div class="tl-title">' + b.label + '</div><div class="tl-sub">' + b.sub + '</div></div>' +
         '</div>';
     }).join('');
+    const activeRow = el.querySelector('.tl-row-active');
+    if (activeRow) activeRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 
   /* Heatmap (exported for Habits tab) */
