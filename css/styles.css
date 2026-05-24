@@ -297,7 +297,7 @@ body {
 }
 .card:hover { box-shadow: 0 2px 16px rgba(0,0,0,0.25); }
 .card-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--accent);
   letter-spacing: 0.16em;
@@ -423,7 +423,7 @@ body {
 .ins-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; }
 .ins-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .ins-empty { font-size: 12px; color: var(--muted-2); grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.insights-footer { font-size: 12px; color: var(--muted-2); display: flex; align-items: center; gap: 6px; padding-top: 4px; border-top: 1px solid var(--line); }
+.insights-footer { font-size: 12.5px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
 .home-grid .hm-act-month-lbl { margin-bottom: 3px; }
 .home-grid .hm-act-legend { margin-top: 16px; }
 .home-grid #heatmapWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; }

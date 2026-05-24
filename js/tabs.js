@@ -26,6 +26,7 @@
         window.renderStatsPanel && window.renderStatsPanel();
         window.renderCalendar && window.renderCalendar();
         window.renderHomeHealthRings ? window.renderHomeHealthRings() : (window.renderHabitFullRings && window.renderHabitFullRings());
+        window.renderHomeInsights && window.renderHomeInsights();
       }
       var tabNames = { main:'Home', finances:'Finances', habits:'Habits', health:'Health', gym:'Gym' };
       var name = tabNames[tab.getAttribute('data-tab')] || tab.textContent.trim();
