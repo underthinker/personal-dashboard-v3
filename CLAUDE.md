@@ -38,18 +38,19 @@ shared → goals → finances → habits → health → tabs → gym
 | File | `window.*` exports | localStorage prefix |
 |------|-------------------|---------------------|
 | `shared.js` | `pad2`, `escHtml` | — |
-| `goals.js` | `renderGoals`, `renderStats`, `renderHomeHealthRings` | `goals:YYYY-MM-DD`, `mood_home:YYYY-MM-DD`, `clock_format_v1`, `quick_notes_v1`, `tweak_*` |
-| `finances.js` | `renderFinances` | `finances_data_v1` |
-| `habits.js` | `renderHabits`, `renderHabitFullRings` | `habits:*`, `mood:*` |
-| `health.js` | `renderHealth` | `health:YYYY-MM-DD`, `health_settings` |
+| `goals.js` | `showConfirm`, `showAlert`, `updateGreeting`, `renderStatsPanel`, `renderCalendar` | `goals:YYYY-MM-DD`, `mood_home:YYYY-MM-DD`, `clock_format_v1`, `quick_notes_v1`, `tweak_*` |
+| `finances.js` | `renderGoals` (financial savings goals), `renderFinances`, `toggleGroup`, `deleteIncome`, `deleteExpense` | `finances_data_v1` |
+| `habits.js` | `renderHabits`, `renderHabitFullRings`, `renderHomeHealthRings` | `habits:*`, `mood:*` |
+| `health.js` | `renderHealth`, `getFocusMinToday`, `addFocusMin` | `health:YYYY-MM-DD`, `health_settings` |
 | `tabs.js` | — (navigation only) | — |
 | `gym.js` | `renderGym` | `po_coach_v1` |
 
 ## Cross-module communication
 
 - `goals.js` fires `CustomEvent('goals-changed')` on any goal mutation.
-- `health.js` fires `CustomEvent('focus-updated')` on focus timer changes.
-- `index.html`'s inline `<script>` (home tab init) listens for both events to refresh the home widgets.
+- `goals.js` fires `CustomEvent('focus-updated')` on focus timer changes (not `health.js`).
+- `health.js` fires `CustomEvent('nutrition-updated')` on meal add/delete.
+- `index.html`'s inline `<script>` (home tab init) listens for all three events to refresh home widgets; `nutrition-updated` and `focus-updated` both call `renderHomeHealthRings`.
 
 ## Key conventions
 

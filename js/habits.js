@@ -802,7 +802,8 @@
         document.querySelectorAll('.habit-sub-btn').forEach(function(b) { b.classList.remove('is-active'); });
         btn.classList.add('is-active');
 
-        var targetId = btn.getAttribute('data-habitview') === 'tracker' ? 'habitTracker' : 'moodTracker';
+        var hv = btn.getAttribute('data-habitview');
+        var targetId = hv === 'tracker' ? 'habitTracker' : hv === 'mood' ? 'moodTracker' : 'habitActivity';
         var targetView = document.getElementById(targetId);
         if (!targetView) return;
 
@@ -825,6 +826,7 @@
           targetView.classList.remove('is-entering');
           void targetView.offsetWidth;
           targetView.classList.add('is-entering');
+          if (hv === 'activity' && window.renderActivityHeatmap) window.renderActivityHeatmap();
           _viewSwitchTimer = setTimeout(function() {
             targetView.classList.remove('is-entering');
             _viewSwitchTimer = null;
@@ -943,51 +945,55 @@
     var waterOz = day.water_oz || 0;
     var proteinG = (day.nutrition_totals && day.nutrition_totals.protein_g) || 0;
 
-    var rings = [
+    var metrics = [
       {
-        label: 'Sleep',
-        color: 'var(--green)',
+        label: 'Sleep', color: 'var(--green)',
         pct: Math.min(100, Math.round(sleepH / settings.sleep_goal_hours * 100)),
-        sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm') : '—'
+        sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm / ' + settings.sleep_goal_hours + 'h') : '—',
+        icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+        tip: function(p) {
+          return p < 60 ? 'Sleep is low. Aim for ' + settings.sleep_goal_hours + 'h tonight.' : 'Sleep recovery looks stable.';
+        }
       },
       {
-        label: 'Water',
-        color: '#60a5fa',
+        label: 'Water', color: '#60a5fa',
         pct: Math.min(100, Math.round(waterOz / settings.water_goal_oz * 100)),
-        sub: waterOz > 0 ? ((waterOz / 33.814).toFixed(1) + ' / ' + (settings.water_goal_oz / 33.814).toFixed(1) + 'L') : '—'
+        sub: waterOz > 0 ? (Math.round(waterOz) + 'oz / ' + settings.water_goal_oz + 'oz') : '—',
+        icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+        tip: function(p) {
+          if (p < 50) return 'Hydration is low. Aim for ' + Math.round(settings.water_goal_oz - waterOz) + 'oz more.';
+          return 'Hydration levels look good.';
+        }
       },
       {
-        label: 'Protein',
-        color: 'var(--accent)',
+        label: 'Protein', color: 'var(--accent)',
         pct: Math.min(100, Math.round(proteinG / settings.protein_goal_g * 100)),
-        sub: proteinG > 0 ? (Math.round(proteinG) + 'g / ' + settings.protein_goal_g + 'g') : '—'
+        sub: proteinG > 0 ? (Math.round(proteinG) + 'g / ' + settings.protein_goal_g + 'g') : '—',
+        icon: '<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>',
+        tip: function(p) {
+          if (p < 50) return 'Protein is below target. Aim for ' + Math.round(settings.protein_goal_g - proteinG) + 'g more.';
+          return 'Protein intake is on track.';
+        }
       }
     ];
 
-    var icons = [
-      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></g>',
-      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></g>',
-      '<g transform="translate(51,29) scale(0.75)" fill="none" stroke="var(--accent)" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12" stroke-width="2.2"/><line x1="2.5" y1="7" x2="2.5" y2="17" stroke-width="4.5"/><line x1="21.5" y1="7" x2="21.5" y2="17" stroke-width="4.5"/></g>'
+    var svgIcons = [
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+      '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>'
     ];
 
-    var r = 52;
-    var c = 2 * Math.PI * r;
     var html = '';
-    rings.forEach(function(ring, i) {
-      var offset = c * (1 - ring.pct / 100);
-      html += '<div class="rm-item">';
-      html += '<div class="rm-ring-wrap">';
-      html += '<svg viewBox="0 0 120 120">';
-      html += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="var(--surface-2)" stroke-width="8" stroke-linecap="round"/>';
-      html += '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + ring.color + '" stroke-width="8" stroke-linecap="round"';
-      html += ' stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '"';
-      html += ' transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 0.6s ease"/>';
-      html += icons[i];
-      html += '</svg>';
-      html += '<span class="rm-pct">' + ring.pct + '%</span>';
+    metrics.forEach(function(m, i) {
+      html += '<div class="rm-h-item">';
+      html += '<div class="rm-h-header">';
+      html += '<span class="rm-h-icon">' + svgIcons[i] + '</span>';
+      html += '<span class="rm-h-label">' + m.label + '</span>';
+      html += '<span class="rm-h-pct">' + m.pct + '%</span>';
       html += '</div>';
-      html += '<span class="rm-name">' + ring.label + '</span>';
-      html += '<span class="rm-sub">' + ring.sub + '</span>';
+      html += '<div class="rm-h-bar-track"><div class="rm-h-bar-fill" style="width:' + m.pct + '%;background:' + m.color + '"></div></div>';
+      html += '<div class="rm-h-sub">' + m.sub + '</div>';
+      html += '<div class="rm-h-tip">' + m.tip(m.pct) + '</div>';
       html += '</div>';
     });
     el.innerHTML = html;

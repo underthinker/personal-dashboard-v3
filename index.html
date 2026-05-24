@@ -45,6 +45,23 @@
     </button>
   </div>
 
+  <!-- AT A GLANCE -->
+  <div class="aag-section">
+    <div class="nav-section-label">At a Glance</div>
+    <div class="aag-list">
+      <div class="aag-row"><span class="aag-key">Focus Score</span><span class="aag-val" id="aagFocusScore">—</span></div>
+      <div class="aag-row"><span class="aag-key">Deep Work</span><span class="aag-val" id="aagDeepWork">—</span></div>
+      <div class="aag-row"><span class="aag-key">Tasks Done</span><span class="aag-val" id="aagTasks">—</span></div>
+      <div class="aag-row"><span class="aag-key">Streak</span><span class="aag-val" id="aagStreak">—</span></div>
+      <div class="aag-row"><span class="aag-key">Recovery</span><span class="aag-val" id="aagRecovery">—</span></div>
+    </div>
+  </div>
+  <!-- ADAPTIVE INSIGHT -->
+  <div class="sidebar-insight" id="sidebarInsight">
+    <svg class="si-icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><polygon points="9,1 3,9 8,9 7,15 13,7 8,7"/></svg>
+    <span class="si-text" id="sidebarInsightText"></span>
+  </div>
+
   <div class="sidebar-user">
     <div class="su-avatar"></div>
     <div class="su-info">
@@ -85,6 +102,7 @@
   <!-- ═══ SESSION CARD ═══ -->
   <div class="card a-session">
     <div class="card-head">
+      <span class="card-label">Morning Session</span>
       <button class="hm-settings-btn" id="drSettingsBtn" type="button" aria-label="Day Ring Settings">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -97,19 +115,22 @@
         </svg>
         <div class="pct">
           <span class="pct-num" id="dayRingPercent">0%</span>
-          <span class="pct-lbl" id="dayRingPhase">MORNING</span>
+          <span class="pct-lbl" id="dayRingPhase">COMPLETE</span>
         </div>
       </div>
       <div class="session-info">
         <div class="session-status" id="dayRingStatus">☀️ Morning — fresh start</div>
         <p class="session-range" id="dayRingRange">—</p>
-        <div class="next-up">
-          <span class="next-up-label">Next up</span>
-          <div class="next-up-row">
-            <span class="nu-dot"></span>
-            <span class="nu-text" id="priorityPillTextHero">No focus item queued</span>
-          </div>
+        <div class="cf-block">
+          <div class="cf-label">Current Focus</div>
+          <div class="cf-task" id="cfTaskText">No focus item queued</div>
+          <div class="cf-meta" id="cfTaskMeta"></div>
         </div>
+        <div class="cf-block cf-next-block">
+          <div class="cf-label">Next Up</div>
+          <div class="cf-task cf-next-task" id="cfNextTask">—</div>
+        </div>
+        <div class="cf-insight" id="cfInsightText"></div>
       </div>
     </div>
   </div>
@@ -117,7 +138,7 @@
   <!-- ═══ GOALS CARD ═══ -->
   <div class="card a-goals" id="gmCardToday">
     <div class="card-head">
-      <span class="card-label">Today</span>
+      <span class="card-label">Today's Plan</span>
       <span class="pill pill-streak" id="gmStreak"><span id="gmStreakNum">0</span> day streak</span>
     </div>
     <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
@@ -129,6 +150,21 @@
       <input type="text" id="goalInput" placeholder="Add a goal...">
       <button id="goalAddBtn" class="add-btn">+</button>
     </div>
+    <div class="outlook-row">
+      <div class="outlook-stat">
+        <div class="outlook-label">Workload</div>
+        <div class="outlook-val" id="outlookWorkload">—</div>
+      </div>
+      <div class="outlook-stat">
+        <div class="outlook-label">Focus Time</div>
+        <div class="outlook-val" id="outlookFocus">—</div>
+      </div>
+      <div class="outlook-stat">
+        <div class="outlook-label">Completion</div>
+        <div class="outlook-val" id="outlookCompletion">—</div>
+      </div>
+    </div>
+    <button class="next-action-btn" id="nextActionBtn">Next Action →</button>
     <div id="todayLabel" style="display:none;"></div>
   </div>
 
@@ -237,16 +273,22 @@
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
-  <!-- ═══ ACTIVITY HEATMAP ═══ -->
+  <!-- ═══ INSIGHTS PANEL ═══ -->
   <div class="card a-activity">
-    <div class="card-head"><span class="card-label">Activity</span></div>
-    <div id="heatmapWidget"></div>
+    <div class="card-head">
+      <span class="card-label">Insights</span>
+      <span class="card-label" style="opacity:0.5">7-Day Summary</span>
+    </div>
+    <div class="insights-grid" id="insightsGrid"></div>
+    <div class="insights-footer" id="insightsFooter"></div>
   </div>
 
   <!-- ═══ MOOD CARD ═══ -->
   <div class="card a-mood">
-    <div class="card-head"><span class="card-label">Mood</span></div>
+    <div class="card-head"><span class="card-label">iMood</span></div>
     <div id="moodWidget"></div>
+    <svg class="mood-spark" id="moodSparkline" viewBox="0 0 120 32"></svg>
+    <div class="mood-trend-label" id="moodTrendLabel"></div>
   </div>
 
   <!-- ═══ WEATHER CARD ═══ -->
@@ -254,7 +296,6 @@
     <div class="card-head"><span class="card-label">Weather</span></div>
     <div id="weatherWidget"></div>
   </div>
-
 
 </div><!-- /home-grid -->
 
@@ -289,9 +330,9 @@
     }).join('');
   }
 
-  /* Heatmap */
-  function renderHeatmap() {
-    const el = $('heatmapWidget');
+  /* Heatmap (exported for Habits tab) */
+  window.renderActivityHeatmap = function() {
+    const el = document.getElementById('heatmapWidget');
     if (!el) return;
     const DAYS = 7, gap = 3;
 
@@ -366,7 +407,7 @@
     const legend = '<div class="hm-act-legend"><div class="hm-act-legend-cells"><span>Less</span><span class="hm-act-cell"></span><span class="hm-act-cell l1"></span><span class="hm-act-cell l2"></span><span class="hm-act-cell l3"></span><span class="hm-act-cell l4"></span><span>More</span></div><button class="hm-act-view-link">View full activity →</button></div>';
 
     el.innerHTML = '<div class="hm-act-outer"><div></div>' + monthBar + dow + grid + '</div>' + legend;
-  }
+  };
 
   /* Mood */
   const HOME_MOODS = [
@@ -406,6 +447,43 @@
         renderMood();
       });
     });
+
+    // Sparkline
+    var sparkEl = $('moodSparkline');
+    var trendEl = $('moodTrendLabel');
+    if (sparkEl) {
+      var MOOD_SCALE = { bad:0, meh:1, ok:2, good:3, great:4 };
+      var now = new Date();
+      var vals = [];
+      for (var mi = 6; mi >= 0; mi--) {
+        var md = new Date(now); md.setDate(md.getDate() - mi);
+        if (md.getHours() < 6) md.setDate(md.getDate() - 1);
+        var mymd = md.getFullYear() + '-' + String(md.getMonth()+1).padStart(2,'0') + '-' + String(md.getDate()).padStart(2,'0');
+        var mk = localStorage.getItem('mood_home:' + mymd);
+        var score = mk != null && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1;
+        vals.push(score);
+      }
+      var hasData = vals.some(function(v) { return v >= 0; });
+      if (hasData) {
+        var w = 120, h = 32, padX = 2, padY = 4;
+        var maxV = 4, minV = 0;
+        var range = maxV - minV || 1;
+        var pts = vals.map(function(v, vi) {
+          if (v < 0) return '';
+          var x = padX + (vi / (vals.length - 1)) * (w - 2 * padX);
+          var y = h - padY - ((v - minV) / range) * (h - 2 * padY);
+          return Math.round(x) + ',' + Math.round(y);
+        }).filter(function(p) { return p; });
+        sparkEl.innerHTML = '<polyline points="' + pts.join(' ') + '"/>';
+
+        var avg = vals.filter(function(v) { return v >= 0; }).reduce(function(a,b){return a+b;},0) / Math.max(vals.filter(function(v){return v>=0;}).length, 1);
+        var avgLabel = avg >= 3 ? 'Good week' : avg >= 2 ? 'Okay week' : avg >= 1 ? 'Tough week' : '';
+        if (trendEl) trendEl.textContent = avgLabel;
+      } else {
+        sparkEl.innerHTML = '';
+        if (trendEl) trendEl.textContent = '';
+      }
+    }
   }
 
   /* Weather */
@@ -421,10 +499,21 @@
     const lo = Math.round(data.main.temp_min);
     const icon = owmIcon(data.weather[0].icon);
     const desc = data.weather[0].description.replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+    const cond = data.weather[0].main;
+    const now = new Date();
+    const h = now.getHours();
+    var rec;
+    if (cond === 'Clear' && temp > 20) rec = 'Great conditions for an outdoor break.';
+    else if (cond === 'Clear' && h >= 17 && h < 21) rec = 'Evening walk recommended.';
+    else if (cond === 'Clouds' || cond === 'Rain' || cond === 'Drizzle' || cond === 'Thunderstorm') rec = 'Great weather for indoor focus.';
+    else if (temp > 28) rec = 'Stay hydrated in the heat.';
+    else if (temp < 5) rec = 'Bundle up — cold day ahead.';
+    else rec = 'Conditions look good for a balanced day.';
     el.innerHTML =
       '<div class="weather-row"><span class="weather-icon">' + icon + '</span><span class="weather-temp">' + temp + '°C</span></div>' +
       '<div class="weather-cond">' + desc + '</div>' +
       '<div class="weather-hl"><span>↑ ' + hi + '°</span><span>↓ ' + lo + '°</span></div>' +
+      '<div class="weather-rec">' + rec + '</div>' +
       '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>';
   }
   function renderWeatherSetup(forceShow) {
@@ -475,18 +564,49 @@
     });
   }
 
-  /* Next up */
+  /* Next up — Current Focus */
   function updateHeroNextUp() {
-    var hero = $('priorityPillTextHero');
-    if (!hero) return;
+    var taskEl = $('cfTaskText');
+    var metaEl = $('cfTaskMeta');
+    var insightEl = $('cfInsightText');
+    if (!taskEl) return;
     try {
       var now = new Date();
       var p2 = function(n) { return String(n).padStart(2,'0'); };
       var key = 'goals:' + now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate());
       var data = JSON.parse(localStorage.getItem(key) || '[]');
       var q = data.find(function(g) { return g.queued && !g.done; });
-      hero.textContent = q ? q.text : 'No focus item queued';
-    } catch(e) { hero.textContent = ''; }
+      taskEl.textContent = q ? q.text : 'No focus item queued';
+      var nextEl = $('cfNextTask');
+      if (nextEl) {
+        var nextGoal = data.find(function(g) { return !g.queued && !g.done; });
+        nextEl.textContent = nextGoal ? nextGoal.text : '—';
+      }
+      if (metaEl) {
+        if (q) {
+          var estMin = 25 + (q.text.length > 20 ? 10 : 0);
+          metaEl.textContent = '~' + estMin + ' min remaining • High impact';
+        } else {
+          metaEl.textContent = '';
+        }
+      }
+      if (insightEl) {
+        var h = now.getHours();
+        if (h >= 5 && h < 10) {
+          insightEl.textContent = 'You usually peak around 9:30 AM. Perfect time for deep work.';
+        } else if (h >= 10 && h < 12) {
+          insightEl.textContent = 'Late morning momentum — keep pushing.';
+        } else if (h >= 12 && h < 14) {
+          insightEl.textContent = 'Post-lunch dip expected. Power through with a short walk.';
+        } else if (h >= 14 && h < 17) {
+          insightEl.textContent = 'Afternoon block — good for collaborative work.';
+        } else if (h >= 17 && h < 20) {
+          insightEl.textContent = 'Evening wind-down. Focus on light tasks.';
+        } else {
+          insightEl.textContent = 'Night owl mode — protect your sleep window.';
+        }
+      }
+    } catch(e) { taskEl.textContent = ''; }
   }
 
   /* Home badge count */
@@ -504,7 +624,7 @@
   }
 
   renderTimeline();
-  renderHeatmap();
+  window.renderHomeInsights && window.renderHomeInsights();
   renderMood();
   renderWeather();
   updateHeroNextUp();
@@ -522,10 +642,11 @@
   });
 
   window.addEventListener('goals-changed', function() {
-    renderHeatmap();
     updateHeroNextUp();
     updateHomeBadge();
     window.renderStatsPanel && window.renderStatsPanel();
+    window.renderSidebarAtAGlance && window.renderSidebarAtAGlance();
+    window.renderHomeInsights && window.renderHomeInsights();
   });
   window.addEventListener('focus-updated', function() {
     window.renderHomeHealthRings && window.renderHomeHealthRings();
@@ -695,6 +816,7 @@
 <div class="habit-sub-nav">
   <button class="habit-sub-btn is-active" data-habitview="tracker">Habit Tracker</button>
   <button class="habit-sub-btn" data-habitview="mood">Mood Tracker</button>
+  <button class="habit-sub-btn" data-habitview="activity">Activity</button>
 </div>
 
 <div class="habit-view" id="habitTracker">
@@ -747,6 +869,13 @@
     <div class="mt-cal-hdr-row" id="mtCalHdr"></div>
     <div class="mt-grid" id="mtGrid"></div>
   </div>
+  </div>
+</div>
+
+<div class="habit-view" id="habitActivity" style="display:none">
+<div class="section">
+  <div class="card-head"><span class="card-label">Activity Heatmap</span></div>
+  <div id="heatmapWidget"></div>
 </div>
 </div>
 

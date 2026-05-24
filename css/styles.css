@@ -137,7 +137,7 @@ body {
 .nav-section-label {
   font-size: 10px;
   font-weight: 600;
-  color: var(--muted-2);
+  color: var(--muted);
   letter-spacing: 0.12em;
   padding: 16px 12px 6px;
   text-transform: uppercase;
@@ -161,7 +161,7 @@ body {
 }
 .nav-item .icon { width: 18px; height: 18px; flex: 0 0 18px; opacity: 0.85; }
 .nav-item:hover { background: var(--surface); color: var(--text); }
-.nav-item.active { background: var(--surface); color: var(--text); }
+.nav-item.active { background: var(--surface); color: var(--text); border-left: 2px solid var(--accent); padding-left: 10px; }
 .nav-item.active .icon { color: var(--accent); opacity: 1; }
 .nav-item .badge {
   margin-left: auto;
@@ -213,6 +213,15 @@ body {
 .su-status-group.is-running .su-focus-status { color: var(--accent); }
 @keyframes breathe { 0%,100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.5); opacity: 1; } }
 
+.aag-section { border-top: 1px solid var(--line); padding-top: 16px; margin-top: auto; }
+.aag-list { display: flex; flex-direction: column; gap: 8px; }
+.aag-row { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+.aag-key { font-size: 12px; color: var(--muted); }
+.aag-val { font-size: 12px; font-weight: 600; color: var(--text); }
+#aagFocusScore, #aagDeepWork { border-bottom: 2px solid var(--accent); padding-bottom: 1px; }
+.sidebar-insight { background: var(--surface-2); border-radius: var(--r-sm); padding: 12px; font-size: 12px; color: var(--muted); line-height: 1.5; display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; }
+.si-icon { color: var(--accent); flex-shrink: 0; }
+
 /* ─── Main Area ─── */
 .main {
   padding: 22px 28px 20px;
@@ -240,6 +249,7 @@ body {
 }
 .greeting h1 .name { color: var(--accent); }
 .greeting p { margin: 0; color: #acacb5; font-size: 13.5px; }
+.greet-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); vertical-align: middle; margin-right: 6px; animation: breathe 2.5s ease-in-out infinite; }
 .topbar-right {
   display: flex;
   align-items: center;
@@ -267,11 +277,12 @@ body {
   gap: 14px;
   height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
-  grid-template-rows: minmax(0, 2.1fr) minmax(0, 1.8fr) minmax(0, 1.8fr);
+  grid-template-rows: minmax(0, 2.5fr) minmax(0, 2.3fr) minmax(0, 2.5fr) 56px;
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   stats"
-    "activity activity mood      weather  calendar";
+    "activity activity mood      weather  calendar"
+    "connect  connect  connect   connect  connect";
 }
 
 /* ─── Card Base ─── */
@@ -283,12 +294,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  transition: box-shadow 0.2s;
 }
+.card:hover { box-shadow: 0 2px 16px rgba(0,0,0,0.25); }
 .card-label {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
-  color: var(--muted-2);
-  letter-spacing: 0.14em;
+  color: var(--accent);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 .card-head { display: flex; align-items: center; justify-content: space-between; }
@@ -321,6 +334,18 @@ body {
 .a-activity { grid-area: activity; }
 .a-mood { grid-area: mood; }
 .a-weather { grid-area: weather; }
+.a-connections { grid-area: connect; flex-direction: row; align-items: center; padding: 10px 18px; }
+.connections-flow { display: flex; align-items: center; gap: 12px; flex: 1; }
+.conn-node { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 60px; }
+.conn-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 2px; }
+.conn-label { font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.1em; }
+.conn-val { font-size: 13px; font-weight: 700; }
+.conn-status { font-size: 10px; }
+.conn-good { color: var(--green); }
+.conn-med { color: var(--amber); }
+.conn-low { color: var(--danger); }
+.conn-arrow { color: var(--muted-2); font-size: 16px; }
+.connections-insight { font-size: 12px; color: var(--muted); max-width: 220px; text-align: right; border-left: 1px solid var(--line); padding-left: 16px; line-height: 1.5; }
 
 /* ─── Home grid card containment ─── */
 .home-grid .card { overflow: hidden; min-height: 0; }
@@ -330,11 +355,19 @@ body {
 .home-grid .po-week { margin-top: 4px; }
 .home-grid .po-dot { max-width: 34px; }
 /* Calendar: fixed cell height instead of width-proportional aspect-ratio */
-.home-grid .cal-day { aspect-ratio: unset; height: 32px; }
+.home-grid .cal-day { aspect-ratio: unset; height: 24px; }
 .home-grid .ring-wrap {
-  width: clamp(90px, 13.5vh, 150px);
-  height: clamp(90px, 13.5vh, 150px);
+  width: clamp(110px, 16vh, 175px);
+  height: clamp(110px, 16vh, 175px);
 }
+.cf-block { background: var(--surface-2); border-radius: var(--r-sm); padding: 12px; }
+.cf-label { font-size: 10px; font-weight: 600; color: var(--muted-2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.cf-task { font-size: 14px; font-weight: 600; color: var(--text); }
+.cf-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.cf-meta em { color: var(--green); font-style: normal; }
+.cf-insight { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.cf-next-block { opacity: 0.7; }
+.cf-next-task { font-size: 13px; color: var(--muted); }
 
 /* ─── Second-row always-on compact sizing ─── */
 /* Timeline */
@@ -352,19 +385,45 @@ body {
 /* Today */
 .home-grid .a-goals > div:nth-child(2) { min-height: 0; }
 .home-grid #goalList { flex: 1; min-height: 0; overflow-y: auto; }
+.outlook-row { display: flex; gap: 8px; }
+.outlook-stat { flex: 1; background: var(--surface-2); border-radius: var(--r-sm); padding: 8px 10px; }
+.outlook-label { font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.1em; }
+.outlook-val { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 2px; }
+.next-action-btn { width: 100%; padding: 10px; background: var(--accent); color: #fff; border-radius: var(--r-sm); font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: opacity 0.15s; }
+.next-action-btn:hover { opacity: 0.85; }
 /* Readiness */
 .home-grid .rm-name { font-size: 12px; }
 .home-grid .rm-sub { font-size: 11px; }
 .home-grid .rm-pct { font-size: 20px; }
-.home-grid .readiness-rings { gap: 8px; }
+.home-grid .readiness-rings { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; }
 .home-grid .rm-item { gap: 5px; }
 .home-grid .rm-ring-wrap { max-width: none; }
+.home-grid .rm-h-item { flex: 1; min-height: 0; overflow: hidden; gap: 2px; padding: 2px 0; }
+.home-grid .rm-h-tip { display: none; }
+.home-grid .view-habits { display: none; }
+.home-grid .a-goals { gap: 10px; }
+.rm-h-item { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.rm-h-header { display: flex; align-items: center; gap: 8px; }
+.rm-h-icon { display: flex; align-items: center; }
+.rm-h-label { font-size: 13px; font-weight: 600; flex: 1; }
+.rm-h-pct { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+.rm-h-bar-track { height: 5px; background: var(--line-2); border-radius: 99px; overflow: hidden; }
+.rm-h-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s var(--ease-out); }
+.rm-h-sub { font-size: 11px; color: var(--muted); }
+.rm-h-tip { font-size: 11px; color: var(--muted-2); }
 /* Calendar */
 .home-grid .cal-month { font-size: 13px; }
 .home-grid .cal-nav button { width: 22px; height: 22px; font-size: 11px; }
-.home-grid .cal-head { padding-bottom: 10px; }
+.home-grid .cal-head { padding-bottom: 6px; }
 /* Activity: compact card + stretch heatmap to fill vertical space */
 .home-grid .a-activity { padding: 12px; gap: 8px; }
+.insights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; flex: 1; }
+.ins-card { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; display: flex; gap: 10px; align-items: flex-start; }
+.ins-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ins-title { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.ins-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.ins-empty { font-size: 12px; color: var(--muted-2); grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.insights-footer { font-size: 12px; color: var(--muted-2); display: flex; align-items: center; gap: 6px; padding-top: 4px; border-top: 1px solid var(--line); }
 .home-grid .hm-act-month-lbl { margin-bottom: 3px; }
 .home-grid .hm-act-legend { margin-top: 16px; }
 .home-grid #heatmapWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; }
@@ -372,6 +431,9 @@ body {
 .home-grid .hm-act-grid { overflow: visible; }
 .home-grid .cal-day { font-size: 11px; }
 .home-grid .cal-dow { font-size: 9px; }
+.mood-spark { width: 100%; height: 32px; }
+.mood-spark polyline { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.mood-trend-label { font-size: 11px; color: var(--muted); }
 
 /* ═══════════════════════════════════════════════════════════════
    HOME WIDGETS
@@ -628,7 +690,7 @@ body {
 .po-trend-val.negative { color: var(--danger); }
 .po-trend-sub { font-size: 9.5px; color: var(--muted-2); line-height: 1; }
 .po-hero-val-row { display: flex; align-items: baseline; gap: 8px; }
-.po-hero-value { font-family: var(--font-mono); font-size: 34px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
+.po-hero-value { font-family: var(--font-mono); font-size: 38px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
 .po-edit-btn { display: inline-flex; align-items: center; justify-content: center; padding: 3px; border: none; background: none; color: var(--muted-2); cursor: pointer; border-radius: 4px; opacity: 0; transition: opacity 0.15s; align-self: center; }
 .po-hero:hover .po-edit-btn { opacity: 1; }
 .po-edit-btn:hover { color: var(--text); background: var(--line-2); }
@@ -835,6 +897,8 @@ body {
   flex-shrink: 0;
 }
 .cal-day.is-today .cal-dot { background: rgba(0,0,0,0.45); }
+.cal-dot-deep { background: var(--accent) !important; }
+.cal-dot-rest { background: var(--green) !important; }
 
 /* ─── Activity Heatmap ─── */
 .heatmap-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
@@ -868,6 +932,12 @@ body {
 .hm-act-legend-cells .hm-act-cell.l4 { background: var(--accent); }
 .hm-act-view-link { font-size: 11px; color: var(--muted); cursor: pointer; background: transparent; border: 0; }
 .hm-act-view-link:hover { color: var(--text); }
+#habitActivity .section { padding: 0; gap: 12px; display: flex; flex-direction: column; }
+#habitActivity #heatmapWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+#habitActivity .hm-act-month-lbl { margin-bottom: 3px; }
+#habitActivity .hm-act-legend { margin-top: 16px; }
+#habitActivity .hm-act-outer { min-height: 0; grid-template-rows: 18px auto; }
+#habitActivity .hm-act-grid { overflow: visible; }
 
 /* ─── Mood Widget ─── */
 .mood-current { display: flex; align-items: center; gap: 12px; }
@@ -895,6 +965,7 @@ body {
 .weather-temp { font-family: var(--font-mono); font-size: 22px; font-weight: 700; }
 .weather-cond { font-size: 12px; color: var(--muted); }
 .weather-hl { display: flex; gap: 14px; font-size: 12px; color: var(--muted); margin-top: auto; font-family: var(--font-mono); }
+.weather-rec { font-size: 12px; color: var(--muted); line-height: 1.4; margin-top: 4px; }
 
 .weather-cfg-btn { background: transparent; border: 0; color: var(--muted); cursor: pointer; padding: 2px; font-size: 12px; }
 .weather-cfg-btn:hover { color: var(--text); }
@@ -2153,7 +2224,8 @@ body {
       "stats stats stats"
       "tomorrow timeline habits"
       "activity activity activity"
-      "mood weather calendar";
+      "mood weather calendar"
+      "connect connect connect";
   }
   .fin-donut-row { grid-template-columns: 1fr; }
   .fin-tables { grid-template-columns: 1fr; }
@@ -2176,7 +2248,8 @@ body {
       "activity"
       "mood"
       "weather"
-      "calendar";
+      "calendar"
+      "connect";
   }
   .po-log-grid { grid-template-columns: 1fr; }
   .po-stats-row { grid-template-columns: 1fr; }

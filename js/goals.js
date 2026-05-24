@@ -347,7 +347,7 @@
       void queueBtn.offsetWidth;
       queueBtn.classList.add('is-popping');
       queueBtn.addEventListener('animationend', () => queueBtn.classList.remove('is-popping'), { once: true });
-      const heroEl = document.getElementById('priorityPillTextHero');
+      const heroEl = document.getElementById('cfTaskText');
       if (heroEl) {
         heroEl.classList.remove('is-flashing');
         void heroEl.offsetWidth;
@@ -686,7 +686,7 @@
     dayRingFill.setAttribute('stroke-dashoffset', String(offset));
     dayRingFill.style.stroke = block.color;
     dayRingPercent.textContent = Math.floor(percent) + '%';
-    dayRingPhase.textContent = block.name.toUpperCase();
+    dayRingPhase.textContent = 'COMPLETE';
 
     const meta = BLOCK_STATUS[block.name] || ['•', block.name];
     dayRingStatus.textContent = meta[0] + ' ' + meta[1];
@@ -804,15 +804,36 @@
     if (periodEl) periodEl.textContent = period;
 
     if (subtitleEl) {
-      const hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
-      const blocks = loadBlocks();
-      const block = findCurrentBlock(blocks, hours);
-      if (block) {
-        const total = block.end - block.start;
-        const elapsed = hours - block.start;
-        const pct = total > 0 ? Math.min(100, Math.round((elapsed / total) * 100)) : 0;
-        subtitleEl.textContent = 'You\'re ' + pct + '% through your ' + block.name.toLowerCase() + ' session.';
+      const todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+      var health = {};
+      try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
+      var settings = {};
+      try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
+      var sleepGoal = settings.sleep_goal_hours || 8;
+      var factors = [];
+      if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
+      if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
+      var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+
+      var streakData = storeGet(STREAK_KEY) || { count: 0 };
+      var todayGoals = storeGet('goals:' + todayYmd) || [];
+      var todayAllDone = todayGoals.length > 0 && todayGoals.every(function(g) { return g && g.done; });
+      var streak = streakData.count + (todayAllDone ? 1 : 0);
+
+      var isMorning = h >= 5 && h < 12;
+      var text;
+      if (readinessScore != null && readinessScore >= 80 && isMorning) {
+        text = 'Strong momentum this morning. You\'re on track for a highly productive day.';
+      } else if (streak >= 7) {
+        text = 'Day ' + streak + ' of your streak. Keep it going.';
+      } else if (readinessScore != null && readinessScore < 40) {
+        text = 'Recovery looks low. Consider a lighter focus load.';
+      } else if (readinessScore != null && readinessScore >= 80) {
+        text = 'Recovery looks strong. Push today.';
+      } else {
+        text = 'Things look balanced. Keep building momentum.';
       }
+      subtitleEl.innerHTML = '<span class="greet-dot"></span> ' + text;
     }
   }
   window.updateGreeting = updateGreeting;
@@ -929,8 +950,176 @@
       var todayAllDone = totalTasks > 0 && todayGoals.every(function(g) { return g && g.done; });
       heroStreak.textContent = ss.count + (todayAllDone ? 1 : 0);
     }
+
+// ── Outlook row ──
+    var wlEl = $('outlookWorkload');
+    if (wlEl) wlEl.textContent = Math.min(totalTasks, 10) + '/10';
+    var focEl = $('outlookFocus');
+    if (focEl) focEl.textContent = focusStr;
+    var compEl = $('outlookCompletion');
+    if (compEl) compEl.textContent = doneTasks + '/' + totalTasks + ' done';
   }
   window.renderStatsPanel = renderStatsPanel;
+
+  // ============ SIDEBAR AT A GLANCE + ADAPTIVE INSIGHT ============
+  window.renderSidebarAtAGlance = function() {
+    var now = new Date();
+    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+
+    var health = {};
+    try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
+    var focusMin = Math.round(health.focus_min || 0);
+    try {
+      var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
+      if (fs.running && fs.startedAt) focusMin += Math.floor((Date.now() - fs.startedAt) / 60000);
+    } catch(e) {}
+    var focusStr = focusMin >= 60 ? Math.floor(focusMin/60) + 'h ' + (focusMin%60) + 'm' : focusMin + 'm';
+
+    var todayGoals = storeGet('goals:' + todayYmd) || [];
+    var total = todayGoals.length;
+    var done = todayGoals.filter(function(g) { return g && g.done; }).length;
+
+    var streakData = storeGet(STREAK_KEY) || { count: 0 };
+    var todayAllDone = total > 0 && todayGoals.every(function(g) { return g && g.done; });
+    var streak = streakData.count + (todayAllDone ? 1 : 0);
+
+    var settings = {};
+    try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
+    var sleepGoal = settings.sleep_goal_hours || 8;
+    var factors = [];
+    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
+    if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
+    var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+
+    var focusScoreEl = $('aagFocusScore');
+    var deepWorkEl = $('aagDeepWork');
+    var tasksEl = $('aagTasks');
+    var streakEl = $('aagStreak');
+    var recoveryEl = $('aagRecovery');
+    if (focusScoreEl) focusScoreEl.textContent = readinessScore != null ? readinessScore : '—';
+    if (deepWorkEl) deepWorkEl.textContent = focusStr;
+    if (tasksEl) tasksEl.textContent = total > 0 ? done + '/' + total : '—';
+    if (streakEl) streakEl.textContent = streak > 0 ? streak + ' days' : '—';
+    if (recoveryEl) recoveryEl.textContent = readinessScore != null ? (readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low') : '—';
+
+    // Adaptive insight
+    var insightEl = $('sidebarInsightText');
+    if (insightEl) {
+      var text;
+      if (streak >= 7) text = 'You\'re in a deep work rhythm this week.';
+      else if (readinessScore != null && readinessScore >= 80) text = 'Recovery looks strong. Push today.';
+      else if (readinessScore != null && readinessScore < 40) text = 'Recovery looks low. Take it easy.';
+      else text = 'Things look balanced. Keep building.';
+      insightEl.textContent = text;
+    }
+  };
+
+  // ============ HOME INSIGHTS PANEL ============
+  window.renderHomeInsights = function() {
+    var gridEl = $('insightsGrid');
+    var footerEl = $('insightsFooter');
+    if (!gridEl) return;
+
+    var now = new Date();
+    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+    var last7 = [];
+    var prev7 = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(now); d.setDate(d.getDate() - i);
+      var ymd = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+      var h = {}; try { h = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) {}
+      last7.push(h);
+      var pd = new Date(now); pd.setDate(pd.getDate() - i - 7);
+      var pymd = pd.getFullYear() + '-' + pad2(pd.getMonth()+1) + '-' + pad2(pd.getDate());
+      var ph = {}; try { ph = JSON.parse(localStorage.getItem('health:' + pymd) || '{}'); } catch(e) {}
+      prev7.push(ph);
+    }
+
+    var avgFocus = function(arr) {
+      var mins = arr.map(function(x) { return x.focus_min || 0; });
+      return mins.reduce(function(a,b){return a+b;},0) / Math.max(mins.length, 1);
+    };
+    var avgSleep = function(arr) {
+      var hrs = arr.filter(function(x) { return x.sleep_hours != null; }).map(function(x){return x.sleep_hours;});
+      return hrs.length > 0 ? hrs.reduce(function(a,b){return a+b;},0) / hrs.length : 0;
+    };
+    var thisWeekFocus = avgFocus(last7);
+    var prevWeekFocus = avgFocus(prev7);
+    var thisWeekSleep = avgSleep(last7);
+    var prevWeekSleep = avgSleep(prev7);
+
+    // Count AM vs PM focus
+    var amCount = 0;
+    for (var hi = 0; hi < last7.length; hi++) {
+      if (last7[hi].focus_min && last7[hi].focus_min > 0) {
+        // rough: if focus was logged it was likely AM (simplified)
+        amCount++;
+      }
+    }
+
+    var cards = [];
+
+    var SVG_TREND   = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,11 5,7 9,9 15,3"/><polyline points="11,3 15,3 15,7"/></svg>';
+    var SVG_MORNING = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>';
+    var SVG_SLEEP   = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10A6 6 0 0 1 6 2a6 6 0 1 0 8 8z"/></svg>';
+    var SVG_CHECK   = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>';
+
+    // Card 1: Focus trend
+    if (thisWeekFocus > 0 || prevWeekFocus > 0) {
+      var diff = thisWeekFocus - prevWeekFocus;
+      var pctDiff = prevWeekFocus > 0 ? Math.round((diff / prevWeekFocus) * 100) : 0;
+      var trendText = pctDiff >= 0 ? 'up ' + Math.abs(pctDiff) + '%' : 'down ' + Math.abs(pctDiff) + '%';
+      cards.push({ icon: SVG_TREND, iconBg: 'var(--accent-soft)', title: 'Deep work is ' + trendText + ' this week', sub: prevWeekFocus > 0 ? (Math.round(thisWeekFocus) + 'm vs ' + Math.round(prevWeekFocus) + 'm') : 'Building baseline' });
+    }
+
+    // Card 2: Best performance time
+    if (amCount >= 4) {
+      cards.push({ icon: SVG_MORNING, iconBg: 'rgba(245,158,11,0.18)', title: 'You peak in the morning', sub: 'Most focus logged before noon' });
+    } else if (amCount >= 2) {
+      cards.push({ icon: SVG_MORNING, iconBg: 'rgba(245,158,11,0.18)', title: 'Morning momentum detected', sub: 'Try blocking AM hours for deep work' });
+    }
+
+    // Card 3: Sleep trend
+    if (thisWeekSleep > 0) {
+      var sleepDiff = thisWeekSleep - prevWeekSleep;
+      var sleepText = sleepDiff >= 0 ? 'up ' + sleepDiff.toFixed(1) + 'h' : 'down ' + Math.abs(sleepDiff).toFixed(1) + 'h';
+      cards.push({ icon: SVG_SLEEP, iconBg: 'rgba(95,214,135,0.18)', title: 'Sleep is ' + sleepText + ' vs last week', sub: thisWeekSleep >= 7 ? 'Great recovery' : 'Room for improvement' });
+    }
+
+    // Card 4: Completion rate
+    var doneCount = 0; var totalCount = 0;
+    for (var gi = 0; gi < 7; gi++) {
+      var d2 = new Date(now); d2.setDate(d2.getDate() - gi);
+      var gYmd = d2.getFullYear() + '-' + pad2(d2.getMonth()+1) + '-' + pad2(d2.getDate());
+      var gs = storeGet('goals:' + gYmd) || [];
+      totalCount += gs.length;
+      doneCount += gs.filter(function(g) { return g && g.done; }).length;
+    }
+    if (totalCount > 0) {
+      var rate = Math.round((doneCount / totalCount) * 100);
+      cards.push({ icon: SVG_CHECK, iconBg: 'rgba(95,214,135,0.18)', title: rate + '% task completion rate', sub: doneCount + '/' + totalCount + ' done this week' });
+    }
+
+    if (cards.length === 0) {
+      gridEl.innerHTML = '<div class="ins-empty">Log health data to see weekly insights.</div>';
+    } else {
+      gridEl.innerHTML = cards.map(function(c) {
+        return '<div class="ins-card">' +
+          '<div class="ins-icon" style="background:' + c.iconBg + '">' + c.icon + '</div>' +
+          '<div class="ins-body">' +
+          '<div class="ins-title">' + c.title + '</div>' +
+          '<div class="ins-sub">' + c.sub + '</div>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    if (footerEl) {
+      var footerText = 'Things look balanced. Keep building momentum.';
+      if (thisWeekFocus > prevWeekFocus * 1.2) footerText = 'Focus is trending up — nice work.';
+      else if (thisWeekSleep < 6) footerText = 'Sleep has been light. Prioritise rest.';
+      footerEl.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--muted-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="9,1 3,9 8,9 7,15 13,7 8,7"/></svg> ' + escHtml(footerText);
+    }
+  };
 
   // ============ CALENDAR ============
   var calState = (function() { var d = new Date(); return { year: d.getFullYear(), month: d.getMonth(), dir: null }; })();
@@ -972,6 +1161,10 @@
       html += '<div class="cal-dow">' + d + '</div>';
     });
 
+    var calHealthSettings = {};
+    try { calHealthSettings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
+    var calSleepGoal = calHealthSettings.sleep_goal_hours || 8;
+
     var prevMonthDays = new Date(year, month, 0).getDate();
     for (var i = offset - 1; i >= 0; i--) {
       html += '<div class="cal-day out">' + (prevMonthDays - i) + '</div>';
@@ -982,9 +1175,15 @@
       var isToday = ymd === todayYMD;
       var goals = storeGet('goals:' + ymd);
       var hasGoals = goals && goals.length > 0;
+      var dayHealth = {};
+      try { dayHealth = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) {}
+      var isDeepWork = (dayHealth.focus_min || 0) > 30;
+      var isRestorative = (dayHealth.sleep_hours || 0) >= calSleepGoal * 0.8;
 
       html += '<div class="cal-day' + (isToday ? ' is-today' : '') + '">' + day;
-      if (hasGoals) html += '<span class="cal-dot"></span>';
+      if (isDeepWork) html += '<span class="cal-dot cal-dot-deep"></span>';
+      else if (isRestorative) html += '<span class="cal-dot cal-dot-rest"></span>';
+      else if (hasGoals) html += '<span class="cal-dot"></span>';
       html += '</div>';
     }
 
@@ -1148,13 +1347,22 @@
   updateDayBar();
   updateGreeting();
   renderStatsPanel();
+  window.renderSidebarAtAGlance();
   renderCalendar();
   initCalendar();
   initFocusTimer();
   _initFocusEdit();
+  var nextBtn = $('nextActionBtn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      var input = $('goalInput');
+      if (input) input.focus();
+    });
+  }
   setInterval(function() {
     updateDayBar();
     renderStatsPanel();
+    window.renderSidebarAtAGlance();
     var ringsFn = window.renderHomeHealthRings || window.renderHabitFullRings;
     if (ringsFn) ringsFn();
   }, 60 * 1000);

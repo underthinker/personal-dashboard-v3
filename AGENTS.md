@@ -24,7 +24,7 @@ Vanilla HTML/CSS/JS personal dashboard ("broken crayons"). No build tools, no pa
 
 ## Key conventions
 
-- **Cross-module events**: `goals.js` dispatches `CustomEvent('goals-changed')` on goal mutations. `health.js` dispatches `CustomEvent('focus-updated')` on focus timer changes.
+- **Cross-module events**: `goals.js` dispatches `CustomEvent('goals-changed')` on goal mutations and `CustomEvent('focus-updated')` on focus timer changes. `health.js` dispatches `CustomEvent('nutrition-updated')` on meal add/delete. All three are listened to in `index.html`'s home-tab init script.
 - **Date key convention**: All daily data uses `YYYY-MM-DD` format. Health tab considers the "active day" to start at 6 AM (so late nights still count as the same day).
 - **No tests, no linting, no CI**. Verify changes by opening `index.html` in a browser.
 
