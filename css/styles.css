@@ -318,7 +318,7 @@ body {
 }
 .pill .dot { width: 6px; height: 6px; border-radius: 99px; background: currentColor; }
 .pill-live { color: var(--accent); background: var(--accent-soft); }
-.pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 12px; letter-spacing: 0.08em; }
+.pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
 .pill-streak.gm-streak-active { color: var(--accent); background: var(--accent-soft); }
 .pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(91,168,247,0.18); color: #80bcfa; font-weight: 500; }
 
