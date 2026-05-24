@@ -700,9 +700,9 @@ body {
 .po-hero-meta { display: flex; align-items: center; gap: 8px; }
 .po-hero-label { font-size: 11px; font-weight: 500; color: var(--muted); }
 .po-trend-block { display: flex; flex-direction: column; align-items: flex-end; gap: 0; }
-.po-trend-val { font-size: 13px; font-weight: 700; color: var(--green); line-height: 1.2; }
+.po-trend-val { font-size: 16px; font-weight: 700; color: var(--green); line-height: 1.2; }
 .po-trend-val.negative { color: var(--danger); }
-.po-trend-sub { font-size: 9.5px; color: var(--muted-2); line-height: 1; }
+.po-trend-sub { font-size: 10px; color: var(--muted-2); line-height: 1; }
 .po-hero-val-row { display: flex; align-items: baseline; gap: 8px; }
 .po-hero-value { font-family: var(--font-mono); font-size: 38px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; color: var(--text); }
 .po-edit-btn { display: inline-flex; align-items: center; justify-content: center; padding: 3px; border: none; background: none; color: var(--muted-2); cursor: pointer; border-radius: 4px; opacity: 0; transition: opacity 0.15s; align-self: center; }
@@ -908,11 +908,11 @@ body {
   border-radius: 99px;
   background: var(--green);
   position: absolute;
-  bottom: 1px;
+  bottom: -2px;
   left: 50%;
   transform: translateX(-50%);
 }
-.cal-day.is-today .cal-dot { background: rgba(0,0,0,0.45); bottom: 3px; }
+.cal-day.is-today .cal-dot { display: none; }
 .cal-dot-deep { background: var(--accent) !important; }
 .cal-dot-rest { background: var(--green) !important; }
 
