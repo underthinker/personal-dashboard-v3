@@ -818,14 +818,28 @@
       weekDoneFlags.push(wg.length > 0 && wg.some(function(g) { return g && g.done; }));
     }
 
+    // Include live session in today's bar so it matches the hero value
+    try {
+      var liveFs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
+      if (liveFs.running && liveFs.startedAt) {
+        weekFocusMins[todayWeekIdx] += Math.floor((Date.now() - liveFs.startedAt) / 60000);
+      }
+    } catch(e) {}
+
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
     var barsEl = $('perfWeekBars');
     if (barsEl) {
-      barsEl.innerHTML = weekFocusMins.map(function(min, i) {
-        var h = min > 0 ? Math.max(10, Math.round((min / maxFocus) * 46)) : 3;
-        var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
-        return '<div class="' + cls + '" style="height:' + h + 'px"></div>';
-      }).join('');
+      var renderBars = function() {
+        var h = barsEl.clientHeight;
+        if (h < 20) { requestAnimationFrame(renderBars); return; }
+        var barMaxH = h - 4;
+        barsEl.innerHTML = weekFocusMins.map(function(min, i) {
+          var px = min > 0 ? Math.max(10, Math.round((min / maxFocus) * barMaxH)) : 3;
+          var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
+          return '<div class="' + cls + '" style="height:' + px + 'px"></div>';
+        }).join('');
+      };
+      requestAnimationFrame(renderBars);
     }
     document.querySelectorAll('.po-week-labels span').forEach(function(s, i) {
       s.classList.toggle('is-today', i === todayWeekIdx);

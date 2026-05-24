@@ -313,7 +313,7 @@
         '</div>';
     }).join('');
     const activeRow = el.querySelector('.tl-row-active');
-    if (activeRow) activeRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (activeRow) el.scrollTop = activeRow.offsetTop - el.clientHeight / 2 + activeRow.offsetHeight / 2;
   }
 
   /* Heatmap (exported for Habits tab) */

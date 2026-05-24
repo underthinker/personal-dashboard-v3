@@ -361,11 +361,14 @@ body {
 .home-grid .card { overflow: hidden; min-height: 0; }
 /* Performance Overview: spans rows 1+2 — more room to breathe */
 .home-grid .a-stats { gap: 14px; padding: 18px; }
-.home-grid .po-week-bars { height: 64px; }
-.home-grid .po-week { margin-top: 4px; }
+.home-grid .po-hero { flex: 1; min-height: 0; overflow: hidden; }
+.home-grid .po-week { flex: 1; min-height: 0; margin-top: 4px; }
+.home-grid .po-week-bars { flex: 1; height: 0; min-height: 0; overflow: hidden; }
+.home-grid .po-dual { flex-shrink: 0; }
+.home-grid .po-consistency { flex-shrink: 0; }
 .home-grid .po-dot { max-width: 34px; }
 /* Calendar: fixed cell height instead of width-proportional aspect-ratio */
-.home-grid .cal-day { aspect-ratio: unset; height: 28px; }
+.home-grid .cal-day { aspect-ratio: unset; height: 24px; }
 .home-grid .ring-wrap {
   width: clamp(110px, 16vh, 175px);
   height: clamp(110px, 16vh, 175px);
