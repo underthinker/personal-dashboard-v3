@@ -984,16 +984,6 @@
 
     var readinessScore = calcReadinessScore(now, todayYmd, health);
 
-    var focusScoreEl = $('aagFocusScore');
-    var deepWorkEl = $('aagDeepWork');
-    var tasksEl = $('aagTasks');
-    var streakEl = $('aagStreak');
-    var recoveryEl = $('aagRecovery');
-    if (focusScoreEl) focusScoreEl.textContent = readinessScore != null ? readinessScore : '—';
-    if (deepWorkEl) deepWorkEl.textContent = focusStr;
-    if (tasksEl) tasksEl.textContent = total > 0 ? done + '/' + total : '—';
-    if (streakEl) streakEl.textContent = streak > 0 ? streak + ' days' : '—';
-    if (recoveryEl) recoveryEl.textContent = readinessScore != null ? (readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low') : '—';
   };
 
   // ============ HOME INSIGHTS PANEL ============

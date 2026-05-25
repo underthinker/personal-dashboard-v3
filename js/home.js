@@ -415,7 +415,7 @@
     const em = startVal ? Math.min(parseMin(startVal) + 60, 23 * 60 + 59) : 0;
     const end = startVal ? normalizeTime(Math.floor(em / 60) + ':' + (em % 60)) : '';
     const bks = getBlocks();
-    bks.push({ id: tlUid(), start: startVal, end: end, label: label, sub: '' });
+    bks.push({ id: tlUid(), start: startVal, end: end, label: label, sub: '-' });
     saveBlocks(bks);
     renderTimeline();
     setTimeout(function() {
