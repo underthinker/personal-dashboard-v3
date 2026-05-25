@@ -10,6 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="vendor/tesseract/tesseract.min.js"></script>
 <script src="vendor/pdfjs/pdf.min.js"></script>
+<script src="vendor/sortable.min.js"></script>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -230,7 +231,7 @@
   <div class="card a-timeline">
     <div class="card-head">
       <span class="card-label">Schedule</span>
-      <button class="tl-add-btn" id="timelineAddBtn" type="button" aria-label="Add block">+</button>
+      <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset order</button>
     </div>
     <div class="timeline home-timeline-widget" id="timelineWidget"></div>
   </div>

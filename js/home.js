@@ -4,117 +4,312 @@
 (function(){
   const $ = id => document.getElementById(id);
 
-  /* ─── Timeline (editable, persisted) ─── */
-  const TIMELINE_KEY = 'timeline_blocks_v1';
+  /* ─── Timeline v2 (range blocks, inline edit, drag sort, undo delete) ─── */
+  const TL_KEY_V1 = 'timeline_blocks_v1';
+  const TL_KEY    = 'timeline_blocks_v2';
+
   const DEFAULT_BLOCKS = [
-    { t: '6:00',  label: 'Morning routine', sub: 'Wake up, stretch, coffee' },
-    { t: '7:00',  label: 'Deep work',       sub: 'Focus session' },
-    { t: '9:00',  label: 'Team sync',       sub: 'Standup' },
-    { t: '10:00', label: 'Project work',    sub: 'Main task block' },
-    { t: '12:00', label: 'Lunch',           sub: 'Break' },
-    { t: '13:00', label: 'Deep work II',    sub: 'Second session' },
-    { t: '15:00', label: 'Admin',           sub: 'Email, planning' },
-    { t: '17:00', label: 'Wind down',       sub: 'Review, plan tomorrow' },
+    { id:'d1', start:'6:00',  end:'7:00',  label:'Morning routine', sub:'Wake up, stretch, coffee' },
+    { id:'d2', start:'7:00',  end:'9:00',  label:'Deep work',       sub:'Focus session' },
+    { id:'d3', start:'9:00',  end:'9:30',  label:'Team sync',       sub:'Standup' },
+    { id:'d4', start:'10:00', end:'12:00', label:'Project work',    sub:'Main task block' },
+    { id:'d5', start:'12:00', end:'13:00', label:'Lunch',           sub:'Break' },
+    { id:'d6', start:'13:00', end:'15:00', label:'Deep work II',    sub:'Second session' },
+    { id:'d7', start:'15:00', end:'17:00', label:'Admin',           sub:'Email, planning' },
+    { id:'d8', start:'17:00', end:'18:00', label:'Wind down',       sub:'Review, plan tomorrow' },
   ];
 
-  function parseBlockTime(t) {
-    const parts = String(t).split(':');
-    const h = parseInt(parts[0], 10) || 0;
-    const m = parseInt(parts[1], 10) || 0;
-    return h * 60 + m;
-  }
-  function normalizeTime(t) {
-    const parts = String(t).split(':');
-    const h = Math.max(0, Math.min(23, parseInt(parts[0], 10) || 0));
-    const m = Math.max(0, Math.min(59, parseInt(parts[1], 10) || 0));
-    return h + ':' + (m < 10 ? '0' + m : m);
-  }
-  function getTimelineBlocks() {
-    try {
-      const raw = localStorage.getItem(TIMELINE_KEY);
-      if (raw == null) return DEFAULT_BLOCKS.slice();
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : DEFAULT_BLOCKS.slice();
-    } catch(e) { return DEFAULT_BLOCKS.slice(); }
-  }
-  function saveTimelineBlocks(blocks) {
-    blocks.sort((a, b) => parseBlockTime(a.t) - parseBlockTime(b.t));
-    localStorage.setItem(TIMELINE_KEY, JSON.stringify(blocks));
+  function tlUid() { return Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
+
+  function parseMin(t) {
+    const p = String(t || '').split(':');
+    return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
   }
 
+  function normalizeTime(t) {
+    const p = String(t || '').split(':');
+    const h = Math.max(0, Math.min(23, parseInt(p[0], 10) || 0));
+    const m = Math.max(0, Math.min(59, parseInt(p[1], 10) || 0));
+    return h + ':' + String(m).padStart(2, '0');
+  }
+
+  function fmtDur(start, end) {
+    const d = parseMin(end) - parseMin(start);
+    if (d <= 0) return '';
+    const h = Math.floor(d / 60), m = d % 60;
+    return h && m ? h + 'h ' + m + 'm' : h ? h + 'h' : m + 'm';
+  }
+
+  /* v1 → v2 migration (runs once) */
+  (function() {
+    const raw = localStorage.getItem(TL_KEY_V1);
+    if (!raw || localStorage.getItem(TL_KEY)) return;
+    try {
+      const v1 = JSON.parse(raw);
+      if (!Array.isArray(v1)) return;
+      const v2 = v1.map(function(b) {
+        const start = normalizeTime(b.t || '0:00');
+        const em = Math.min(parseMin(start) + 60, 23 * 60 + 59);
+        return { id: tlUid(), start: start, end: normalizeTime(Math.floor(em / 60) + ':' + (em % 60)), label: b.label || '', sub: b.sub || '' };
+      });
+      localStorage.setItem(TL_KEY, JSON.stringify(v2));
+      localStorage.removeItem(TL_KEY_V1);
+    } catch(e) {}
+  })();
+
+  function getBlocks() {
+    try {
+      const raw = localStorage.getItem(TL_KEY);
+      if (raw == null) return DEFAULT_BLOCKS.map(function(b) { return Object.assign({}, b); });
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : DEFAULT_BLOCKS.map(function(b) { return Object.assign({}, b); });
+    } catch(e) { return DEFAULT_BLOCKS.map(function(b) { return Object.assign({}, b); }); }
+  }
+
+  function saveBlocks(blocks) { localStorage.setItem(TL_KEY, JSON.stringify(blocks)); }
+
+  function sortedBlocks() {
+    const blocks = getBlocks();
+    const hasOrder = blocks.some(function(b) { return b.sortOrder != null; });
+    return blocks.slice().sort(function(a, b) {
+      return hasOrder
+        ? (a.sortOrder == null ? 9999 : a.sortOrder) - (b.sortOrder == null ? 9999 : b.sortOrder)
+        : parseMin(a.start) - parseMin(b.start);
+    });
+  }
+
+  function updateResetBtn() {
+    const btn = $('tlResetSort');
+    if (!btn) return;
+    btn.style.display = getBlocks().some(function(b) { return b.sortOrder != null; }) ? '' : 'none';
+  }
+
+  /* ─── Undo delete ─── */
+  var _undoTimer = null, _undoBlock = null;
+
+  function deleteBlockUndo(blockId) {
+    clearTimeout(_undoTimer);
+    const blocks = getBlocks();
+    const idx = blocks.findIndex(function(b) { return b.id === blockId; });
+    if (idx === -1) return;
+    _undoBlock = blocks.splice(idx, 1)[0];
+    saveBlocks(blocks);
+    renderTimeline();
+    showToast('Block deleted', function() {
+      clearTimeout(_undoTimer);
+      const cur = getBlocks();
+      cur.push(_undoBlock);
+      saveBlocks(cur);
+      _undoBlock = null;
+      clearToast();
+      renderTimeline();
+    });
+    _undoTimer = setTimeout(function() { _undoBlock = null; clearToast(); }, 3000);
+  }
+
+  function showToast(msg, undoFn) {
+    clearToast();
+    const card = document.querySelector('.a-timeline');
+    if (!card) return;
+    const t = document.createElement('div');
+    t.className = 'tl-toast'; t.id = 'tlToast';
+    t.innerHTML = window.escHtml(msg) + ' <button class="tl-toast-undo">Undo</button>';
+    t.querySelector('.tl-toast-undo').addEventListener('click', undoFn);
+    card.appendChild(t);
+  }
+
+  function clearToast() { const t = $('tlToast'); if (t) t.remove(); }
+
+  /* ─── Time popover ─── */
+  var _timePop = null;
+
+  function openTimePop(anchor, blockId) {
+    closeTimePop();
+    const blocks = getBlocks();
+    const b = blocks.find(function(x) { return x.id === blockId; });
+    if (!b) return;
+    const esc = window.escHtml;
+    const pop = document.createElement('div');
+    pop.className = 'tl-time-pop'; pop.id = 'tlTimePop';
+    pop.innerHTML =
+      '<label>Start<input type="text" class="tl-pop-start" value="' + esc(b.start) + '"></label>' +
+      '<label>End<input type="text" class="tl-pop-end" value="' + esc(b.end) + '"></label>' +
+      '<button class="tl-pop-done">Done</button>';
+    document.body.appendChild(pop);
+    const rect = anchor.getBoundingClientRect();
+    pop.style.top  = (rect.bottom + 6 + window.scrollY) + 'px';
+    pop.style.left = Math.max(4, rect.left) + 'px';
+    pop.querySelector('.tl-pop-done').addEventListener('click', function() {
+      const ns = normalizeTime(pop.querySelector('.tl-pop-start').value);
+      const ne = normalizeTime(pop.querySelector('.tl-pop-end').value);
+      const bks = getBlocks();
+      const bl = bks.find(function(x) { return x.id === blockId; });
+      if (bl) { bl.start = ns; bl.end = ne; saveBlocks(bks); }
+      closeTimePop(); renderTimeline();
+    });
+    _timePop = pop;
+    requestAnimationFrame(function() { document.addEventListener('click', _tlOutsidePop); });
+  }
+
+  function _tlOutsidePop(e) {
+    if (_timePop && !_timePop.contains(e.target)) {
+      document.removeEventListener('click', _tlOutsidePop);
+      closeTimePop();
+    }
+  }
+
+  function closeTimePop() {
+    document.removeEventListener('click', _tlOutsidePop);
+    if (_timePop) { _timePop.remove(); _timePop = null; }
+  }
+
+  /* ─── Inline editing ─── */
+  var _edit = null; // { el, blockId, field, orig }
+
+  function startEdit(el, blockId, field) {
+    if (_edit) commitEdit();
+    _edit = { el: el, blockId: blockId, field: field, orig: el.textContent };
+    el.contentEditable = 'true';
+    el.classList.add('tl-editing');
+    el.focus();
+    var r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+    var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  function commitEdit() {
+    if (!_edit) return;
+    var d = _edit; _edit = null;
+    d.el.contentEditable = 'false';
+    d.el.classList.remove('tl-editing');
+    var val = d.el.textContent.trim();
+    if (val === d.orig) return;
+    var blocks = getBlocks();
+    var b = blocks.find(function(x) { return x.id === d.blockId; });
+    if (b) { b[d.field] = val; saveBlocks(blocks); renderTimeline(); }
+  }
+
+  function revertEdit() {
+    if (!_edit) return;
+    var d = _edit; _edit = null;
+    d.el.contentEditable = 'false';
+    d.el.classList.remove('tl-editing');
+    d.el.textContent = d.orig;
+  }
+
+  /* ─── Quick-add ─── */
+  function submitQuickAdd() {
+    const el = $('timelineWidget');
+    if (!el) return;
+    const qaLabel = el.querySelector('.tl-qa-label');
+    const qaStart = el.querySelector('.tl-qa-start');
+    if (!qaLabel) return;
+    const label = qaLabel.value.trim();
+    if (!label) return;
+    const startVal = (qaStart && qaStart.value.trim()) ? normalizeTime(qaStart.value.trim()) : '';
+    const em = startVal ? Math.min(parseMin(startVal) + 60, 23 * 60 + 59) : 0;
+    const end = startVal ? normalizeTime(Math.floor(em / 60) + ':' + (em % 60)) : '';
+    const bks = getBlocks();
+    bks.push({ id: tlUid(), start: startVal, end: end, label: label, sub: '' });
+    saveBlocks(bks);
+    renderTimeline();
+    setTimeout(function() {
+      const lbl = $('timelineWidget') && $('timelineWidget').querySelector('.tl-qa-label');
+      if (lbl) lbl.focus();
+    }, 0);
+  }
+
+  /* ─── Render ─── */
   function renderTimeline() {
     const el = $('timelineWidget');
     if (!el) return;
     const esc = window.escHtml;
-    const blocks = getTimelineBlocks().slice().sort((a, b) => parseBlockTime(a.t) - parseBlockTime(b.t));
+    const blocks = sortedBlocks();
     const nowMin = (new Date()).getHours() * 60 + (new Date()).getMinutes();
-    let activeIdx = -1;
-    for (let i = 0; i < blocks.length; i++) {
-      if (parseBlockTime(blocks[i].t) <= nowMin) activeIdx = i;
-    }
-    el.innerHTML = blocks.map((b, i) => {
-      const active = i === activeIdx;
-      return '<div class="tl-row' + (active ? ' tl-row-active' : '') + '">' +
-        '<div class="tl-time' + (active ? ' active' : '') + '">' + esc(b.t) + '</div>' +
-        '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (active ? ' active' : '') + '"></div></div>' +
-        '<div class="tl-content' + (active ? ' active' : '') + '"><div class="tl-title">' + esc(b.label) + '</div>' +
-        (b.sub ? '<div class="tl-sub">' + esc(b.sub) + '</div>' : '') +
-        '</div>' +
-        '<button class="tl-del-btn" data-tl-del="' + i + '" aria-label="Delete">×</button>' +
-        '</div>';
+
+    const rows = blocks.map(function(b, i) {
+      const isActive = nowMin >= parseMin(b.start) && nowMin < parseMin(b.end);
+      const isLast   = i === blocks.length - 1;
+      const dur = fmtDur(b.start, b.end);
+      return (
+        '<div class="tl-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '" data-tl-id="' + esc(b.id) + '">' +
+          '<div class="tl-time-col">' +
+            '<span class="tl-start' + (isActive ? ' active' : '') + '" data-tl-time>' + esc(b.start) + '</span>' +
+          '</div>' +
+          '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
+          '<div class="tl-content' + (isActive ? ' active' : '') + '">' +
+            '<div class="tl-title-row">' +
+              '<span class="tl-title" data-tl-label>' + esc(b.label) + '</span>' +
+              (dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '') +
+            '</div>' +
+            (b.sub ? '<div class="tl-sub" data-tl-sub>' + esc(b.sub) + '</div>' : '') +
+          '</div>' +
+          '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block">×</button>' +
+        '</div>'
+      );
     }).join('');
+
+    el.innerHTML = rows +
+      '<div class="tl-quick-add">' +
+        '<input class="tl-qa-start" type="text" placeholder="9:00" autocomplete="off">' +
+        '<input class="tl-qa-label" type="text" placeholder="Add block…" autocomplete="off">' +
+        '<button class="tl-qa-btn" type="button">+</button>' +
+      '</div>';
+
     const activeRow = el.querySelector('.tl-row-active');
     if (activeRow) el.scrollTop = activeRow.offsetTop - el.clientHeight / 2 + activeRow.offsetHeight / 2;
+
+    updateResetBtn();
   }
 
-  function openTimelineAddForm() {
-    const el = $('timelineWidget');
-    if (!el) return;
-    el.innerHTML =
-      '<form class="tl-form" id="tlAddForm">' +
-        '<input id="tlTime"  type="text" placeholder="Time (e.g. 9:30)" autocomplete="off" required>' +
-        '<input id="tlLabel" type="text" placeholder="Title" autocomplete="off" required>' +
-        '<input id="tlSub"   type="text" placeholder="Subtitle (optional)" autocomplete="off">' +
-        '<div class="tl-form-row">' +
-          '<button type="button" class="tl-form-cancel" id="tlCancel">Cancel</button>' +
-          '<button type="submit" class="tl-form-save">Add</button>' +
-        '</div>' +
-      '</form>';
-    const timeInput = $('tlTime');
-    if (timeInput) timeInput.focus();
-    $('tlCancel').addEventListener('click', renderTimeline);
-    $('tlAddForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const t = normalizeTime($('tlTime').value.trim());
-      const label = $('tlLabel').value.trim();
-      const sub = $('tlSub').value.trim();
-      if (!label) return;
-      const blocks = getTimelineBlocks();
-      blocks.push({ t: t, label: label, sub: sub });
-      saveTimelineBlocks(blocks);
-      renderTimeline();
-    });
-  }
-
-  function deleteTimelineBlock(idx) {
-    const blocks = getTimelineBlocks();
-    if (idx < 0 || idx >= blocks.length) return;
-    blocks.splice(idx, 1);
-    saveTimelineBlocks(blocks);
-    renderTimeline();
-  }
-
-  /* Delegated click handler for delete buttons */
+  /* ─── Delegated event handlers (registered once at load) ─── */
   document.addEventListener('click', function(e) {
-    const t = e.target;
-    if (t && t.matches && t.matches('[data-tl-del]')) {
+    const delBtn = e.target.closest('[data-tl-del]');
+    if (delBtn) { e.stopPropagation(); deleteBlockUndo(delBtn.getAttribute('data-tl-del')); return; }
+
+    if (e.target.closest('.tl-qa-btn')) { submitQuickAdd(); return; }
+
+    const timeEl = e.target.closest('[data-tl-time]');
+    if (timeEl) {
       e.stopPropagation();
-      deleteTimelineBlock(parseInt(t.getAttribute('data-tl-del'), 10));
+      const row = timeEl.closest('[data-tl-id]');
+      if (row) openTimePop(timeEl, row.getAttribute('data-tl-id'));
+      return;
+    }
+
+    const labelEl = e.target.closest('[data-tl-label]');
+    if (labelEl && labelEl.contentEditable !== 'true') {
+      const row = labelEl.closest('[data-tl-id]');
+      if (row) { startEdit(labelEl, row.getAttribute('data-tl-id'), 'label'); return; }
+    }
+
+    const subEl = e.target.closest('[data-tl-sub]');
+    if (subEl && subEl.contentEditable !== 'true') {
+      const row = subEl.closest('[data-tl-id]');
+      if (row) { startEdit(subEl, row.getAttribute('data-tl-id'), 'sub'); return; }
     }
   });
 
-  const addBtn = $('timelineAddBtn');
-  if (addBtn) addBtn.addEventListener('click', openTimelineAddForm);
+  document.addEventListener('keydown', function(e) {
+    if (e.target.matches && e.target.matches('.tl-qa-label') && e.key === 'Enter') { submitQuickAdd(); return; }
+    if (!_edit) return;
+    if (e.key === 'Enter') { e.preventDefault(); commitEdit(); }
+    else if (e.key === 'Escape') { revertEdit(); }
+  });
+
+  document.addEventListener('blur', function(e) {
+    if (_edit && e.target === _edit.el) {
+      var held = _edit;
+      setTimeout(function() { if (_edit === held) commitEdit(); }, 0);
+    }
+  }, true);
+
+  const resetBtn = $('tlResetSort');
+  if (resetBtn) resetBtn.addEventListener('click', function() {
+    const bks = getBlocks();
+    bks.forEach(function(b) { delete b.sortOrder; });
+    saveBlocks(bks);
+    renderTimeline();
+  });
 
   /* ─── Activity heatmap (also called from Habits tab) ─── */
   window.renderActivityHeatmap = function() {
@@ -319,6 +514,28 @@
 
   /* ─── Init ─── */
   renderTimeline();
+
+  /* SortableJS drag-to-reorder (init once; innerHTML replacement keeps instance valid) */
+  if (window.Sortable) {
+    var _tlEl = $('timelineWidget');
+    if (_tlEl) Sortable.create(_tlEl, {
+      draggable: '.tl-row',
+      handle: '.tl-dot-col',
+      animation: 150,
+      ghostClass: 'tl-drag-ghost',
+      onEnd: function() {
+        var rows = _tlEl.querySelectorAll('.tl-row[data-tl-id]');
+        var bks = getBlocks();
+        rows.forEach(function(row, idx) {
+          var b = bks.find(function(x) { return x.id === row.getAttribute('data-tl-id'); });
+          if (b) b.sortOrder = idx;
+        });
+        saveBlocks(bks);
+        updateResetBtn();
+      }
+    });
+  }
+
   window.renderHomeInsights && window.renderHomeInsights();
   renderWeather();
   updateHeroNextUp();
