@@ -378,7 +378,6 @@ body {
 .cf-task { font-size: 14px; font-weight: 600; color: var(--text); }
 .cf-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .cf-meta em { color: var(--green); font-style: normal; }
-.cf-insight { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .cf-next-block { opacity: 0.7; }
 .cf-next-task { font-size: 13px; color: var(--muted); }
 
@@ -629,20 +628,6 @@ body {
 }
 
 .goal-item.is-dragover { border-top: 2px solid var(--accent); }
-
-.push-tomorrow {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  background: transparent;
-  border: 1px dashed var(--line-2);
-  border-radius: 9px;
-  color: var(--muted);
-  font-size: 12.5px;
-  cursor: pointer;
-  margin-top: 8px;
-}
-.push-tomorrow:hover { color: var(--text); border-color: var(--accent); }
 
 .add-goal { display: flex; gap: 0; align-items: stretch; margin-top: 6px; }
 .add-goal input {

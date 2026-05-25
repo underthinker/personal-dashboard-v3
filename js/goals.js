@@ -129,7 +129,6 @@
   const goalAddBtn = $('goalAddBtn');
   const goalPolishBtn = $('goalPolishBtn');
   const polishStatus = $('polishStatus');
-  const gmPushBtn = $('gmPushBtn');
   const gmCardToday = $('gmCardToday');
 
   const tomorrowList = $('tomorrowList');
@@ -358,15 +357,7 @@
     return li;
   }
 
-  // ----------- Today header / streak -----------
-  function renderTodayHeader() {
-    const key = 'goals:' + getActiveDateString();
-    const goals = storeGet(key) || [];
-
-    const undone = goals.filter(g => !g.done).length;
-    gmPushBtn.style.display = undone > 0 ? 'block' : 'none';
-  }
-
+  // ----------- Streak -----------
   function renderStreak() {
     const state = storeGet(STREAK_KEY) || { count: 0 };
     const todayKey = 'goals:' + getActiveDateString();
@@ -385,7 +376,7 @@
     tomorrowLabel.textContent = 'Tomorrow — ' + formatDate(getTomorrowDateString());
   }
 
-  // ----------- Render list with show-more -----------
+  // ----------- Render list -----------
   function renderListInto(goals, listEl, emptyEl, key, readOnly) {
     listEl.innerHTML = '';
     if (!goals || goals.length === 0) {
@@ -393,39 +384,57 @@
     } else {
       emptyEl.style.display = 'none';
       const reload = readOnly ? loadTomorrow : loadToday;
-      const limit = 5;
-      const visible = goals.length > limit ? limit : goals.length;
-      for (let i = 0; i < visible; i++) {
+      for (let i = 0; i < goals.length; i++) {
         listEl.appendChild(buildGoalRow(goals[i], i, key, reload, readOnly));
-      }
-      if (goals.length > limit) {
-        const expanded = listEl.dataset.expanded === '1';
-        if (expanded) {
-          for (let i = limit; i < goals.length; i++) {
-            listEl.appendChild(buildGoalRow(goals[i], i, key, reload, readOnly));
-          }
-        }
-        const toggle = document.createElement('button');
-        toggle.className = 'gm-show-more';
-        toggle.type = 'button';
-        toggle.textContent = expanded
-          ? 'Show less ▴'
-          : ('Show ' + (goals.length - limit) + ' more ▾');
-        toggle.addEventListener('click', () => {
-          listEl.dataset.expanded = expanded ? '0' : '1';
-          renderListInto(goals, listEl, emptyEl, key, readOnly);
-        });
-        listEl.appendChild(toggle);
       }
     }
     if (readOnly) renderTomorrowCount();
-    else renderTodayHeader();
   }
 
   function cleanGoals(arr) {
     return (arr || []).filter(function(g) { return g && typeof g === 'object'; });
   }
+
+  // ----------- Auto-rollover -----------
+  const ROLLOVER_KEY = 'goal_rollover_v1';
+  function autoRollover() {
+    const today = getActiveDateString();
+    const state = storeGet(ROLLOVER_KEY) || { lastDate: null };
+    if (state.lastDate === today) return;
+
+    const todayKey = 'goals:' + today;
+    const todayGoals = cleanGoals(storeGet(todayKey));
+    const todayTexts = new Set(todayGoals.map(g => g.text));
+
+    const keys = storeListKeys('goals:')
+      .map(k => k.slice('goals:'.length))
+      .filter(d => d < today)
+      .sort();
+
+    let changed = false;
+    const lastDate = state.lastDate;
+
+    for (const d of keys) {
+      if (lastDate && d <= lastDate) continue;
+      const arr = storeGet('goals:' + d) || [];
+      const undone = arr.filter(g => g && typeof g === 'object' && !g.done);
+      for (const g of undone) {
+        if (!todayTexts.has(g.text)) {
+          todayGoals.push({ text: g.text, done: false });
+          todayTexts.add(g.text);
+          changed = true;
+        }
+      }
+    }
+
+    if (changed) {
+      storeSet(todayKey, todayGoals);
+    }
+    storeSet(ROLLOVER_KEY, { lastDate: today });
+  }
+
   function loadToday() {
+    autoRollover();
     const key = 'goals:' + getActiveDateString();
     const goals = cleanGoals(storeGet(key));
     renderListInto(goals, goalList, emptyState, key, false);
@@ -435,29 +444,6 @@
     const goals = cleanGoals(storeGet(key));
     renderListInto(goals, tomorrowList, tomorrowEmpty, key, true);
   }
-
-  // ----------- Push remaining -----------
-  gmPushBtn.addEventListener('click', () => {
-    showConfirm('Move all unchecked goals to tomorrow?', () => {
-      const todayKey = 'goals:' + getActiveDateString();
-      const tomorrowKey = 'goals:' + getTomorrowDateString();
-      const today = storeGet(todayKey) || [];
-      const tomorrow = storeGet(tomorrowKey) || [];
-      const tomorrowTexts = new Set(tomorrow.map(g => g.text));
-      const remaining = today.filter(g => !g.done);
-      for (const g of remaining) {
-        if (!tomorrowTexts.has(g.text)) {
-          tomorrow.push({ text: g.text, done: false });
-          tomorrowTexts.add(g.text);
-        }
-      }
-      const kept = today.filter(g => g.done);
-      storeSet(todayKey, kept);
-      storeSet(tomorrowKey, tomorrow);
-      loadToday();
-      loadTomorrow();
-    });
-  });
 
   // ----------- Add handlers -----------
   function makeAddHandlers(input, addBtn, getKey, reload) {
@@ -591,11 +577,11 @@
   ];
 
   const BLOCK_STATUS = {
-    Morning:   ['☀️', 'Morning — fresh start'],
-    Afternoon: ['⚡',  'Afternoon — keep moving'],
-    Evening:   ['🔥', 'Evening — push it'],
-    Night:     ['🌙', 'Night — wind down'],
-    Sleep:     ['😴', 'Sleep — rest up']
+    Morning:   ['', 'Morning — peak focus window. Perfect time for deep work.'],
+    Afternoon: ['', 'Afternoon — good for collaborative work. Power through the dip.'],
+    Evening:   ['', 'Evening — wind down. Focus on light tasks.'],
+    Night:     ['', 'Night — wind down. Protect your sleep window.'],
+    Sleep:     ['', 'Sleep — rest up']
   };
 
   const dayRingFill = $('dayRingFill');
@@ -674,7 +660,10 @@
     dayRingPhase.textContent = 'COMPLETE';
 
     const meta = BLOCK_STATUS[block.name] || ['•', block.name];
-    dayRingStatus.textContent = meta[0] + ' ' + meta[1];
+    dayRingStatus.textContent = meta[1];
+
+    const cardLabel = document.querySelector('.card-label');
+    if (cardLabel) cardLabel.textContent = block.name + ' Session';
 
     dayRingRange.textContent = formatBlockTime(block.start) + ' – ' + formatBlockTime(block.end);
   }

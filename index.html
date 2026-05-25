@@ -125,7 +125,6 @@
           <div class="cf-label">Next Up</div>
           <div class="cf-task cf-next-task" id="cfNextTask">—</div>
         </div>
-        <div class="cf-insight" id="cfInsightText"></div>
       </div>
     </div>
   </div>
@@ -139,7 +138,6 @@
     <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
       <ul id="goalList" class="goal-list"></ul>
       <div id="emptyState" class="hm-empty"><span>No goals for today yet — add one below.</span></div>
-      <button id="gmPushBtn" class="push-tomorrow" style="display:none;">Push remaining to tomorrow →</button>
     </div>
     <div class="add-goal">
       <input type="text" id="goalInput" placeholder="Add a goal...">
@@ -490,7 +488,6 @@
   function updateHeroNextUp() {
     var taskEl = $('cfTaskText');
     var metaEl = $('cfTaskMeta');
-    var insightEl = $('cfInsightText');
     if (!taskEl) return;
     try {
       var now = new Date();
@@ -512,22 +509,7 @@
           metaEl.textContent = '';
         }
       }
-      if (insightEl) {
-        var h = now.getHours();
-        if (h >= 5 && h < 10) {
-          insightEl.textContent = 'You usually peak around 9:30 AM. Perfect time for deep work.';
-        } else if (h >= 10 && h < 12) {
-          insightEl.textContent = 'Late morning momentum — keep pushing.';
-        } else if (h >= 12 && h < 14) {
-          insightEl.textContent = 'Post-lunch dip expected. Power through with a short walk.';
-        } else if (h >= 14 && h < 17) {
-          insightEl.textContent = 'Afternoon block — good for collaborative work.';
-        } else if (h >= 17 && h < 20) {
-          insightEl.textContent = 'Evening wind-down. Focus on light tasks.';
-        } else {
-          insightEl.textContent = 'Night owl mode — protect your sleep window.';
-        }
-      }
+
     } catch(e) { taskEl.textContent = ''; }
   }
 
