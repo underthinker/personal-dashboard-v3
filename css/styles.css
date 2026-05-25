@@ -558,18 +558,22 @@ body {
   font-size: 14px;
   cursor: pointer;
   padding: 4px;
-  opacity: 0.4;
+  opacity: 0;
+  color: var(--text);
   border-radius: 4px;
   transition: opacity var(--dur-fast) var(--ease-smooth),
               background var(--dur-fast) var(--ease-smooth),
               transform var(--dur-fast) var(--ease-bounce);
+}
+.goal-item:hover .gm-queue-btn {
+  opacity: 0.35;
 }
 .gm-queue-btn.is-active {
   opacity: 1;
   color: var(--accent);
 }
 .gm-queue-btn:hover {
-  opacity: 1;
+  opacity: 1 !important;
   background: rgba(var(--accent-rgb), 0.15);
   transform: scale(1.18);
 }
@@ -587,6 +591,12 @@ body {
   transition: opacity var(--dur-fast) var(--ease-smooth),
               background var(--dur-fast) var(--ease-smooth),
               transform var(--dur-fast) var(--ease-bounce);
+}
+.goal-item:hover .goal-delete { opacity: 0.35; }
+.goal-delete:hover {
+  opacity: 1 !important;
+  background: rgba(255, 107, 107, 0.15);
+  transform: scale(1.18);
 }
 .goal-item:hover .goal-delete { opacity: 0.45; }
 .goal-delete:hover {
