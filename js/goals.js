@@ -1234,7 +1234,6 @@
     var backdrop = $('dayFlyoutBackdrop');
     if (flyout) { flyout.classList.add('is-open'); flyout.setAttribute('aria-hidden', 'false'); }
     if (backdrop) backdrop.classList.add('is-visible');
-    setTimeout(function() { var inp = $('dayFlyoutInput'); if (inp) inp.focus(); }, 280);
   }
 
   function closeDayFlyout() {
@@ -1268,22 +1267,6 @@
     }).join('');
   }
 
-  function addFlyoutGoal() {
-    if (!_flyoutYmd) return;
-    var inp = $('dayFlyoutInput');
-    if (!inp) return;
-    var text = inp.value.trim();
-    if (!text) return;
-    var key = 'goals:' + _flyoutYmd;
-    var goals = storeGet(key) || [];
-    goals.push({ text: text, done: false });
-    storeSet(key, goals);
-    inp.value = '';
-    renderDayFlyoutGoals(_flyoutYmd);
-    renderCalendar();
-    inp.focus();
-  }
-
   function initDayFlyout() {
     var closeBtn = $('dayFlyoutClose');
     if (closeBtn) closeBtn.addEventListener('click', closeDayFlyout);
@@ -1294,11 +1277,6 @@
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && _flyoutYmd) closeDayFlyout();
     });
-
-    var addBtn = $('dayFlyoutAddBtn');
-    var addInp = $('dayFlyoutInput');
-    if (addBtn) addBtn.addEventListener('click', addFlyoutGoal);
-    if (addInp) addInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') addFlyoutGoal(); });
 
     var list = $('dayFlyoutList');
     if (list) {

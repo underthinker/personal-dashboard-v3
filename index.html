@@ -1062,6 +1062,17 @@
   </div>
 </div>
 
+<!-- ═══ DAY FLYOUT ═══ -->
+<div class="day-flyout-backdrop" id="dayFlyoutBackdrop"></div>
+<aside class="day-flyout" id="dayFlyout" aria-hidden="true">
+  <div class="day-flyout-head">
+    <span class="day-flyout-title" id="dayFlyoutTitle"></span>
+    <button class="day-flyout-close" id="dayFlyoutClose" aria-label="Close">×</button>
+  </div>
+  <ul class="day-flyout-list" id="dayFlyoutList"></ul>
+  <div class="day-flyout-empty" id="dayFlyoutEmpty">No goals for this day.</div>
+</aside>
+
 <!-- ═══ SCRIPTS ═══ -->
 <script src="js/shared.js"></script>
 <script src="js/goals.js"></script>
@@ -1119,21 +1130,6 @@
 
 })();
 </script>
-
-<!-- ═══ DAY FLYOUT ═══ -->
-<div class="day-flyout-backdrop" id="dayFlyoutBackdrop"></div>
-<aside class="day-flyout" id="dayFlyout" aria-hidden="true">
-  <div class="day-flyout-head">
-    <span class="day-flyout-title" id="dayFlyoutTitle"></span>
-    <button class="day-flyout-close" id="dayFlyoutClose" aria-label="Close">×</button>
-  </div>
-  <ul class="day-flyout-list" id="dayFlyoutList"></ul>
-  <div class="day-flyout-empty" id="dayFlyoutEmpty">No goals for this day.</div>
-  <div class="day-flyout-add">
-    <input class="day-flyout-input" id="dayFlyoutInput" type="text" placeholder="Add goal…" autocomplete="off">
-    <button class="day-flyout-add-btn" id="dayFlyoutAddBtn">+</button>
-  </div>
-</aside>
 
 </body>
 </html>

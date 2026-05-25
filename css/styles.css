@@ -1009,24 +1009,31 @@ body {
 .day-flyout-backdrop.is-visible { opacity: 1; pointer-events: auto; }
 
 .day-flyout {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 401;
-  width: 300px;
+  position: fixed; top: 50%; left: 50%; z-index: 401;
+  width: 340px; max-height: min(70vh, 480px);
+  transform: translate(-50%, -50%) scale(0.94);
   background: var(--surface);
-  border-left: 1px solid var(--line, rgba(255,255,255,0.08));
+  border: 1px solid var(--line);
+  border-radius: var(--r);
   display: flex; flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.26s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: -8px 0 32px rgba(0,0,0,0.35);
+  opacity: 0; pointer-events: none;
+  transition: transform 0.26s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.45);
 }
-.day-flyout.is-open { transform: translateX(0); }
+.day-flyout.is-open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1; pointer-events: auto;
+}
 
 .day-flyout-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 16px 14px;
-  border-bottom: 1px solid var(--line, rgba(255,255,255,0.08));
+  padding: var(--pad) var(--pad) 0;
   flex-shrink: 0;
 }
-.day-flyout-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.day-flyout-title {
+  font-size: 10px; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.16em; text-transform: uppercase;
+}
 .day-flyout-close {
   background: transparent; border: none; color: var(--muted);
   font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
@@ -1035,17 +1042,39 @@ body {
 .day-flyout-close:hover { color: var(--text); background: var(--surface-2); }
 
 .day-flyout-list {
-  list-style: none; margin: 0; padding: 10px 0;
+  list-style: none; margin: 0; padding: 6px 0;
   flex: 1; overflow-y: auto; min-height: 0;
 }
 .df-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 7px 16px; font-size: 13px; color: var(--text);
+  padding: 7px var(--pad); font-size: 13px; color: var(--text);
   transition: background 0.12s;
 }
 .df-item:hover { background: var(--surface-2); }
 .df-item.is-done .df-text { text-decoration: line-through; color: var(--muted); }
-.df-check { accent-color: var(--accent); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }
+.df-check {
+  appearance: none;
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--line-2);
+  border-radius: 4px;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  flex: 0 0 16px;
+  cursor: pointer;
+}
+.df-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.df-check:checked::after {
+  content: '';
+  width: 8px; height: 5px;
+  border-left: 2px solid #08120c;
+  border-bottom: 2px solid #08120c;
+  transform: rotate(-45deg);
+  margin-top: -2px;
+}
 .df-text { flex: 1; min-width: 0; }
 .df-time { font-size: 10px; color: var(--accent); font-family: var(--font-mono); flex-shrink: 0; }
 .df-del {
@@ -1057,29 +1086,11 @@ body {
 .df-del:hover { opacity: 1 !important; color: #e07474; }
 
 .day-flyout-empty {
-  display: none; padding: 24px 16px;
+  display: none; padding: 24px var(--pad);
   font-size: 13px; color: var(--muted); text-align: center;
 }
 
-.day-flyout-add {
-  display: flex; gap: 6px; padding: 10px 14px 16px;
-  border-top: 1px solid var(--line, rgba(255,255,255,0.08));
-  flex-shrink: 0;
-}
-.day-flyout-input {
-  flex: 1; background: var(--surface-2);
-  border: 1px solid var(--line, rgba(255,255,255,0.08));
-  color: inherit; padding: 6px 10px; border-radius: 7px;
-  font: inherit; font-size: 12.5px; outline: none;
-}
-.day-flyout-input:focus { border-color: var(--accent); }
-.day-flyout-add-btn {
-  background: var(--accent); border: none; color: #0b0b0e;
-  font-size: 16px; line-height: 1; font-weight: 700;
-  padding: 6px 12px; border-radius: 7px; cursor: pointer;
-  transition: filter 0.15s;
-}
-.day-flyout-add-btn:hover { filter: brightness(1.1); }
+
 
 /* ─── Activity Heatmap ─── */
 .heatmap-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
