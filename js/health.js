@@ -130,7 +130,7 @@
     const N = 0.5; // neutral default
 
     const hasAnyData = day.sleep_hours != null
-      || (day.water_oz > 0) || day.energy_score != null
+      || (day.water_oz > 0)
       || (day.recovery && Object.values(day.recovery).some(v => v != null))
       || (day.nutrition_totals && day.nutrition_totals.calories > 0);
     const streak = getConsistencyStreak(date);
@@ -240,7 +240,6 @@
     }
     metrics += row('Water', waterOz ? waterOz + ' oz' : '—', waterOz ? waterOz >= settings.water_goal_oz : null,
       settings.water_goal_oz + 'oz goal');
-    metrics += row('Energy', day.energy_score != null ? day.energy_score + '/10' : '—', null, null);
     metrics += row('Exercise', exerciseDone ? 'Done' : '—', exerciseDone || null, exerciseDone ? 'from gym' : null);
     metrics += row('Mood', moodInfo ? moodSvgImg(mood) || moodInfo.emoji : '—', null, null);
     if (cals != null) metrics += row('Calories', cals.toLocaleString(), null, 'from nutrition');
@@ -270,13 +269,7 @@
     const sleepWake = day.sleep_waketime || '';
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
-    const energy = day.energy_score;
     const rec = day.recovery || {};
-
-    const energyPills = Array.from({ length: 10 }, (_, i) => {
-      const v = i + 1;
-      return `<button type="button" class="ql-energy-pill${energy === v ? ' is-active' : ''}" data-energy="${v}">${v}</button>`;
-    }).join('');
 
     const slidersHtml = RECOVERY_SLIDERS.map(s => {
       const val = rec[s.key] != null ? rec[s.key] : 4;
@@ -328,10 +321,6 @@
             </div>
           </div>
         </div>
-        <div class="ql-row">
-          <label class="ql-label">Energy</label>
-          <div class="ql-energy-pills" id="qlEnergyPills">${energyPills}</div>
-        </div>
       </div>
       <div class="ql-divider"></div>
       <div class="ql-rec-head">Recovery</div>
@@ -354,15 +343,6 @@
     el.querySelectorAll('.ql-water-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         day.water_oz = Math.max(0, (day.water_oz || 0) + parseInt(btn.dataset.add, 10));
-        saveDay(date, day);
-        renderHealth();
-      });
-    });
-
-    el.querySelectorAll('[data-energy]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const v = parseInt(btn.dataset.energy, 10);
-        day.energy_score = day.energy_score === v ? null : v;
         saveDay(date, day);
         renderHealth();
       });
@@ -651,17 +631,6 @@
       insights.push({ type: 'warn', text: `Hydration below goal for ${waterStreak} days running.` });
     }
 
-    // Energy average this week
-    const energyVals = h7.map(h => h.day.energy_score).filter(v => v != null);
-    if (energyVals.length >= 3) {
-      const avg = energyVals.reduce((a, b) => a + b, 0) / energyVals.length;
-      if (avg >= 7.5) {
-        insights.push({ type: 'positive', text: `Energy averaging ${avg.toFixed(1)}/10 this week — strong.` });
-      } else if (avg <= 4.0) {
-        insights.push({ type: 'warn', text: `Energy averaging only ${avg.toFixed(1)}/10 this week.` });
-      }
-    }
-
     // Gym → mood comparison (14 days)
     const moodedDays = h14.filter(h => h.mood != null);
     if (moodedDays.length >= 5) {
@@ -675,28 +644,6 @@
         } else if (noGymAvg - gymAvg >= 0.15) {
           insights.push({ type: 'info', text: 'Mood tends to be higher on rest days — possible overtraining.' });
         }
-      }
-    }
-
-    // Water × Energy correlation (14 days)
-    const wePairs = h14.filter(h => h.day.water_oz > 0 && h.day.energy_score != null);
-    if (wePairs.length >= 5) {
-      const r = pearson(wePairs.map(h => h.day.water_oz), wePairs.map(h => h.day.energy_score));
-      if (r != null && r >= 0.45) {
-        insights.push({ type: 'info', text: `Higher water intake correlates with better energy (r=${r.toFixed(2)}).` });
-      } else if (r != null && r <= -0.45) {
-        insights.push({ type: 'info', text: `Water and energy are inversely correlated — check for confounders (r=${r.toFixed(2)}).` });
-      }
-    }
-
-    // Sleep hours × Energy correlation (14 days)
-    const sePairs = h14.filter(h => h.day.sleep_hours != null && h.day.energy_score != null);
-    if (sePairs.length >= 5) {
-      const r = pearson(sePairs.map(h => h.day.sleep_hours), sePairs.map(h => h.day.energy_score));
-      if (r != null && r >= 0.45) {
-        insights.push({ type: 'info', text: `More sleep correlates with higher energy scores (r=${r.toFixed(2)}).` });
-      } else if (r != null && r <= -0.45) {
-        insights.push({ type: 'info', text: `Sleep and energy are inversely correlated — possible oversleeping (r=${r.toFixed(2)}).` });
       }
     }
 
@@ -830,7 +777,6 @@
     const pointX = history.map((_, i) => padL + groupW * i + groupW / 2);
     const maxSleep = Math.max(12, settings.sleep_goal_hours * 1.25);
     function ySleep(v) { return padT + plotH - Math.min(v / maxSleep, 1) * plotH; }
-    function yEnergy(v) { return padT + plotH - (v / 10) * plotH; }
 
     let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg" aria-hidden="true">`;
 
@@ -846,16 +792,6 @@
       const barH = Math.max(2, (padT + plotH) - top);
       const color = v >= settings.sleep_goal_hours * 0.875 ? 'rgba(107,227,164,0.65)' : 'rgba(255,107,107,0.55)';
       html += `<rect x="${(pointX[i] - barW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${barW}" height="${barH.toFixed(1)}" rx="2" fill="${color}"/>`;
-    });
-
-    // Energy line + dots
-    const energyYVals = history.map(h => h.day.energy_score != null ? yEnergy(h.day.energy_score) : null);
-    htSegments(pointX, energyYVals).forEach(seg => {
-      if (seg.length >= 2) html += `<path d="${htLinePath(seg)}" class="htrend-line-energy"/>`;
-    });
-    history.forEach((h, i) => {
-      if (h.day.energy_score == null) return;
-      html += `<circle cx="${pointX[i]}" cy="${yEnergy(h.day.energy_score)}" r="3" fill="#F2C063" stroke="rgba(0,0,0,0.6)" stroke-width="1.5"/>`;
     });
 
     // Day labels

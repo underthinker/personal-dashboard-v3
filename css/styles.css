@@ -7396,37 +7396,6 @@ body {
   color: var(--danger);
 }
 
-.ql-energy-pills { display: flex; gap: 5px; flex-wrap: wrap; }
-
-.ql-energy-pill {
-  width: 30px;
-  height: 30px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--hairline);
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
-  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background var(--dur-fast) var(--ease-smooth),
-              border-color var(--dur-fast) var(--ease-smooth),
-              color var(--dur-fast) var(--ease-smooth);
-}
-.ql-energy-pill:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.16);
-  color: var(--text-primary);
-}
-.ql-energy-pill.is-active {
-  background: rgba(242,192,99,0.18);
-  border-color: rgba(242,192,99,0.55);
-  color: #F2C063;
-}
-
 .ql-divider {
   height: 1px;
   background: var(--hairline);
@@ -7906,13 +7875,6 @@ body {
   fill: none;
   stroke: rgba(255,255,255,0.55);
   stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.htrend-line-energy {
-  fill: none;
-  stroke: #F2C063;
-  stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

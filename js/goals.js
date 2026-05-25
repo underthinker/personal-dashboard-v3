@@ -808,16 +808,12 @@
     var todayWeekIdx = dow === 0 ? 6 : dow - 1; // 0=Mon, 6=Sun
 
     var weekFocusMins = [];
-    var weekDoneFlags = [];
     for (var wi = 0; wi < 7; wi++) {
       var wd = new Date(monday); wd.setDate(monday.getDate() + wi);
       var wymd = wd.getFullYear() + '-' + pad2(wd.getMonth()+1) + '-' + pad2(wd.getDate());
       var wh = {}; try { wh = JSON.parse(localStorage.getItem('health:' + wymd) || '{}'); } catch(e) {}
       weekFocusMins.push(Math.round(wh.focus_min || 0));
-      var wg = storeGet('goals:' + wymd) || [];
-      weekDoneFlags.push(wg.length > 0 && wg.some(function(g) { return g && g.done; }));
     }
-
     // Include live session in today's bar so it matches the hero value
     try {
       var liveFs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
@@ -825,6 +821,7 @@
         weekFocusMins[todayWeekIdx] += Math.floor((Date.now() - liveFs.startedAt) / 60000);
       }
     } catch(e) {}
+    var weekDeepFlags = weekFocusMins.map(function(m) { return m >= 30; });
 
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
     var barsEl = $('perfWeekBars');
@@ -855,12 +852,24 @@
     var taskSubEl = $('perfTaskSub'); if (taskSubEl) taskSubEl.textContent = doneTasks + ' / ' + totalTasks + ' tasks';
     var taskFillEl = $('perfTaskFill'); if (taskFillEl) taskFillEl.style.width = taskRate + '%';
 
-    // ── Readiness (derived from logged health data) ──
+    // ── Readiness (sleep + focus + yesterday tasks + mood) ──
     var settings = {}; try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
     var sleepGoal = settings.sleep_goal_hours || 8;
+    var focusGoal = settings.focus_goal_min || 240;
+    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
+    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    var ydGoals = storeGet('goals:' + ydYmd) || [];
+    var ydTotal = ydGoals.length;
+    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
+    var ydRate = ydTotal > 0 ? ydDone / ydTotal : null;
+    var todayMood = null;
+    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
+    var MOOD_SCORE_MAP = { motivated: 0.95, happy: 0.90, calm: 0.80, numb: 0.35, tired: 0.35, anxious: 0.30, frustrated: 0.25, sad: 0.20 };
     var factors = [];
     if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-    if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
+    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
+    if (ydRate != null) factors.push(ydRate);
+    if (todayMood != null) factors.push(MOOD_SCORE_MAP[todayMood] || 0.5);
     var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
     var readinessLabel = readinessScore == null ? '—' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
 
@@ -868,14 +877,14 @@
     var readSubEl = $('perfReadinessSub'); if (readSubEl) readSubEl.textContent = readinessLabel;
     var readFillEl = $('perfReadinessFill'); if (readFillEl) readFillEl.style.width = (readinessScore || 0) + '%';
 
-    // ── Weekly consistency dots ──
-    var consistencyCount = weekDoneFlags.filter(Boolean).length;
-    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days';
+    // ── Deep work consistency dots ──
+    var consistencyCount = weekDeepFlags.filter(Boolean).length;
+    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days with 30+ min';
 
     var DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     var dotsEl = $('perfDots');
     if (dotsEl) {
-      dotsEl.innerHTML = weekDoneFlags.map(function(done, i) {
+      dotsEl.innerHTML = weekDeepFlags.map(function(done, i) {
         var wrapCls = 'po-dot-wrap' + (done ? ' done' : '') + (i === todayWeekIdx ? ' today' : '');
         return '<div class="' + wrapCls + '"><div class="po-dot"></div><span class="po-dot-label">' + DAY_LABELS[i] + '</span></div>';
       }).join('');
@@ -926,9 +935,21 @@
     var settings = {};
     try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
     var sleepGoal = settings.sleep_goal_hours || 8;
+    var focusGoal = settings.focus_goal_min || 240;
+    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
+    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    var ydGoals = storeGet('goals:' + ydYmd) || [];
+    var ydTotal = ydGoals.length;
+    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
+    var ydRate = ydTotal > 0 ? ydDone / ydTotal : null;
+    var todayMood = null;
+    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
+    var MOOD_SCORE_MAP = { motivated: 0.95, happy: 0.90, calm: 0.80, numb: 0.35, tired: 0.35, anxious: 0.30, frustrated: 0.25, sad: 0.20 };
     var factors = [];
     if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-    if (health.energy_score != null) factors.push((health.energy_score - 1) / 4);
+    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
+    if (ydRate != null) factors.push(ydRate);
+    if (todayMood != null) factors.push(MOOD_SCORE_MAP[todayMood] || 0.5);
     var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
 
     var focusScoreEl = $('aagFocusScore');
