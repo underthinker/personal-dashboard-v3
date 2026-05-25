@@ -754,9 +754,27 @@
   window.updateGreeting = updateTopbarStatus; // Keep alias for tab switching compatibility
 
   // ============ PERFORMANCE OVERVIEW PANEL ============
+  function calcReadinessScore(now, todayYmd, health) {
+    var settings = {}; try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
+    var sleepGoal = settings.sleep_goal_hours || 8;
+    var focusGoal = settings.focus_goal_min || 240;
+    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
+    var ydGoals = storeGet('goals:' + dateToYMD(yd)) || [];
+    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
+    var ydRate = ydGoals.length > 0 ? ydDone / ydGoals.length : null;
+    var todayMood = null;
+    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
+    var factors = [];
+    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
+    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
+    if (ydRate != null) factors.push(ydRate);
+    if (todayMood != null) factors.push(window.MOOD_SCORE_MAP[todayMood] || 0.5);
+    return factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+  }
+
   function renderStatsPanel() {
     var now = new Date();
-    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+    var todayYmd = dateToYMD(now);
 
     // ── Focus time (today + live session) ──
     var health = {};
@@ -773,7 +791,7 @@
 
     // ── Trend vs yesterday ──
     var yd = new Date(now); yd.setDate(yd.getDate() - 1);
-    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    var ydYmd = dateToYMD(yd);
     var ydHealth = {};
     try { ydHealth = JSON.parse(localStorage.getItem('health:' + ydYmd) || '{}'); } catch(e) {}
     var ydMin = Math.round(ydHealth.focus_min || 0);
@@ -799,7 +817,7 @@
     var weekFocusMins = [];
     for (var wi = 0; wi < 7; wi++) {
       var wd = new Date(monday); wd.setDate(monday.getDate() + wi);
-      var wymd = wd.getFullYear() + '-' + pad2(wd.getMonth()+1) + '-' + pad2(wd.getDate());
+      var wymd = dateToYMD(wd);
       var wh = {}; try { wh = JSON.parse(localStorage.getItem('health:' + wymd) || '{}'); } catch(e) {}
       weekFocusMins.push(Math.round(wh.focus_min || 0));
     }
@@ -842,24 +860,7 @@
     var taskFillEl = $('perfTaskFill'); if (taskFillEl) taskFillEl.style.width = taskRate + '%';
 
     // ── Readiness (sleep + focus + yesterday tasks + mood) ──
-    var settings = {}; try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
-    var sleepGoal = settings.sleep_goal_hours || 8;
-    var focusGoal = settings.focus_goal_min || 240;
-    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
-    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
-    var ydGoals = storeGet('goals:' + ydYmd) || [];
-    var ydTotal = ydGoals.length;
-    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
-    var ydRate = ydTotal > 0 ? ydDone / ydTotal : null;
-    var todayMood = null;
-    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
-    var MOOD_SCORE_MAP = { motivated: 0.95, happy: 0.90, calm: 0.80, numb: 0.35, tired: 0.35, anxious: 0.30, frustrated: 0.25, sad: 0.20 };
-    var factors = [];
-    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
-    if (ydRate != null) factors.push(ydRate);
-    if (todayMood != null) factors.push(MOOD_SCORE_MAP[todayMood] || 0.5);
-    var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+    var readinessScore = calcReadinessScore(now, todayYmd, health);
     var readinessLabel = readinessScore == null ? '—' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
 
     var readEl = $('perfReadiness'); if (readEl) readEl.textContent = readinessScore != null ? readinessScore : '—';
@@ -902,7 +903,7 @@
   // ============ SIDEBAR AT A GLANCE + ADAPTIVE INSIGHT ============
   window.renderSidebarAtAGlance = function() {
     var now = new Date();
-    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+    var todayYmd = dateToYMD(now);
 
     var health = {};
     try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
@@ -921,25 +922,7 @@
     var todayAllDone = total > 0 && todayGoals.every(function(g) { return g && g.done; });
     var streak = streakData.count + (todayAllDone ? 1 : 0);
 
-    var settings = {};
-    try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
-    var sleepGoal = settings.sleep_goal_hours || 8;
-    var focusGoal = settings.focus_goal_min || 240;
-    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
-    var ydYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
-    var ydGoals = storeGet('goals:' + ydYmd) || [];
-    var ydTotal = ydGoals.length;
-    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
-    var ydRate = ydTotal > 0 ? ydDone / ydTotal : null;
-    var todayMood = null;
-    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
-    var MOOD_SCORE_MAP = { motivated: 0.95, happy: 0.90, calm: 0.80, numb: 0.35, tired: 0.35, anxious: 0.30, frustrated: 0.25, sad: 0.20 };
-    var factors = [];
-    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
-    if (ydRate != null) factors.push(ydRate);
-    if (todayMood != null) factors.push(MOOD_SCORE_MAP[todayMood] || 0.5);
-    var readinessScore = factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
+    var readinessScore = calcReadinessScore(now, todayYmd, health);
 
     var focusScoreEl = $('aagFocusScore');
     var deepWorkEl = $('aagDeepWork');
@@ -960,16 +943,16 @@
     if (!gridEl) return;
 
     var now = new Date();
-    var todayYmd = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+    var todayYmd = dateToYMD(now);
     var last7 = [];
     var prev7 = [];
     for (var i = 0; i < 7; i++) {
       var d = new Date(now); d.setDate(d.getDate() - i);
-      var ymd = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+      var ymd = dateToYMD(d);
       var h = {}; try { h = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) {}
       last7.push(h);
       var pd = new Date(now); pd.setDate(pd.getDate() - i - 7);
-      var pymd = pd.getFullYear() + '-' + pad2(pd.getMonth()+1) + '-' + pad2(pd.getDate());
+      var pymd = dateToYMD(pd);
       var ph = {}; try { ph = JSON.parse(localStorage.getItem('health:' + pymd) || '{}'); } catch(e) {}
       prev7.push(ph);
     }
@@ -1029,7 +1012,7 @@
     var doneCount = 0; var totalCount = 0;
     for (var gi = 0; gi < 7; gi++) {
       var d2 = new Date(now); d2.setDate(d2.getDate() - gi);
-      var gYmd = d2.getFullYear() + '-' + pad2(d2.getMonth()+1) + '-' + pad2(d2.getDate());
+      var gYmd = dateToYMD(d2);
       var gs = storeGet('goals:' + gYmd) || [];
       totalCount += gs.length;
       doneCount += gs.filter(function(g) { return g && g.done; }).length;
@@ -1087,7 +1070,7 @@
     if (!grid) return;
 
     var today = new Date();
-    var todayYMD = today.getFullYear() + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
+    var todayYMD = dateToYMD(today);
 
     var firstDay = new Date(year, month, 1).getDay();
     var offset = firstDay === 0 ? 6 : firstDay - 1;
@@ -1196,7 +1179,7 @@
     s.startedAt = null;
     saveFocusSession(s);
     var td = new Date();
-    var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+    var ymd = dateToYMD(td);
     try {
       var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
       health.focus_min = (health.focus_min || 0) + Math.round(sessionMin);
@@ -1237,10 +1220,10 @@
   function _migrateFocusCarryover() {
     if (localStorage.getItem('focus_migrated_v1')) return;
     var td = new Date();
-    var todayYmd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+    var todayYmd = dateToYMD(td);
     var yd = new Date(td);
     yd.setDate(yd.getDate() - 1);
-    var yesterdayYmd = yd.getFullYear() + '-' + pad2(yd.getMonth()+1) + '-' + pad2(yd.getDate());
+    var yesterdayYmd = dateToYMD(yd);
     try {
       var todayHealth = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}');
       var carryover = Math.round(todayHealth.focus_min || 0);
@@ -1260,7 +1243,7 @@
     if (!btn) return;
     btn.addEventListener('click', function() {
       var td = new Date();
-      var ymd = td.getFullYear() + '-' + pad2(td.getMonth()+1) + '-' + pad2(td.getDate());
+      var ymd = dateToYMD(td);
       try {
         var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
         var current = Math.round(health.focus_min || 0);
