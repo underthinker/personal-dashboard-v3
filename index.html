@@ -501,14 +501,7 @@
         var nextGoal = data.find(function(g) { return !g.queued && !g.done; });
         nextEl.textContent = nextGoal ? nextGoal.text : '—';
       }
-      if (metaEl) {
-        if (q) {
-          var estMin = 25 + (q.text.length > 20 ? 10 : 0);
-          metaEl.textContent = '~' + estMin + ' min remaining • High impact';
-        } else {
-          metaEl.textContent = '';
-        }
-      }
+
 
     } catch(e) { taskEl.textContent = ''; }
   }

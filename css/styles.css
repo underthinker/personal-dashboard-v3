@@ -378,7 +378,7 @@ body {
 .cf-task { font-size: 14px; font-weight: 600; color: var(--text); }
 .cf-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .cf-meta em { color: var(--green); font-style: normal; }
-.cf-next-block { opacity: 0.7; }
+.cf-next-block { opacity: 0.7; position: relative; top: 10px; }
 .cf-next-task { font-size: 13px; color: var(--muted); }
 
 /* ─── Second-row always-on compact sizing ─── */
