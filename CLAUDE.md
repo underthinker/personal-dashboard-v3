@@ -19,7 +19,7 @@ There are no tests, no linter, and no CI. Verify changes by opening the page in 
 
 Vanilla HTML/CSS/JS — no framework, no build tool, no package manager.
 
-- **`index.html`** — the entire app. All tab HTML lives here; scripts are loaded at the bottom in a specific order that must be preserved (`index.html:1336–1342`).
+- **`index.html`** — the entire app. All tab HTML lives here; scripts are loaded at the bottom in a specific order that must be preserved (`index.html:1061–1068`).
 - **`css/styles.css`** — ~7.9K lines. Single file. CSS custom properties drive theming; `--accent` and `--accent-soft` are the two live-overridden vars.
 - **`js/*.js`** — each file is an IIFE that writes to `window.*` for cross-module calls.
 - **`vendor/`** — Tesseract.js (OCR) and PDF.js, bundled locally, no CDN. Paystub import runs OCR entirely client-side in a WebWorker; max file size 8 MB.
@@ -28,10 +28,10 @@ Vanilla HTML/CSS/JS — no framework, no build tool, no package manager.
 ## Script load order (must not change)
 
 ```
-shared → goals → finances → habits → health → tabs → gym
+shared → goals → finances → habits → health → tabs → gym → home
 ```
 
-`tabs.js` calls `window.render*` functions defined by the earlier modules, so it must load after them. `gym.js` must be last.
+`tabs.js` calls `window.render*` functions defined by the earlier modules, so it must load after them. `home.js` runs the home-tab init at load time, so it must come last.
 
 ## Module / localStorage ownership
 
@@ -44,6 +44,7 @@ shared → goals → finances → habits → health → tabs → gym
 | `health.js` | `renderHealth`, `getFocusMinToday`, `addFocusMin` | `health:YYYY-MM-DD`, `health_settings` |
 | `tabs.js` | — (navigation only) | — |
 | `gym.js` | `renderGym` | `po_coach_v1` |
+| `home.js` | `renderTimeline`, `renderActivityHeatmap`, `renderWeather`, `renderWeatherSetup`, `saveWeatherConfig`, `updateHeroNextUp`, `updateHomeBadge` | `timeline_blocks_v1`, `weather_config_v1`, `weather_cache_v1` |
 
 ## Cross-module communication
 
@@ -51,13 +52,13 @@ shared → goals → finances → habits → health → tabs → gym
 - `goals.js` fires `CustomEvent('focus-updated')` on focus timer changes (not `health.js`).
 - `health.js` fires `CustomEvent('nutrition-updated')` on meal add/delete.
 - `index.html`'s tweaks init fires `CustomEvent('accent-changed')` when the user picks a new accent color.
-- `index.html`'s inline `<script>` (home tab init) listens for the first three events to refresh home widgets; `nutrition-updated` and `focus-updated` both call `renderHomeHealthRings`.
+- `js/home.js` listens for `goals-changed`, `focus-updated`, and `nutrition-updated` to refresh home widgets; `nutrition-updated` and `focus-updated` both call `renderHomeHealthRings`.
 
 ## Key conventions
 
 - **Date keys**: all daily data uses `YYYY-MM-DD`. The "active day" rolls over at 6 AM, not midnight (late nights count as the same day). See `health.js` and the mood/goals logic.
 - **`escHtml`** (from `shared.js`) must wrap any user-supplied string before injecting into `innerHTML`.
-- The Tweaks panel (`index.html:1276–1299`) manages `--accent` / `--accent-soft` at runtime and persists the choice to `localStorage('tweak_accent')`. Clock format is a 4-state integer stored in `clock_format_v1` (0=12h+sec, 1=12h, 2=24h+sec, 3=24h).
+- The Tweaks panel (`index.html:1001` onward) manages `--accent` / `--accent-soft` at runtime and persists the choice to `localStorage('tweak_accent')`. Clock format is a 4-state integer stored in `clock_format_v1` (0=12h+sec, 1=12h, 2=24h+sec, 3=24h).
 
 ## First-load seeding
 
