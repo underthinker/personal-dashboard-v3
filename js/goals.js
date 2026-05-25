@@ -189,6 +189,55 @@
     } catch (_) { return null; }
   }
 
+  /* ─── Time-slot popover (goal clock button) ─── */
+  var _tsPop = null;
+
+  function closeTsPop() {
+    document.removeEventListener('click', _tsOutside);
+    if (_tsPop) { _tsPop.remove(); _tsPop = null; }
+  }
+
+  function _tsOutside(e) {
+    if (_tsPop && !_tsPop.contains(e.target)) { document.removeEventListener('click', _tsOutside); closeTsPop(); }
+  }
+
+  function openTsPopover(btn, goalKey, goalIdx, reload) {
+    closeTsPop();
+    const goals = storeGet(goalKey) || [];
+    const goal = goals[goalIdx];
+    if (!goal) return;
+    const ts = goal.timeSlot || {};
+    const esc = window.escHtml;
+    const pop = document.createElement('div');
+    pop.className = 'ts-pop'; pop.id = 'tsPop';
+    pop.innerHTML =
+      '<label>Start<input class="ts-pop-start" type="text" placeholder="9:00" value="' + esc(ts.start || '') + '"></label>' +
+      '<label>End<input class="ts-pop-end" type="text" placeholder="10:00" value="' + esc(ts.end || '') + '"></label>' +
+      '<div class="ts-pop-btns">' +
+        '<button class="ts-pop-set" type="button">Set</button>' +
+        (goal.timeSlot ? '<button class="ts-pop-clear" type="button">Clear</button>' : '') +
+      '</div>';
+    document.body.appendChild(pop);
+    const rect = btn.getBoundingClientRect();
+    pop.style.top  = (rect.bottom + 6) + 'px';
+    pop.style.left = Math.max(4, rect.left - 60) + 'px';
+    pop.querySelector('.ts-pop-set').addEventListener('click', function() {
+      const start = pop.querySelector('.ts-pop-start').value.trim();
+      const end   = pop.querySelector('.ts-pop-end').value.trim();
+      const gs = storeGet(goalKey) || [];
+      if (gs[goalIdx] && start) { gs[goalIdx].timeSlot = { start: start, end: end }; storeSet(goalKey, gs); reload(); }
+      closeTsPop();
+    });
+    const clearBtn = pop.querySelector('.ts-pop-clear');
+    if (clearBtn) clearBtn.addEventListener('click', function() {
+      const gs = storeGet(goalKey) || [];
+      if (gs[goalIdx]) { delete gs[goalIdx].timeSlot; storeSet(goalKey, gs); reload(); }
+      closeTsPop();
+    });
+    _tsPop = pop;
+    requestAnimationFrame(function() { document.addEventListener('click', _tsOutside); });
+  }
+
   function wireDragReorder(li, dragHandle, idx, key, reload) {
     li.draggable = false;
     dragHandle.addEventListener('mousedown', () => { li.draggable = true; });
@@ -335,6 +384,17 @@
       setTimeout(() => { reload(); }, 460);
     });
     li.appendChild(queueBtn);
+
+    const clockBtn = document.createElement('button');
+    clockBtn.className = 'tl-clock-btn' + (goal.timeSlot ? ' is-active' : '');
+    clockBtn.type = 'button';
+    clockBtn.title = 'Set time slot';
+    clockBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    if (!readOnly) clockBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openTsPopover(clockBtn, key, idx, reload);
+    });
+    li.appendChild(clockBtn);
 
     const del = document.createElement('button');
     del.className = 'goal-delete';

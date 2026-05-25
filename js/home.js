@@ -113,8 +113,13 @@
     if (!card) return;
     const t = document.createElement('div');
     t.className = 'tl-toast'; t.id = 'tlToast';
-    t.innerHTML = window.escHtml(msg) + ' <button class="tl-toast-undo">Undo</button>';
-    t.querySelector('.tl-toast-undo').addEventListener('click', undoFn);
+    if (undoFn) {
+      t.innerHTML = window.escHtml(msg) + ' <button class="tl-toast-undo">Undo</button>';
+      t.querySelector('.tl-toast-undo').addEventListener('click', undoFn);
+    } else {
+      t.textContent = msg;
+      setTimeout(clearToast, 3000);
+    }
     card.appendChild(t);
   }
 
@@ -223,13 +228,52 @@
     const el = $('timelineWidget');
     if (!el) return;
     const esc = window.escHtml;
-    const blocks = sortedBlocks();
     const nowMin = (new Date()).getHours() * 60 + (new Date()).getMinutes();
 
-    const rows = blocks.map(function(b, i) {
+    // Load time-blocked goals for today
+    const gKey = 'goals:' + (window.getTodayYmd ? window.getTodayYmd() : '');
+    var goalEntries = [];
+    try {
+      var todayGoals = JSON.parse(localStorage.getItem(gKey) || '[]');
+      todayGoals.forEach(function(g, i) {
+        if (g && g.timeSlot && g.timeSlot.start) {
+          goalEntries.push({ _isGoal: true, start: g.timeSlot.start, end: g.timeSlot.end || '', label: g.text || '', done: !!g.done, _gKey: gKey, _gIdx: i });
+        }
+      });
+    } catch(e) {}
+
+    // Merge blocks with goal entries; use time sort when goals are present, else respect manual order
+    var blocks = sortedBlocks().map(function(b) { return Object.assign({ _isGoal: false }, b); });
+    var allEntries;
+    if (goalEntries.length > 0) {
+      allEntries = blocks.concat(goalEntries);
+      allEntries.sort(function(a, b) { return parseMin(a.start || '0:00') - parseMin(b.start || '0:00'); });
+    } else {
+      allEntries = blocks;
+    }
+
+    const rows = allEntries.map(function(b, i) {
       const isActive = nowMin >= parseMin(b.start) && nowMin < parseMin(b.end);
-      const isLast   = i === blocks.length - 1;
+      const isLast   = i === allEntries.length - 1;
       const dur = fmtDur(b.start, b.end);
+
+      if (b._isGoal) {
+        return (
+          '<div class="tl-row tl-goal-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '"' +
+              ' data-tl-gkey="' + esc(b._gKey) + '" data-tl-gidx="' + b._gIdx + '">' +
+            '<div class="tl-time-col"><span class="tl-start' + (isActive ? ' active' : '') + '">' + esc(b.start) + '</span></div>' +
+            '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
+            '<div class="tl-content' + (isActive ? ' active' : '') + '">' +
+              '<div class="tl-title-row">' +
+                '<input type="checkbox" class="tl-goal-check"' + (b.done ? ' checked' : '') + ' aria-label="Mark done">' +
+                '<span class="tl-title' + (b.done ? ' tl-goal-done' : '') + '">' + esc(b.label) + '</span>' +
+                (dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
       return (
         '<div class="tl-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '" data-tl-id="' + esc(b.id) + '">' +
           '<div class="tl-time-col">' +
@@ -263,6 +307,25 @@
 
   /* ─── Delegated event handlers (registered once at load) ─── */
   document.addEventListener('click', function(e) {
+    // Goal checkbox on timeline
+    if (e.target.matches && e.target.matches('.tl-goal-check')) {
+      var row = e.target.closest('[data-tl-gkey]');
+      if (row) {
+        var gk = row.getAttribute('data-tl-gkey');
+        var gi = parseInt(row.getAttribute('data-tl-gidx'), 10);
+        try {
+          var gs = JSON.parse(localStorage.getItem(gk) || '[]');
+          if (gs[gi]) {
+            gs[gi].done = e.target.checked;
+            if (e.target.checked) gs[gi].doneAt = Date.now(); else delete gs[gi].doneAt;
+            localStorage.setItem(gk, JSON.stringify(gs));
+            window.dispatchEvent(new CustomEvent('goals-changed'));
+          }
+        } catch(ex) {}
+      }
+      return;
+    }
+
     const delBtn = e.target.closest('[data-tl-del]');
     if (delBtn) { e.stopPropagation(); deleteBlockUndo(delBtn.getAttribute('data-tl-del')); return; }
 
@@ -487,8 +550,16 @@
     try {
       const key = 'goals:' + window.getTodayYmd();
       const data = JSON.parse(localStorage.getItem(key) || '[]');
+      const nowMin = (new Date()).getHours() * 60 + (new Date()).getMinutes();
+
+      // Active time-blocked goal takes priority over queued
+      const activeTimedGoal = data.find(function(g) {
+        if (!g.timeSlot || !g.timeSlot.start || g.done) return false;
+        return nowMin >= parseMin(g.timeSlot.start) && nowMin < parseMin(g.timeSlot.end || g.timeSlot.start);
+      });
+
       const q = data.find(g => g.queued && !g.done);
-      taskEl.textContent = q ? q.text : '—';
+      taskEl.textContent = activeTimedGoal ? activeTimedGoal.text : (q ? q.text : '—');
       const nextEl = $('cfNextTask');
       if (nextEl) {
         const nextGoal = data.find(g => !g.queued && !g.done);
@@ -561,6 +632,7 @@
   });
 
   window.addEventListener('goals-changed', () => {
+    renderTimeline();
     updateHeroNextUp();
     updateHomeBadge();
     window.renderStatsPanel && window.renderStatsPanel();

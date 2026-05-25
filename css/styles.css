@@ -827,6 +827,26 @@ body {
 .tl-pop-done { background: var(--accent); border: none; color: #0b0b0e; padding: 6px 12px; border-radius: 6px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
 .tl-pop-done:hover { filter: brightness(1.1); }
 
+/* Goal-type rows on timeline */
+.tl-goal-row .tl-content { border-left: 2px dashed color-mix(in srgb, var(--accent) 45%, transparent); padding-left: 6px; }
+.tl-goal-row .tl-dot { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.tl-goal-check { width: 13px; height: 13px; margin-right: 5px; margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+.tl-goal-done { text-decoration: line-through; color: var(--muted, #9191a0); }
+/* Clock button in goal rows */
+.tl-clock-btn { background: transparent; border: none; color: var(--muted-2, #6a6a7a); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; padding: 2px 3px; display: flex; align-items: center; flex-shrink: 0; }
+.goal-item:hover .tl-clock-btn { opacity: 0.6; }
+.tl-clock-btn.is-active { opacity: 1; color: var(--accent); }
+.tl-clock-btn:hover { opacity: 1 !important; color: var(--accent); }
+/* Time-slot popover */
+.ts-pop { position: fixed; z-index: 300; background: var(--surface); border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); min-width: 160px; }
+.ts-pop label { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: #acacb5; text-transform: uppercase; letter-spacing: .05em; }
+.ts-pop input { background: var(--line-2, rgba(255,255,255,0.04)); border: 1px solid var(--line, rgba(255,255,255,0.08)); color: inherit; padding: 5px 8px; border-radius: 6px; font: inherit; font-size: 12px; font-family: var(--font-mono); outline: none; }
+.ts-pop input:focus { border-color: var(--accent); }
+.ts-pop-btns { display: flex; gap: 6px; }
+.ts-pop-set { flex: 1; background: var(--accent); border: none; color: #0b0b0e; padding: 6px 12px; border-radius: 6px; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ts-pop-set:hover { filter: brightness(1.1); }
+.ts-pop-clear { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; font-size: 12px; color: var(--muted, #9191a0); }
+
 /* Legacy form rules (kept for safety, no longer rendered) */
 .tl-form { display: flex; flex-direction: column; gap: 8px; padding: 4px 2px; }
 .tl-form input { background: var(--line-2, rgba(255,255,255,0.04)); border: 1px solid var(--line, rgba(255,255,255,0.08)); color: inherit; padding: 6px 8px; border-radius: 6px; font: inherit; font-size: 12px; outline: none; }
