@@ -5,8 +5,10 @@
   const $ = id => document.getElementById(id);
 
   /* ─── Timeline v2 (range blocks, inline edit, drag sort, undo delete) ─── */
-  const TL_KEY_V1 = 'timeline_blocks_v1';
-  const TL_KEY    = 'timeline_blocks_v2';
+  const TL_KEY_V1  = 'timeline_blocks_v1';
+  const TL_KEY     = 'timeline_blocks_v2';
+  const RECUR_KEY  = 'recurring_blocks_v1';
+  const TMPL_KEY   = 'schedule_templates_v1';
 
   const DEFAULT_BLOCKS = [
     { id:'d1', start:'6:00',  end:'7:00',  label:'Morning routine', sub:'Wake up, stretch, coffee' },
@@ -67,6 +69,198 @@
   }
 
   function saveBlocks(blocks) { localStorage.setItem(TL_KEY, JSON.stringify(blocks)); }
+
+  /* ─── Recurring blocks ─── */
+  function getRecurBlocks() {
+    try { var r = localStorage.getItem(RECUR_KEY); return r ? JSON.parse(r) : []; } catch(e) { return []; }
+  }
+  function saveRecurBlocks(b) { localStorage.setItem(RECUR_KEY, JSON.stringify(b)); }
+
+  function getRecurBlocksForToday() {
+    var ymd = window.getTodayYmd ? window.getTodayYmd() : new Date().toISOString().slice(0, 10);
+    var dow = new Date(ymd + 'T12:00:00').getDay();
+    return getRecurBlocks().filter(function(b) {
+      if (!b.recurrence) return false;
+      if (b.recurrence.until && ymd > b.recurrence.until) return false;
+      var f = b.recurrence.freq;
+      if (f === 'daily') return true;
+      if (f === 'weekdays') return dow >= 1 && dow <= 5;
+      if (f === 'weekly') return b.recurrence.daysOfWeek ? b.recurrence.daysOfWeek.includes(dow) : false;
+      return false;
+    }).map(function(b) { return Object.assign({}, b, { _isRecurring: true }); });
+  }
+
+  /* ─── Templates ─── */
+  function getTemplates() {
+    try { var r = localStorage.getItem(TMPL_KEY); return r ? JSON.parse(r) : []; } catch(e) { return []; }
+  }
+  function saveTemplates(t) { localStorage.setItem(TMPL_KEY, JSON.stringify(t)); }
+
+  function updateTemplateSelect() {
+    var sel = $('tlTemplateSelect');
+    if (!sel) return;
+    var tmpls = getTemplates();
+    sel.innerHTML = '<option value="">Templates…</option>' +
+      tmpls.map(function(t, i) {
+        return '<option value="' + i + '">' + window.escHtml(t.name) + (t.autoApply ? ' ★' : '') + '</option>';
+      }).join('') +
+      (tmpls.length ? '<option value="__manage">Manage…</option>' : '');
+  }
+
+  /* ─── Recurrence popover ─── */
+  var _recurPop = null;
+
+  function openRecurPop(anchor, blockId, isRecurring) {
+    closeRecurPop();
+    var source = isRecurring ? getRecurBlocks() : getBlocks();
+    var b = source.find(function(x) { return x.id === blockId; });
+    if (!b) return;
+    var esc = window.escHtml;
+    var curFreq = (b.recurrence && b.recurrence.freq) || '';
+    var curUntil = (b.recurrence && b.recurrence.until) || '';
+    var pop = document.createElement('div');
+    pop.className = 'tl-recur-pop'; pop.id = 'tlRecurPop';
+    pop.innerHTML =
+      '<div class="tl-recur-pop-title">Repeat</div>' +
+      '<label class="tl-pop-lbl">Frequency' +
+        '<select class="tl-recur-freq">' +
+          '<option value=""'   + (!curFreq ? ' selected' : '') + '>Never</option>' +
+          '<option value="daily"'    + (curFreq === 'daily'    ? ' selected' : '') + '>Every day</option>' +
+          '<option value="weekdays"' + (curFreq === 'weekdays' ? ' selected' : '') + '>Weekdays</option>' +
+          '<option value="weekly"'   + (curFreq === 'weekly'   ? ' selected' : '') + '>Every week</option>' +
+        '</select>' +
+      '</label>' +
+      '<label class="tl-pop-lbl">Until (optional)<input type="date" class="tl-recur-until" value="' + esc(curUntil) + '"></label>' +
+      '<div class="tl-pop-row"><button class="tl-recur-cancel">Cancel</button><button class="tl-pop-done tl-recur-save">Save</button></div>';
+    document.body.appendChild(pop);
+    var rect = anchor.getBoundingClientRect();
+    pop.style.top  = (rect.bottom + 6 + window.scrollY) + 'px';
+    pop.style.left = Math.max(4, rect.left) + 'px';
+    pop.querySelector('.tl-recur-cancel').addEventListener('click', closeRecurPop);
+    pop.querySelector('.tl-recur-save').addEventListener('click', function() {
+      var freq  = pop.querySelector('.tl-recur-freq').value;
+      var until = pop.querySelector('.tl-recur-until').value;
+      saveRecurrence(blockId, isRecurring, freq, until);
+      closeRecurPop();
+    });
+    _recurPop = pop;
+    requestAnimationFrame(function() { document.addEventListener('click', _recurOutside); });
+  }
+
+  function _recurOutside(e) {
+    if (_recurPop && !_recurPop.contains(e.target)) {
+      document.removeEventListener('click', _recurOutside);
+      closeRecurPop();
+    }
+  }
+
+  function closeRecurPop() {
+    document.removeEventListener('click', _recurOutside);
+    if (_recurPop) { _recurPop.remove(); _recurPop = null; }
+  }
+
+  function saveRecurrence(blockId, wasRecurring, freq, until) {
+    if (freq) {
+      var ymd = window.getTodayYmd ? window.getTodayYmd() : new Date().toISOString().slice(0, 10);
+      var dow = new Date(ymd + 'T12:00:00').getDay();
+      var recurrence = { freq: freq };
+      if (freq === 'weekly') recurrence.daysOfWeek = [dow];
+      if (until) recurrence.until = until;
+      if (wasRecurring) {
+        var rbs = getRecurBlocks();
+        var rb = rbs.find(function(x) { return x.id === blockId; });
+        if (rb) { rb.recurrence = recurrence; saveRecurBlocks(rbs); }
+      } else {
+        var bks = getBlocks();
+        var idx = bks.findIndex(function(x) { return x.id === blockId; });
+        if (idx !== -1) {
+          var moved = bks.splice(idx, 1)[0];
+          moved.recurrence = recurrence;
+          saveBlocks(bks);
+          var rbs2 = getRecurBlocks(); rbs2.push(moved); saveRecurBlocks(rbs2);
+        }
+      }
+    } else if (wasRecurring) {
+      var rbs3 = getRecurBlocks();
+      var ri = rbs3.findIndex(function(x) { return x.id === blockId; });
+      if (ri !== -1) {
+        var back = rbs3.splice(ri, 1)[0];
+        delete back.recurrence;
+        saveRecurBlocks(rbs3);
+        var bks2 = getBlocks(); bks2.push(back); saveBlocks(bks2);
+      }
+    }
+    renderTimeline();
+  }
+
+  /* ─── Template popovers ─── */
+  var _tmplPop = null;
+
+  function openSaveTemplatePop() {
+    if (_tmplPop) { _tmplPop.remove(); _tmplPop = null; return; }
+    var btn = $('tlSaveTemplate');
+    if (!btn) return;
+    var pop = document.createElement('div');
+    pop.className = 'tl-tmpl-pop'; pop.id = 'tlTemplatePop';
+    pop.innerHTML =
+      '<label class="tl-pop-lbl">Name<input type="text" class="tl-tmpl-name-in" placeholder="e.g. Work day" autocomplete="off"></label>' +
+      '<label class="tl-tmpl-auto-lbl"><input type="checkbox" class="tl-tmpl-auto"> Auto-apply when empty</label>' +
+      '<div class="tl-pop-row"><button class="tl-recur-cancel">Cancel</button><button class="tl-pop-done tl-tmpl-ok">Save</button></div>';
+    document.body.appendChild(pop);
+    var rect = btn.getBoundingClientRect();
+    pop.style.top  = (rect.bottom + 6 + window.scrollY) + 'px';
+    pop.style.left = Math.max(4, rect.right - 200) + 'px';
+    var nameIn = pop.querySelector('.tl-tmpl-name-in');
+    nameIn.focus();
+    pop.querySelector('.tl-recur-cancel').addEventListener('click', function() { pop.remove(); _tmplPop = null; });
+    pop.querySelector('.tl-tmpl-ok').addEventListener('click', function() {
+      var name = nameIn.value.trim();
+      if (!name) { nameIn.focus(); return; }
+      var autoApply = pop.querySelector('.tl-tmpl-auto').checked;
+      var blocks = getBlocks().map(function(b) { return { start: b.start, end: b.end, label: b.label, sub: b.sub || '' }; });
+      var tmpls = getTemplates(); tmpls.push({ name: name, blocks: blocks, autoApply: autoApply });
+      saveTemplates(tmpls); updateTemplateSelect();
+      pop.remove(); _tmplPop = null;
+      showToast('Template “' + name + '” saved');
+    });
+    _tmplPop = pop;
+    requestAnimationFrame(function() {
+      document.addEventListener('click', function _tmplOut(e) {
+        if (_tmplPop && !_tmplPop.contains(e.target) && e.target !== btn) {
+          document.removeEventListener('click', _tmplOut);
+          if (_tmplPop) { _tmplPop.remove(); _tmplPop = null; }
+        }
+      });
+    });
+  }
+
+  function openManageTemplates() {
+    var esc = window.escHtml;
+    var tmpls = getTemplates();
+    if (!tmpls.length) return;
+    var btn = $('tlTemplateSelect');
+    var pop = document.createElement('div');
+    pop.className = 'tl-tmpl-pop'; pop.id = 'tlManagePop';
+    pop.innerHTML = '<div class="tl-recur-pop-title">Manage Templates</div>' +
+      tmpls.map(function(t, i) {
+        return '<div class="tl-tmpl-item"><span>' + esc(t.name) + (t.autoApply ? ' ★' : '') + '</span>' +
+          '<button class="tl-tmpl-del" data-idx="' + i + '">\xd7</button></div>';
+      }).join('') +
+      '<button class="tl-recur-cancel" style="margin-top:6px;width:100%">Close</button>';
+    document.body.appendChild(pop);
+    if (btn) {
+      var rect = btn.getBoundingClientRect();
+      pop.style.top  = (rect.bottom + 6 + window.scrollY) + 'px';
+      pop.style.left = Math.max(4, rect.right - 200) + 'px';
+    }
+    pop.querySelector('.tl-recur-cancel').addEventListener('click', function() { pop.remove(); });
+    pop.querySelectorAll('.tl-tmpl-del').forEach(function(b) {
+      b.addEventListener('click', function() {
+        var idx = parseInt(b.getAttribute('data-idx'), 10);
+        var t = getTemplates(); t.splice(idx, 1); saveTemplates(t); updateTemplateSelect(); pop.remove();
+      });
+    });
+  }
 
   function sortedBlocks() {
     const blocks = getBlocks();
@@ -242,11 +436,12 @@
       });
     } catch(e) {}
 
-    // Merge blocks with goal entries; use time sort when goals are present, else respect manual order
-    var blocks = sortedBlocks().map(function(b) { return Object.assign({ _isGoal: false }, b); });
+    // Merge blocks, goal entries, and recurring entries
+    var recurEntries = getRecurBlocksForToday();
+    var blocks = sortedBlocks().map(function(b) { return Object.assign({ _isGoal: false, _isRecurring: false }, b); });
     var allEntries;
-    if (goalEntries.length > 0) {
-      allEntries = blocks.concat(goalEntries);
+    if (goalEntries.length > 0 || recurEntries.length > 0) {
+      allEntries = blocks.concat(goalEntries).concat(recurEntries);
       allEntries.sort(function(a, b) { return parseMin(a.start || '0:00') - parseMin(b.start || '0:00'); });
     } else {
       allEntries = blocks;
@@ -256,6 +451,25 @@
       const isActive = nowMin >= parseMin(b.start) && nowMin < parseMin(b.end);
       const isLast   = i === allEntries.length - 1;
       const dur = fmtDur(b.start, b.end);
+
+      if (b._isRecurring) {
+        var freq = b.recurrence && b.recurrence.freq ? b.recurrence.freq : '';
+        return (
+          '<div class="tl-row tl-recur-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '" data-tl-rid="' + esc(b.id) + '">' +
+            '<div class="tl-time-col"><span class="tl-start' + (isActive ? ' active' : '') + '">' + esc(b.start) + '</span></div>' +
+            '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
+            '<div class="tl-content' + (isActive ? ' active' : '') + '">' +
+              '<div class="tl-title-row">' +
+                '<span class="tl-title">' + esc(b.label) + '</span>' +
+                '<span class="tl-recur-badge" data-tl-recur-edit="' + esc(b.id) + '" title="Edit recurrence">↻ ' + esc(freq) + '</span>' +
+                (dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '') +
+              '</div>' +
+              (b.sub ? '<div class="tl-sub">' + esc(b.sub) + '</div>' : '') +
+            '</div>' +
+            '<button class="tl-del-btn" data-tl-rdel="' + esc(b.id) + '" aria-label="Delete block">\xd7</button>' +
+          '</div>'
+        );
+      }
 
       if (b._isGoal) {
         return (
@@ -287,7 +501,8 @@
             '</div>' +
             (b.sub ? '<div class="tl-sub" data-tl-sub>' + esc(b.sub) + '</div>' : '') +
           '</div>' +
-          '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block">×</button>' +
+          '<button class="tl-recur-btn" data-tl-recur-new="' + esc(b.id) + '" title="Set recurrence" aria-label="Set recurrence">↻</button>' +
+          '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block">\xd7</button>' +
         '</div>'
       );
     }).join('');
@@ -328,6 +543,29 @@
 
     const delBtn = e.target.closest('[data-tl-del]');
     if (delBtn) { e.stopPropagation(); deleteBlockUndo(delBtn.getAttribute('data-tl-del')); return; }
+
+    const rdelBtn = e.target.closest('[data-tl-rdel]');
+    if (rdelBtn) {
+      e.stopPropagation();
+      var rdelId = rdelBtn.getAttribute('data-tl-rdel');
+      var rbs = getRecurBlocks(); var ri = rbs.findIndex(function(x) { return x.id === rdelId; });
+      if (ri !== -1) { rbs.splice(ri, 1); saveRecurBlocks(rbs); renderTimeline(); }
+      return;
+    }
+
+    const recurEditEl = e.target.closest('[data-tl-recur-edit]');
+    if (recurEditEl) {
+      e.stopPropagation();
+      openRecurPop(recurEditEl, recurEditEl.getAttribute('data-tl-recur-edit'), true);
+      return;
+    }
+
+    const recurNewEl = e.target.closest('[data-tl-recur-new]');
+    if (recurNewEl) {
+      e.stopPropagation();
+      openRecurPop(recurNewEl, recurNewEl.getAttribute('data-tl-recur-new'), false);
+      return;
+    }
 
     if (e.target.closest('.tl-qa-btn')) { submitQuickAdd(); return; }
 
@@ -584,7 +822,34 @@
   window.updateHomeBadge = updateHomeBadge;
 
   /* ─── Init ─── */
+
+  /* Auto-apply: if no saved timeline yet, apply the first auto-apply template */
+  if (localStorage.getItem(TL_KEY) === null) {
+    var _autoTmpl = getTemplates().find(function(t) { return t.autoApply; });
+    if (_autoTmpl) {
+      saveBlocks(_autoTmpl.blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
+    }
+  }
+
   renderTimeline();
+  updateTemplateSelect();
+
+  var _saveTemplBtn = $('tlSaveTemplate');
+  if (_saveTemplBtn) _saveTemplBtn.addEventListener('click', openSaveTemplatePop);
+
+  var _tmplSel = $('tlTemplateSelect');
+  if (_tmplSel) _tmplSel.addEventListener('change', function() {
+    var val = _tmplSel.value;
+    if (!val) return;
+    if (val === '__manage') { openManageTemplates(); _tmplSel.value = ''; return; }
+    var idx = parseInt(val, 10);
+    var tmpls = getTemplates();
+    if (!tmpls[idx]) { _tmplSel.value = ''; return; }
+    saveBlocks(tmpls[idx].blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
+    renderTimeline();
+    showToast('Template applied');
+    _tmplSel.value = '';
+  });
 
   /* SortableJS drag-to-reorder (init once; innerHTML replacement keeps instance valid) */
   if (window.Sortable) {

@@ -1162,10 +1162,12 @@
       var isDeepWork = (dayHealth.focus_min || 0) > 30;
       var isRestorative = (dayHealth.sleep_hours || 0) >= calSleepGoal * 0.8;
 
-      html += '<div class="cal-day' + (isToday ? ' is-today' : '') + '">' + day;
+      var hasTimedGoals = goals && goals.some(function(g) { return g && g.timeSlot && g.timeSlot.start; });
+      html += '<div class="cal-day' + (isToday ? ' is-today' : '') + (hasTimedGoals ? ' cal-has-timed' : '') + '" data-ymd="' + ymd + '">' + day;
       if (isDeepWork) html += '<span class="cal-dot cal-dot-deep"></span>';
       else if (isRestorative) html += '<span class="cal-dot cal-dot-rest"></span>';
       else if (hasGoals) html += '<span class="cal-dot"></span>';
+      if (hasTimedGoals) html += '<span class="cal-bar"></span>';
       html += '</div>';
     }
 
@@ -1203,6 +1205,124 @@
         calState.month++;
         if (calState.month > 11) { calState.month = 0; calState.year++; }
         renderCalendar(calState.year, calState.month);
+      });
+    }
+    var grid = $('calGrid');
+    if (grid) {
+      grid.addEventListener('click', function(e) {
+        var day = e.target.closest('.cal-day[data-ymd]');
+        if (day) openDayFlyout(day.getAttribute('data-ymd'));
+      });
+    }
+  }
+
+  /* ─── Day flyout ─── */
+  var _flyoutYmd = null;
+
+  function openDayFlyout(ymd) {
+    _flyoutYmd = ymd;
+    var titleEl = $('dayFlyoutTitle');
+    if (titleEl) {
+      var parts = ymd.split('-');
+      var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      titleEl.textContent = dayNames[d.getDay()] + ', ' + monthNames[d.getMonth()] + ' ' + d.getDate();
+    }
+    renderDayFlyoutGoals(ymd);
+    var flyout = $('dayFlyout');
+    var backdrop = $('dayFlyoutBackdrop');
+    if (flyout) { flyout.classList.add('is-open'); flyout.setAttribute('aria-hidden', 'false'); }
+    if (backdrop) backdrop.classList.add('is-visible');
+    setTimeout(function() { var inp = $('dayFlyoutInput'); if (inp) inp.focus(); }, 280);
+  }
+
+  function closeDayFlyout() {
+    var flyout = $('dayFlyout');
+    var backdrop = $('dayFlyoutBackdrop');
+    if (flyout) { flyout.classList.remove('is-open'); flyout.setAttribute('aria-hidden', 'true'); }
+    if (backdrop) backdrop.classList.remove('is-visible');
+    _flyoutYmd = null;
+  }
+
+  function renderDayFlyoutGoals(ymd) {
+    var list = $('dayFlyoutList');
+    var empty = $('dayFlyoutEmpty');
+    if (!list) return;
+    var goals = storeGet('goals:' + ymd) || [];
+    if (goals.length === 0) {
+      list.innerHTML = '';
+      if (empty) empty.style.display = 'block';
+      return;
+    }
+    if (empty) empty.style.display = 'none';
+    var esc = window.escHtml;
+    list.innerHTML = goals.map(function(g, i) {
+      var timeTag = (g.timeSlot && g.timeSlot.start) ? '<span class="df-time">' + esc(g.timeSlot.start) + '</span>' : '';
+      return '<li class="df-item' + (g.done ? ' is-done' : '') + '">' +
+        '<input type="checkbox" class="df-check" data-idx="' + i + '"' + (g.done ? ' checked' : '') + '>' +
+        '<span class="df-text">' + esc(g.text || '') + '</span>' +
+        timeTag +
+        '<button class="df-del" data-del="' + i + '" aria-label="Delete">×</button>' +
+      '</li>';
+    }).join('');
+  }
+
+  function addFlyoutGoal() {
+    if (!_flyoutYmd) return;
+    var inp = $('dayFlyoutInput');
+    if (!inp) return;
+    var text = inp.value.trim();
+    if (!text) return;
+    var key = 'goals:' + _flyoutYmd;
+    var goals = storeGet(key) || [];
+    goals.push({ text: text, done: false });
+    storeSet(key, goals);
+    inp.value = '';
+    renderDayFlyoutGoals(_flyoutYmd);
+    renderCalendar();
+    inp.focus();
+  }
+
+  function initDayFlyout() {
+    var closeBtn = $('dayFlyoutClose');
+    if (closeBtn) closeBtn.addEventListener('click', closeDayFlyout);
+
+    var backdrop = $('dayFlyoutBackdrop');
+    if (backdrop) backdrop.addEventListener('click', closeDayFlyout);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && _flyoutYmd) closeDayFlyout();
+    });
+
+    var addBtn = $('dayFlyoutAddBtn');
+    var addInp = $('dayFlyoutInput');
+    if (addBtn) addBtn.addEventListener('click', addFlyoutGoal);
+    if (addInp) addInp.addEventListener('keydown', function(e) { if (e.key === 'Enter') addFlyoutGoal(); });
+
+    var list = $('dayFlyoutList');
+    if (list) {
+      list.addEventListener('change', function(e) {
+        if (!e.target.classList.contains('df-check') || !_flyoutYmd) return;
+        var idx = parseInt(e.target.getAttribute('data-idx'), 10);
+        var key = 'goals:' + _flyoutYmd;
+        var goals = storeGet(key) || [];
+        if (!goals[idx]) return;
+        goals[idx].done = e.target.checked;
+        if (e.target.checked) goals[idx].doneAt = Date.now(); else delete goals[idx].doneAt;
+        storeSet(key, goals);
+        renderDayFlyoutGoals(_flyoutYmd);
+      });
+      list.addEventListener('click', function(e) {
+        var del = e.target.closest('[data-del]');
+        if (!del || !_flyoutYmd) return;
+        var idx = parseInt(del.getAttribute('data-del'), 10);
+        var key = 'goals:' + _flyoutYmd;
+        var goals = storeGet(key) || [];
+        goals.splice(idx, 1);
+        storeSet(key, goals);
+        renderDayFlyoutGoals(_flyoutYmd);
+        renderCalendar();
       });
     }
   }
@@ -1333,6 +1453,7 @@
   window.renderSidebarAtAGlance();
   renderCalendar();
   initCalendar();
+  initDayFlyout();
   initFocusTimer();
   _initFocusEdit();
   var nextBtn = $('nextActionBtn');

@@ -231,7 +231,11 @@
   <div class="card a-timeline">
     <div class="card-head">
       <span class="card-label">Schedule</span>
-      <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset order</button>
+      <div class="tl-head-right">
+        <select class="tl-tmpl-sel" id="tlTemplateSelect"><option value="">Templates…</option></select>
+        <button class="tl-save-tmpl-btn" id="tlSaveTemplate" type="button">+ Save</button>
+        <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset order</button>
+      </div>
     </div>
     <div class="timeline home-timeline-widget" id="timelineWidget"></div>
   </div>
@@ -1115,6 +1119,21 @@
 
 })();
 </script>
+
+<!-- ═══ DAY FLYOUT ═══ -->
+<div class="day-flyout-backdrop" id="dayFlyoutBackdrop"></div>
+<aside class="day-flyout" id="dayFlyout" aria-hidden="true">
+  <div class="day-flyout-head">
+    <span class="day-flyout-title" id="dayFlyoutTitle"></span>
+    <button class="day-flyout-close" id="dayFlyoutClose" aria-label="Close">×</button>
+  </div>
+  <ul class="day-flyout-list" id="dayFlyoutList"></ul>
+  <div class="day-flyout-empty" id="dayFlyoutEmpty">No goals for this day.</div>
+  <div class="day-flyout-add">
+    <input class="day-flyout-input" id="dayFlyoutInput" type="text" placeholder="Add goal…" autocomplete="off">
+    <button class="day-flyout-add-btn" id="dayFlyoutAddBtn">+</button>
+  </div>
+</aside>
 
 </body>
 </html>

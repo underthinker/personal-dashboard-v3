@@ -986,6 +986,100 @@ body {
 .cal-day.is-today .cal-dot { display: none; }
 .cal-dot-deep { background: var(--accent) !important; }
 .cal-dot-rest { background: var(--green) !important; }
+.cal-day[data-ymd] { cursor: pointer; }
+.cal-bar {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px; height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.75;
+}
+.cal-day.is-today .cal-bar { opacity: 0.4; }
+
+/* ─── Day Flyout ─── */
+.day-flyout-backdrop {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,0.4);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.day-flyout-backdrop.is-visible { opacity: 1; pointer-events: auto; }
+
+.day-flyout {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 401;
+  width: 300px;
+  background: var(--surface);
+  border-left: 1px solid var(--line, rgba(255,255,255,0.08));
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.26s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,0.35);
+}
+.day-flyout.is-open { transform: translateX(0); }
+
+.day-flyout-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--line, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+}
+.day-flyout-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.day-flyout-close {
+  background: transparent; border: none; color: var(--muted);
+  font-size: 20px; line-height: 1; cursor: pointer; padding: 2px 6px;
+  border-radius: 4px; transition: color 0.15s, background 0.15s;
+}
+.day-flyout-close:hover { color: var(--text); background: var(--surface-2); }
+
+.day-flyout-list {
+  list-style: none; margin: 0; padding: 10px 0;
+  flex: 1; overflow-y: auto; min-height: 0;
+}
+.df-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px; font-size: 13px; color: var(--text);
+  transition: background 0.12s;
+}
+.df-item:hover { background: var(--surface-2); }
+.df-item.is-done .df-text { text-decoration: line-through; color: var(--muted); }
+.df-check { accent-color: var(--accent); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }
+.df-text { flex: 1; min-width: 0; }
+.df-time { font-size: 10px; color: var(--accent); font-family: var(--font-mono); flex-shrink: 0; }
+.df-del {
+  background: transparent; border: none; color: var(--muted-2);
+  font-size: 14px; line-height: 1; cursor: pointer; padding: 1px 4px;
+  opacity: 0; transition: opacity 0.15s, color 0.15s; flex-shrink: 0;
+}
+.df-item:hover .df-del { opacity: 0.6; }
+.df-del:hover { opacity: 1 !important; color: #e07474; }
+
+.day-flyout-empty {
+  display: none; padding: 24px 16px;
+  font-size: 13px; color: var(--muted); text-align: center;
+}
+
+.day-flyout-add {
+  display: flex; gap: 6px; padding: 10px 14px 16px;
+  border-top: 1px solid var(--line, rgba(255,255,255,0.08));
+  flex-shrink: 0;
+}
+.day-flyout-input {
+  flex: 1; background: var(--surface-2);
+  border: 1px solid var(--line, rgba(255,255,255,0.08));
+  color: inherit; padding: 6px 10px; border-radius: 7px;
+  font: inherit; font-size: 12.5px; outline: none;
+}
+.day-flyout-input:focus { border-color: var(--accent); }
+.day-flyout-add-btn {
+  background: var(--accent); border: none; color: #0b0b0e;
+  font-size: 16px; line-height: 1; font-weight: 700;
+  padding: 6px 12px; border-radius: 7px; cursor: pointer;
+  transition: filter 0.15s;
+}
+.day-flyout-add-btn:hover { filter: brightness(1.1); }
 
 /* ─── Activity Heatmap ─── */
 .heatmap-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
@@ -7997,4 +8091,47 @@ body {
   font-style: italic;
 }
 
+/* ═══ PHASE 4: RECURRENCE + TEMPLATES ═══ */
 
+/* Timeline card header layout */
+.tl-head-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* Template select */
+.tl-tmpl-sel { background: var(--line-2, rgba(255,255,255,0.04)); border: 1px solid var(--line, rgba(255,255,255,0.08)); color: inherit; padding: 3px 6px; border-radius: 6px; font: inherit; font-size: 11px; outline: none; cursor: pointer; max-width: 120px; }
+.tl-tmpl-sel:focus { border-color: var(--accent); }
+
+/* Save template button */
+.tl-save-tmpl-btn { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); color: var(--text-muted, #acacb5); cursor: pointer; padding: 3px 8px; border-radius: 6px; font: inherit; font-size: 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; white-space: nowrap; }
+.tl-save-tmpl-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+/* Recurrence button on regular blocks (hover-visible) */
+.tl-recur-btn { position: absolute; top: 0; right: 26px; background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 13px; line-height: 1; padding: 2px 5px; }
+.tl-row:hover .tl-recur-btn { opacity: 0.7; }
+.tl-recur-btn:hover { opacity: 1 !important; color: var(--accent); }
+
+/* Recurring block row */
+.tl-recur-row .tl-dot { background: color-mix(in srgb, var(--accent) 55%, #7c7c9a); }
+.tl-recur-row .tl-content { border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); padding-left: 6px; }
+
+/* Recurrence badge (↻ freq) on recurring block rows */
+.tl-recur-badge { font-size: 10px; font-family: var(--font-mono); color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 99px; flex-shrink: 0; cursor: pointer; user-select: none; transition: filter 0.15s; }
+.tl-recur-badge:hover { filter: brightness(1.2); }
+
+/* Recurrence popover */
+.tl-recur-pop { position: absolute; background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.5); min-width: 180px; }
+.tl-recur-pop-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted-2, #68687a); }
+.tl-pop-lbl { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: #acacb5; text-transform: uppercase; letter-spacing: .05em; }
+.tl-pop-lbl select, .tl-pop-lbl input { background: var(--line-2, rgba(255,255,255,0.04)); border: 1px solid var(--line, rgba(255,255,255,0.08)); color: inherit; padding: 5px 8px; border-radius: 6px; font: inherit; font-size: 12px; outline: none; }
+.tl-pop-lbl select:focus, .tl-pop-lbl input:focus { border-color: var(--accent); }
+.tl-pop-row { display: flex; gap: 6px; justify-content: flex-end; }
+.tl-recur-cancel { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); color: inherit; padding: 5px 10px; border-radius: 6px; font: inherit; font-size: 11px; cursor: pointer; }
+.tl-recur-cancel:hover { background: var(--line-2, rgba(255,255,255,0.04)); }
+
+/* Template save/manage popover */
+.tl-tmpl-pop { position: absolute; background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.5); min-width: 200px; }
+.tl-tmpl-auto-lbl { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #acacb5; cursor: pointer; }
+.tl-tmpl-auto-lbl input { accent-color: var(--accent); }
+.tl-tmpl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--hairline, rgba(255,255,255,0.06)); font-size: 12px; }
+.tl-tmpl-item:last-of-type { border-bottom: none; }
+.tl-tmpl-del { background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; font-size: 14px; padding: 0 4px; transition: color 0.15s; }
+.tl-tmpl-del:hover { color: #e07474; }
