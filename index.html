@@ -118,7 +118,7 @@
         <p class="session-range" id="dayRingRange">—</p>
         <div class="cf-block">
           <div class="cf-label">Current Focus</div>
-          <div class="cf-task" id="cfTaskText">No focus item queued</div>
+          <div class="cf-task" id="cfTaskText">—</div>
           <div class="cf-meta" id="cfTaskMeta"></div>
         </div>
         <div class="cf-block cf-next-block">
@@ -495,7 +495,7 @@
       var key = 'goals:' + now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate());
       var data = JSON.parse(localStorage.getItem(key) || '[]');
       var q = data.find(function(g) { return g.queued && !g.done; });
-      taskEl.textContent = q ? q.text : 'No focus item queued';
+      taskEl.textContent = q ? q.text : '—';
       var nextEl = $('cfNextTask');
       if (nextEl) {
         var nextGoal = data.find(function(g) { return !g.queued && !g.done; });
