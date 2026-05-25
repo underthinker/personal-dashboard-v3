@@ -16,6 +16,11 @@ Icon
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 .vscode/
+AGENTS.md
+CLAUDE.md
+Home UI Evolution Plan.md
+SCHEDULE_PLAN.md
+UI Aesthetic Polish Progress.md
 .idea/
 *.sublime-workspace
 *.sublime-project

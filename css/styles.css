@@ -709,6 +709,9 @@ body {
 .po-week-labels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .po-week-labels span { text-align: center; font-size: 9px; font-weight: 500; color: var(--muted-2); }
 .po-week-labels span.is-today { color: var(--accent); font-weight: 700; }
+.po-week-tooltip { position: absolute; z-index: 100; pointer-events: none; background: rgba(30,30,30,0.95); border: 1px solid rgba(255,255,255,0.10); border-radius: 8px; padding: 4px 8px; font-size: 10.5px; font-weight: 600; color: var(--text-primary); opacity: 0; transition: opacity 0.12s ease; backdrop-filter: blur(12px); box-shadow: 0 8px 24px rgba(0,0,0,0.45); white-space: nowrap; }
+.po-week-tooltip.is-visible { opacity: 1; }
+.po-week { position: relative; }
 
 /* Dual metrics */
 .po-dual { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 0; }
@@ -785,9 +788,14 @@ body {
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(255,255,255,0.04)); padding: 0 2px; min-width: 40px; }
 
 /* Per-row buttons */
-.tl-row .tl-del-btn { position: absolute; top: 0; right: 0; background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 14px; line-height: 1; padding: 2px 6px; }
-.tl-row:hover .tl-del-btn { opacity: 0.7; }
+.tl-row .tl-del-btn,
+.tl-recur-btn { position: absolute; top: 0; background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 14px; line-height: 1; padding: 2px 6px; display: inline-flex; align-items: center; }
+.tl-row .tl-del-btn { right: 0; }
+.tl-recur-btn { right: 26px; }
+.tl-row:hover .tl-del-btn,
+.tl-row:hover .tl-recur-btn { opacity: 0.7; }
 .tl-row .tl-del-btn:hover { opacity: 1; color: #e07474; }
+.tl-recur-btn:hover { opacity: 1 !important; color: var(--accent); }
 .tl-insert-btn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 99px; background: var(--accent); border: none; color: #0b0b0e; cursor: pointer; opacity: 0; transition: opacity 0.15s; font-size: 10px; line-height: 14px; text-align: center; z-index: 2; padding: 0; }
 .tl-row:hover .tl-insert-btn { opacity: 1; }
 
@@ -8139,9 +8147,7 @@ body {
 .tl-save-tmpl-btn { background: transparent; border: 1px solid var(--line, rgba(255,255,255,0.08)); color: var(--text-muted, #acacb5); cursor: pointer; padding: 3px 8px; border-radius: 6px; font: inherit; font-size: 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; white-space: nowrap; }
 .tl-save-tmpl-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 
-/* Recurrence button on regular blocks (hover-visible) */
-.tl-recur-btn { position: absolute; top: 0; right: 26px; background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 13px; line-height: 1; padding: 2px 5px; }
-.tl-row:hover .tl-recur-btn { opacity: 0.7; }
+/* Recurrence button hover (defined above with .tl-del-btn) */
 .tl-recur-btn:hover { opacity: 1 !important; color: var(--accent); }
 
 /* Recurring block row */

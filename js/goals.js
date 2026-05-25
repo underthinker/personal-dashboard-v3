@@ -341,8 +341,10 @@
       const goals = storeGet(key) || [];
       if (!goals[idx]) return;
       goals[idx].done = cb.checked;
-      if (cb.checked) goals[idx].doneAt = Date.now();
-      else delete goals[idx].doneAt;
+      if (cb.checked) {
+        goals[idx].doneAt = Date.now();
+        delete goals[idx].queued;
+      } else delete goals[idx].doneAt;
       storeSet(key, goals);
       reload();
       checkStreak();
@@ -900,8 +902,30 @@
         barsEl.innerHTML = weekFocusMins.map(function(min, i) {
           var px = min > 0 ? Math.max(10, Math.round((min / maxFocus) * barMaxH)) : 3;
           var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
-          return '<div class="' + cls + '" style="height:' + px + 'px"></div>';
+          return '<div class="' + cls + '" style="height:' + px + 'px" data-day="' + i + '"></div>';
         }).join('');
+        var tooltip = $('perfWeekTooltip');
+        if (tooltip) {
+          barsEl.querySelectorAll('.po-week-bar').forEach(function(bar) {
+            bar.addEventListener('mouseenter', function(e) {
+              var idx = parseInt(bar.getAttribute('data-day'));
+              var mins = weekFocusMins[idx];
+              tooltip.textContent = mins + 'm deep work';
+              var barRect = bar.getBoundingClientRect();
+              var wrapRect = barsEl.closest('.po-week').getBoundingClientRect();
+              var leftPos = barRect.left - wrapRect.left + barRect.width / 2 - tooltip.offsetWidth / 2;
+              var wrapW = wrapRect.width;
+              var ttW = tooltip.offsetWidth;
+              leftPos = Math.max(4, Math.min(leftPos, wrapW - ttW - 4));
+              tooltip.style.left = leftPos + 'px';
+              tooltip.style.top = (barRect.top - wrapRect.top - 6) + 'px';
+              tooltip.classList.add('is-visible');
+            });
+            bar.addEventListener('mouseleave', function() {
+              tooltip.classList.remove('is-visible');
+            });
+          });
+        }
       };
       requestAnimationFrame(renderBars);
     }
