@@ -9,6 +9,7 @@
   const TL_KEY     = 'timeline_blocks_v2';
   const RECUR_KEY  = 'recurring_blocks_v1';
   const TMPL_KEY   = 'schedule_templates_v1';
+  const ACTIVE_TMPL_KEY = 'tl_active_template';
 
   const DEFAULT_BLOCKS = [
     { id:'d1', start:'6:00',  end:'7:00',  label:'Morning routine', sub:'Wake up, stretch, coffee' },
@@ -100,7 +101,7 @@
     var sel = $('tlTemplateSelect');
     if (!sel) return;
     var tmpls = getTemplates();
-    sel.innerHTML = '<option value="">Templates…</option>' +
+    sel.innerHTML = '<option value="">Default</option>' +
       tmpls.map(function(t, i) {
         return '<option value="' + i + '">' + window.escHtml(t.name) + (t.autoApply ? ' ★' : '') + '</option>';
       }).join('') +
@@ -258,6 +259,12 @@
       b.addEventListener('click', function() {
         var idx = parseInt(b.getAttribute('data-idx'), 10);
         var t = getTemplates(); t.splice(idx, 1); saveTemplates(t); updateTemplateSelect(); pop.remove();
+        var active = localStorage.getItem(ACTIVE_TMPL_KEY);
+        if (active != null) {
+          var a = parseInt(active, 10);
+          if (a === idx) localStorage.removeItem(ACTIVE_TMPL_KEY);
+          else if (a > idx) localStorage.setItem(ACTIVE_TMPL_KEY, a - 1);
+        }
       });
     });
   }
@@ -825,14 +832,24 @@
 
   /* Auto-apply: if no saved timeline yet, apply the first auto-apply template */
   if (localStorage.getItem(TL_KEY) === null) {
-    var _autoTmpl = getTemplates().find(function(t) { return t.autoApply; });
+    var _tmpls = getTemplates();
+    var _autoTmpl = _tmpls.find(function(t) { return t.autoApply; });
     if (_autoTmpl) {
       saveBlocks(_autoTmpl.blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
+      localStorage.setItem(ACTIVE_TMPL_KEY, _tmpls.indexOf(_autoTmpl));
     }
   }
 
   renderTimeline();
   updateTemplateSelect();
+  (function() {
+    var sel = $('tlTemplateSelect');
+    if (!sel) return;
+    var active = localStorage.getItem(ACTIVE_TMPL_KEY);
+    if (active != null && sel.querySelector('option[value="' + active + '"]')) {
+      sel.value = active;
+    }
+  })();
 
   var _saveTemplBtn = $('tlSaveTemplate');
   if (_saveTemplBtn) _saveTemplBtn.addEventListener('click', openSaveTemplatePop);
@@ -848,7 +865,8 @@
     saveBlocks(tmpls[idx].blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
     renderTimeline();
     showToast('Template applied');
-    _tmplSel.value = '';
+    _tmplSel.value = idx;
+    localStorage.setItem(ACTIVE_TMPL_KEY, idx);
   });
 
   /* SortableJS drag-to-reorder (init once; innerHTML replacement keeps instance valid) */
