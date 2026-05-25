@@ -111,6 +111,13 @@
     numb:       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#6C757D"/><circle cx="13" cy="17" r="2" fill="#2C3034"/><circle cx="23" cy="17" r="2" fill="#2C3034"/><line x1="13" y1="23" x2="23" y2="23" stroke="#2C3034" stroke-width="2" stroke-linecap="round"/></svg>'
   };
 
+  // Health ring SVG icons for renderHomeHealthRings
+  const HEALTH_RING_ICONS = [
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>'
+  ];
+
   function moodSvgUri(key) {
     const svg = MOOD_SVGS[key];
     return svg ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) : '';
@@ -927,11 +934,8 @@
     var el = document.getElementById(containerId);
     if (!el) return;
 
-    var now = new Date();
-    var ymd = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-
-    var day = {};
-    try { day = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) {}
+    var ymd = getTodayYmd();
+    var day = getHealthData(ymd);
 
     var settings = { water_goal_oz: 64, sleep_goal_hours: 8, protein_goal_g: 118 };
     try {
@@ -950,7 +954,6 @@
         label: 'Sleep', color: 'var(--green)',
         pct: Math.min(100, Math.round(sleepH / settings.sleep_goal_hours * 100)),
         sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm / ' + settings.sleep_goal_hours + 'h') : '—',
-        icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
         tip: function(p) {
           return p < 60 ? 'Sleep is low. Aim for ' + settings.sleep_goal_hours + 'h tonight.' : 'Sleep recovery looks stable.';
         }
@@ -959,7 +962,6 @@
         label: 'Water', color: '#60a5fa',
         pct: Math.min(100, Math.round(waterOz / settings.water_goal_oz * 100)),
         sub: waterOz > 0 ? (Math.round(waterOz) + 'oz / ' + settings.water_goal_oz + 'oz') : '—',
-        icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
         tip: function(p) {
           if (p < 50) return 'Hydration is low. Aim for ' + Math.round(settings.water_goal_oz - waterOz) + 'oz more.';
           return 'Hydration levels look good.';
@@ -969,7 +971,6 @@
         label: 'Protein', color: 'var(--accent)',
         pct: Math.min(100, Math.round(proteinG / settings.protein_goal_g * 100)),
         sub: proteinG > 0 ? (Math.round(proteinG) + 'g / ' + settings.protein_goal_g + 'g') : '—',
-        icon: '<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>',
         tip: function(p) {
           if (p < 50) return 'Protein is below target. Aim for ' + Math.round(settings.protein_goal_g - proteinG) + 'g more.';
           return 'Protein intake is on track.';
@@ -977,17 +978,11 @@
       }
     ];
 
-    var svgIcons = [
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
-      '<svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>'
-    ];
-
     var html = '';
     metrics.forEach(function(m, i) {
       html += '<div class="rm-h-item">';
       html += '<div class="rm-h-header">';
-      html += '<span class="rm-h-icon">' + svgIcons[i] + '</span>';
+      html += '<span class="rm-h-icon">' + HEALTH_RING_ICONS[i] + '</span>';
       html += '<span class="rm-h-label">' + m.label + '</span>';
       html += '<span class="rm-h-pct">' + m.pct + '%</span>';
       html += '</div>';
@@ -1006,12 +1001,11 @@
 
     var now = new Date();
     if (now.getHours() < 6) now.setDate(now.getDate() - 1);
-    var p2 = function(n) { return String(n).padStart(2, '0'); };
-    var ymd = now.getFullYear() + '-' + p2(now.getMonth()+1) + '-' + p2(now.getDate());
+    var ymd = dateToYMD(now);
     var currentKey = getMood(ymd);
     var def = currentKey ? getMoodDef(currentKey) : null;
 
-    var MOOD_NOTES = {
+    const MOOD_NOTES = {
       happy: 'Riding high today.', calm: 'Steady and balanced.',
       motivated: 'Crushing it!', tired: 'Rest when you can.',
       anxious: 'Take a breath.', frustrated: 'Hang in there.',
@@ -1050,27 +1044,27 @@
     var sparkEl = document.getElementById('moodSparkline');
     var trendEl = document.getElementById('moodTrendLabel');
     if (sparkEl) {
-      var MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
-      var vals = [];
-      for (var i = 6; i >= 0; i--) {
-        var d = new Date(now);
+      const MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
+      const vals = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
         d.setDate(d.getDate() - i);
-        var dk = d.getFullYear() + '-' + p2(d.getMonth()+1) + '-' + p2(d.getDate());
-        var mk = getMood(dk);
+        const dk = dateToYMD(d);
+        const mk = getMood(dk);
         vals.push(mk && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1);
       }
-      var hasData = vals.some(function(v) { return v >= 0; });
+      const hasData = vals.some(function(v) { return v >= 0; });
       if (hasData) {
-        var w = 120, h = 32, padX = 2, padY = 4;
-        var pts = vals.map(function(v, vi) {
+        const w = 120, h = 32, padX = 2, padY = 4;
+        const pts = vals.map(function(v, vi) {
           if (v < 0) return '';
           var x = padX + (vi / (vals.length - 1)) * (w - 2*padX);
           var y = h - padY - ((v - 1) / 4) * (h - 2*padY);
           return Math.round(x) + ',' + Math.round(y);
         }).filter(Boolean);
         sparkEl.innerHTML = '<polyline points="' + pts.join(' ') + '"/>';
-        var validVals = vals.filter(function(v) { return v >= 0; });
-        var avg = validVals.reduce(function(a,b){return a+b;},0) / validVals.length;
+        const validVals = vals.filter(function(v) { return v >= 0; });
+        const avg = validVals.reduce(function(a,b){return a+b;},0) / validVals.length;
         if (trendEl) trendEl.textContent = avg >= 4.5 ? 'Great week' : avg >= 3.5 ? 'Good week' : avg >= 2.5 ? 'Okay week' : 'Tough week';
       } else {
         sparkEl.innerHTML = '';

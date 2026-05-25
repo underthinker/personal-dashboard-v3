@@ -331,7 +331,7 @@ body {
 .pill-live { color: var(--accent); background: var(--accent-soft); }
 .pill-streak { color: var(--muted); background: rgba(255, 255, 255, 0.05); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
 .pill-streak.gm-streak-active { color: var(--accent); background: var(--accent-soft); }
-.pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(91,168,247,0.18); color: #80bcfa; font-weight: 500; }
+.pill-tag { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: color-mix(in srgb, var(--blue) 18%, transparent); color: #80bcfa; font-weight: 500; }
 
 /* ─── Grid Areas ─── */
 .a-session { grid-area: session; }
@@ -363,6 +363,7 @@ body {
 .home-grid .a-stats { gap: 14px; padding: 18px; }
 .home-grid .po-hero { flex: 1; min-height: 0; overflow: hidden; }
 .home-grid .po-week { flex: 1; min-height: 0; margin-top: 4px; }
+/* height:0 lets flex:1 shrink below content size for overflow chart rendering */
 .home-grid .po-week-bars { flex: 1; height: 0; min-height: 0; overflow: hidden; }
 .home-grid .po-dual { flex-shrink: 0; }
 .home-grid .po-consistency { flex-shrink: 0; }
@@ -383,7 +384,7 @@ body {
 
 /* ─── Second-row always-on compact sizing ─── */
 /* Timeline */
-.home-grid .a-timeline #timelineWidget { overflow-y: auto; flex: 1; min-height: 0; }
+.home-grid .home-timeline-widget { overflow-y: auto; flex: 1; min-height: 0; }
 .home-grid .timeline { gap: 6px; }
 .home-grid .tl-row { gap: 8px; }
 .home-grid .tl-time { font-size: 10.5px; }
@@ -396,7 +397,7 @@ body {
 .home-grid .tomorrow-list { gap: 4px; flex: 1; min-height: 0; overflow-y: auto; }
 /* Today */
 .home-grid .a-goals > div:nth-child(2) { min-height: 0; }
-.home-grid #goalList { flex: 1; min-height: 0; overflow-y: auto; }
+.home-grid .goal-list { flex: 1; min-height: 0; overflow-y: auto; }
 .outlook-row { display: flex; gap: 8px; }
 .outlook-stat { flex: 1; background: var(--surface-2); border-radius: var(--r-sm); padding: 8px 10px; }
 .outlook-label { font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.1em; }
@@ -410,7 +411,7 @@ body {
 .home-grid .readiness-rings { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; }
 .home-grid .rm-item { gap: 5px; }
 .home-grid .rm-ring-wrap { max-width: none; }
-.home-grid .rm-h-item { flex: 1; min-height: 0; overflow: hidden; gap: 2px; padding: 2px 0; }
+.home-grid .rm-h-item { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; gap: 2px; padding: 2px 0; }
 .home-grid .rm-h-tip { display: none; }
 .home-grid .view-habits { display: none; }
 .home-grid .a-goals { gap: 10px; }
@@ -439,7 +440,7 @@ body {
 .insights-footer { font-size: 12.5px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
 .home-grid .hm-act-month-lbl { margin-bottom: 3px; }
 .home-grid .hm-act-legend { margin-top: 16px; }
-.home-grid #heatmapWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.home-grid .home-heatmap-widget { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .home-grid .hm-act-outer { min-height: 0; grid-template-rows: 18px auto; }
 .home-grid .hm-act-grid { overflow: visible; }
 .home-grid .cal-day { font-size: 11px; }
