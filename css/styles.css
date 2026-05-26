@@ -190,9 +190,10 @@ body {
   flex: 0 0 48px;
   display: grid;
   place-items: center;
-  overflow: hidden;
   position: relative;
   cursor: pointer;
+  transform: scale(1.33);
+  transform-origin: center;
 }
 .su-avatar::after {
   content: '';
@@ -220,8 +221,15 @@ body {
   z-index: 1;
 }
 .su-info { display: flex; flex-direction: column; line-height: 1.4; }
-.su-name { font-family: var(--font-serif); font-size: 19px; font-weight: 600; font-style: italic; letter-spacing: 0.4px; cursor: text; }
+.su-name { font-family: var(--font-serif); font-size: 24px; font-weight: 600; font-style: italic; letter-spacing: 0.4px; cursor: text; }
 .su-name:hover { opacity: 0.75; }
+.su-name[contenteditable="true"] {
+  opacity: 1;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  outline: none;
+  cursor: text;
+}
 .su-status-group { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .su-online-status { font-size: 13px; color: var(--green); display: flex; align-items: center; gap: 4px; }
 .su-status-group:not(.is-running) .su-online-dot { animation: breathe 2.5s ease-in-out infinite; }
