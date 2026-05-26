@@ -1071,7 +1071,7 @@
         }
         prev = { x: x, y: y };
         var tipLabel = (d.date.getMonth() + 1) + '/' + d.date.getDate();
-        var tip = d.def ? tipLabel + ' \u2014 ' + d.def.label + ' ' + d.def.emoji : tipLabel;
+        var tip = d.def ? tipLabel + ' \u2014 ' + d.def.label : tipLabel;
         circles += '<circle cx="' + Math.round(x) + '" cy="' + Math.round(y) + '" r="' + r + '" fill="var(--accent)" data-tip="' + tip + '"/>';
       });
       sparkEl.innerHTML = '<g>' + lines + circles + labels + '</g>';
