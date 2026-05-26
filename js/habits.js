@@ -115,7 +115,7 @@
   const HEALTH_RING_ICONS = [
     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
-    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round"><line x1="3" y1="7" x2="11" y2="7" stroke-width="2.2"/><line x1="7" y1="3" x2="7" y2="11" stroke-width="2.2"/></svg>'
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/><path d="M15 14a5 5 0 0 0-7.584 2"/><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/></svg>'
   ];
 
   function moodSvgUri(key) {
@@ -1025,7 +1025,8 @@
     var pickerHtml = '<div class="mood-picker">' +
       MOOD_DEFS.map(function(m) {
         return '<button class="mood-pick' + (m.key === currentKey ? ' active' : '') +
-          '" data-mood-key="' + m.key + '" title="' + m.label + '">' + m.emoji + '</button>';
+          '" data-mood-key="' + m.key + '" title="' + m.label + '">' +
+          '<img class="mood-pick-icon" src="' + moodSvgUri(m.key) + '" alt="' + m.label + '"></button>';
       }).join('') +
     '</div>';
 
@@ -1042,33 +1043,59 @@
 
     // Sparkline
     var sparkEl = document.getElementById('moodSparkline');
-    var trendEl = document.getElementById('moodTrendLabel');
     if (sparkEl) {
       const MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
-      const vals = [];
+      const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const days = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
-        const dk = dateToYMD(d);
-        const mk = getMood(dk);
-        vals.push(mk && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1);
+        const mk = getMood(dateToYMD(d));
+        const def = mk ? getMoodDef(mk) : null;
+        const score = mk && MOOD_SCALE[mk] != null ? MOOD_SCALE[mk] : -1;
+        days.push({ score: score, def: def, date: d });
       }
-      const hasData = vals.some(function(v) { return v >= 0; });
-      if (hasData) {
-        const w = 120, h = 32, padX = 2, padY = 4;
-        const pts = vals.map(function(v, vi) {
-          if (v < 0) return '';
-          var x = padX + (vi / (vals.length - 1)) * (w - 2*padX);
-          var y = h - padY - ((v - 1) / 4) * (h - 2*padY);
-          return Math.round(x) + ',' + Math.round(y);
-        }).filter(Boolean);
-        sparkEl.innerHTML = '<polyline points="' + pts.join(' ') + '"/>';
-        const validVals = vals.filter(function(v) { return v >= 0; });
-        const avg = validVals.reduce(function(a,b){return a+b;},0) / validVals.length;
-        if (trendEl) trendEl.textContent = avg >= 4.5 ? 'Great week' : avg >= 3.5 ? 'Good week' : avg >= 2.5 ? 'Okay week' : 'Tough week';
-      } else {
-        sparkEl.innerHTML = '';
-        if (trendEl) trendEl.textContent = '';
+      const w = 200, h = 89, padX = 16, padTop = 0, padBottom = 41, r = 6, labelY = 68;
+      var lines = '';
+      var circles = '';
+      var labels = '';
+      var prev = null;
+      days.forEach(function(d, vi) {
+        var x = padX + (vi / 6) * (w - 2 * padX);
+        var dayLbl = DAY_NAMES[d.date.getDay()][0];
+        labels += '<text x="' + Math.round(x) + '" y="' + labelY + '">' + dayLbl + '</text>';
+        if (d.score < 0) { prev = null; return; }
+        var y = h - padBottom - ((d.score - 1) / 4) * (h - padBottom - padTop);
+        if (prev) {
+          lines += '<line x1="' + Math.round(prev.x) + '" y1="' + Math.round(prev.y) + '" x2="' + Math.round(x) + '" y2="' + Math.round(y) + '"/>';
+        }
+        prev = { x: x, y: y };
+        var tipLabel = (d.date.getMonth() + 1) + '/' + d.date.getDate();
+        var tip = d.def ? tipLabel + ' \u2014 ' + d.def.label + ' ' + d.def.emoji : tipLabel;
+        circles += '<circle cx="' + Math.round(x) + '" cy="' + Math.round(y) + '" r="' + r + '" fill="var(--accent)" data-tip="' + tip + '"/>';
+      });
+      sparkEl.innerHTML = '<g>' + lines + circles + labels + '</g>';
+
+      if (!sparkEl._moodTip) {
+        sparkEl._moodTip = document.createElement('div');
+        sparkEl._moodTip.className = 'mood-tip';
+        document.body.appendChild(sparkEl._moodTip);
+        sparkEl.addEventListener('mouseover', function(e) {
+          var c = e.target.closest('circle');
+          var tip = sparkEl._moodTip;
+          if (!c) { tip.style.display = 'none'; return; }
+          var t = c.getAttribute('data-tip');
+          if (t) { tip.textContent = t; tip.style.display = 'block'; }
+        });
+        sparkEl.addEventListener('mousemove', function(e) {
+          var tip = sparkEl._moodTip;
+          if (tip.style.display !== 'block') return;
+          tip.style.left = (e.clientX + 10) + 'px';
+          tip.style.top = (e.clientY - 28) + 'px';
+        });
+        sparkEl.addEventListener('mouseout', function(e) {
+          if (e.target.closest('circle')) sparkEl._moodTip.style.display = 'none';
+        });
       }
     }
   }

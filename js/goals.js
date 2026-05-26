@@ -904,26 +904,26 @@
           var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
           return '<div class="' + cls + '" style="height:' + px + 'px" data-day="' + i + '"></div>';
         }).join('');
-        var tooltip = $('perfWeekTooltip');
-        if (tooltip) {
-          barsEl.querySelectorAll('.po-week-bar').forEach(function(bar) {
-            bar.addEventListener('mouseenter', function(e) {
-              var idx = parseInt(bar.getAttribute('data-day'));
-              var mins = weekFocusMins[idx];
-              tooltip.textContent = mins + 'm deep work';
-              var barRect = bar.getBoundingClientRect();
-              var wrapRect = barsEl.closest('.po-week').getBoundingClientRect();
-              var leftPos = barRect.left - wrapRect.left + barRect.width / 2 - tooltip.offsetWidth / 2;
-              var wrapW = wrapRect.width;
-              var ttW = tooltip.offsetWidth;
-              leftPos = Math.max(4, Math.min(leftPos, wrapW - ttW - 4));
-              tooltip.style.left = leftPos + 'px';
-              tooltip.style.top = (barRect.top - wrapRect.top - 6) + 'px';
-              tooltip.classList.add('is-visible');
-            });
-            bar.addEventListener('mouseleave', function() {
-              tooltip.classList.remove('is-visible');
-            });
+        barsEl._weekMins = weekFocusMins;
+        if (!barsEl._perfTip) {
+          barsEl._perfTip = $('perfWeekTooltip');
+          barsEl.addEventListener('mouseover', function(e) {
+            var bar = e.target.closest('.po-week-bar');
+            var tip = barsEl._perfTip;
+            if (!bar) { tip.classList.remove('is-visible'); return; }
+            var idx = parseInt(bar.getAttribute('data-day'));
+            var mins = barsEl._weekMins[idx];
+            tip.textContent = mins + 'm Deep Work';
+            tip.classList.add('is-visible');
+          });
+          barsEl.addEventListener('mousemove', function(e) {
+            var tip = barsEl._perfTip;
+            if (!tip.classList.contains('is-visible')) return;
+            tip.style.left = (e.clientX + 10) + 'px';
+            tip.style.top = (e.clientY - 28) + 'px';
+          });
+          barsEl.addEventListener('mouseout', function(e) {
+            if (e.target.closest('.po-week-bar')) barsEl._perfTip.classList.remove('is-visible');
           });
         }
       };

@@ -706,8 +706,10 @@
   function renderWeatherData(data) {
     const el = $('weatherWidget');
     if (!el || !data) return;
+    const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
+    const unit = cfg.unit || 'metric';
+    const unitLabel = unit === 'metric' ? '°C' : '°F';
     const temp = Math.round(data.main.temp);
-    const feelsLike = Math.round(data.main.feels_like);
     const humidity = data.main.humidity;
     const hi = Math.round(data.main.temp_max);
     const lo = Math.round(data.main.temp_min);
@@ -720,44 +722,58 @@
       const sr = new Date(data.sys.sunrise * 1000);
       const ss = new Date(data.sys.sunset * 1000);
       const fmt = d => window.pad2(d.getHours()) + ':' + window.pad2(d.getMinutes());
-      sunHtml = '<div class="weather-sun-row"><span>↑ ' + fmt(sr) + '</span><span>↓ ' + fmt(ss) + '</span></div>';
+      sunHtml = '<div class="weather-sun-row"><span class="weather-sun-rise">↑ ' + fmt(sr) + '</span><span class="weather-sun-set">' + fmt(ss) + ' ↓</span></div>';
     }
     let rec;
-    if (cond === 'Clear' && temp > 20) rec = 'Great conditions for an outdoor break.';
+    if (cond === 'Clear' && temp > (unit === 'metric' ? 20 : 68)) rec = 'Great conditions for an outdoor break.';
     else if (cond === 'Clear' && h >= 17 && h < 21) rec = 'Evening walk recommended.';
     else if (cond === 'Clouds' || cond === 'Rain' || cond === 'Drizzle' || cond === 'Thunderstorm') rec = 'Great weather for indoor focus.';
-    else if (temp > 28) rec = 'Stay hydrated in the heat.';
-    else if (temp < 5) rec = 'Bundle up — cold day ahead.';
+    else if (temp > (unit === 'metric' ? 28 : 82)) rec = 'Stay hydrated in the heat.';
+    else if (temp < (unit === 'metric' ? 5 : 41)) rec = 'Bundle up — cold day ahead.';
     else rec = 'Conditions look good for a balanced day.';
     el.innerHTML =
-      '<div class="weather-row"><span class="weather-icon">' + icon + '</span><span class="weather-temp">' + temp + '°C</span></div>' +
+      '<div class="weather-row"><span class="weather-temp">' + temp + unitLabel + '</span></div>' +
       '<div class="weather-cond">' + desc + '</div>' +
-      '<div class="weather-meta-row"><span>Feels like ' + feelsLike + '°C</span><span>' + humidity + '% humidity</span></div>' +
-      '<div class="weather-hl"><span>↑ ' + hi + '°</span><span>↓ ' + lo + '°</span></div>' +
+      '<div class="weather-meta-row"><span>' + humidity + '% humidity</span></div>' +
+      '<div class="weather-hl"><span class="weather-hl-hi">↑ ' + hi + unitLabel + '</span><span class="weather-hl-lo">' + lo + unitLabel + ' ↓</span></div>' +
+      '<div class="weather-icon-mid"><span class="weather-icon">' + icon + '</span></div>' +
       sunHtml +
-      '<div class="weather-rec">' + rec + '</div>' +
-      '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>';
+      '<div class="weather-rec">' + rec + '</div>';
+    // Condition data attr for optional per-condition theming
+    el.closest('.card').dataset.weather = cond;
+    // Gear in card-head
+    const head = el.closest('.card').querySelector('.card-head');
+    head.querySelector('.weather-cfg-btn')?.remove();
+    head.insertAdjacentHTML('beforeend', '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>');
   }
 
   function renderWeatherSetup(forceShow) {
     const el = $('weatherWidget');
     if (!el) return;
+    el.closest('.card').removeAttribute('data-weather');
+    // Remove gear from card-head in setup mode
+    const head = el.closest('.card').querySelector('.card-head');
+    head.querySelector('.weather-cfg-btn')?.remove();
     el.innerHTML =
       '<form class="weather-form" onsubmit="saveWeatherConfig(event)">' +
         '<input id="wxApiKey" type="text" placeholder="OpenWeatherMap API key" autocomplete="off">' +
         '<input id="wxCity" type="text" placeholder="City (e.g. San Francisco)">' +
+        '<div class="weather-unit-row"><label><input type="radio" name="wxUnit" value="metric"> °C</label><label><input type="radio" name="wxUnit" value="imperial"> °F</label></div>' +
         '<button type="submit" class="weather-save-btn">Save</button>' +
       '</form>';
     const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
     if (cfg.apiKey) el.querySelector('#wxApiKey').value = cfg.apiKey;
     if (cfg.city) el.querySelector('#wxCity').value = cfg.city;
+    const unitRadio = el.querySelector('input[name="wxUnit"][value="' + (cfg.unit || 'metric') + '"]');
+    if (unitRadio) unitRadio.checked = true;
   }
   function saveWeatherConfig(e) {
     e.preventDefault();
     const apiKey = document.getElementById('wxApiKey').value.trim();
     const city = document.getElementById('wxCity').value.trim();
+    const unit = document.querySelector('input[name="wxUnit"]:checked')?.value || 'metric';
     if (!apiKey || !city) return;
-    localStorage.setItem(WEATHER_CONFIG_KEY, JSON.stringify({ apiKey, city }));
+    localStorage.setItem(WEATHER_CONFIG_KEY, JSON.stringify({ apiKey, city, unit }));
     localStorage.removeItem(WEATHER_CACHE_KEY);
     renderWeather();
   }
@@ -771,7 +787,9 @@
       renderWeatherData(cache.data);
       return;
     }
-    const url = 'https://api.openweathermap.org/data/2.5/weather?q=' + encodeURIComponent(cfg.city) + '&appid=' + cfg.apiKey + '&units=metric';
+    const unit = cfg.unit || 'metric';
+    const url = 'https://api.openweathermap.org/data/2.5/weather?q=' + encodeURIComponent(cfg.city) + '&appid=' + cfg.apiKey + '&units=' + unit;
+    el.closest('.card').removeAttribute('data-weather');
     el.innerHTML = '<div class="weather-loading">Loading…</div>';
     fetch(url).then(r => {
       if (!r.ok) throw new Error(r.status);
@@ -781,7 +799,11 @@
       renderWeatherData(data);
     }).catch(() => {
       if (cache) { renderWeatherData(cache.data); return; }
+      el.closest('.card').removeAttribute('data-weather');
       el.innerHTML = '<div class="weather-error">Weather unavailable. <button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">Configure →</button></div>';
+      // Remove head gear (error has its own action button)
+      const head = el.closest('.card').querySelector('.card-head');
+      head.querySelector('.weather-cfg-btn')?.remove();
     });
   }
   window.renderWeatherSetup = renderWeatherSetup;
