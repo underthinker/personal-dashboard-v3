@@ -1063,9 +1063,19 @@
     // Card 1: Focus trend
     if (thisWeekFocus > 0 || prevWeekFocus > 0) {
       var diff = thisWeekFocus - prevWeekFocus;
-      var pctDiff = prevWeekFocus > 0 ? Math.round((diff / prevWeekFocus) * 100) : 0;
-      var trendText = pctDiff >= 0 ? 'up ' + Math.abs(pctDiff) + '%' : 'down ' + Math.abs(pctDiff) + '%';
-      cards.push({ icon: SVG_TREND, iconBg: 'var(--accent-soft)', title: 'Deep work is ' + trendText + ' this week', sub: prevWeekFocus > 0 ? (Math.round(thisWeekFocus) + 'm vs ' + Math.round(prevWeekFocus) + 'm') : 'Building baseline' });
+      var pctDiff = prevWeekFocus > 0 ? Math.round((diff / prevWeekFocus) * 100) : null;
+      var trendText, subText;
+      if (pctDiff === null) {
+        trendText = 'building baseline';
+        subText = Math.round(thisWeekFocus) + 'm avg this week';
+      } else if (pctDiff === 0) {
+        trendText = 'flat';
+        subText = Math.round(thisWeekFocus) + 'm avg both weeks';
+      } else {
+        trendText = pctDiff > 0 ? 'up ' + pctDiff + '%' : 'down ' + Math.abs(pctDiff) + '%';
+        subText = Math.round(thisWeekFocus) + 'm vs ' + Math.round(prevWeekFocus) + 'm';
+      }
+      cards.push({ icon: SVG_TREND, iconBg: 'var(--accent-soft)', title: 'Deep work is ' + trendText + ' this week', sub: subText });
     }
 
     // Card 2: Best performance time

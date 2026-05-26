@@ -700,6 +700,9 @@
   /* ─── Weather ─── */
   const WEATHER_CONFIG_KEY = 'weather_config_v1';
   const WEATHER_CACHE_KEY = 'weather_cache_v1';
+  const WEATHER_TTL = 5 * 60 * 1000; // 5 min cache — weather can shift fast
+  const WEATHER_REFRESH_INTERVAL = 5 * 60 * 1000; // re-check every 5 min
+  let weatherRefreshTimer = null;
   const OWM_ICON_MAP = { '01':'☀️','02':'🌤️','03':'⛅','04':'☁️','09':'🌧️','10':'🌦️','11':'⛈️','13':'❄️','50':'🌫️' };
   function owmIcon(icon) { return OWM_ICON_MAP[icon.slice(0,2)] || '🌡️'; }
 
@@ -747,6 +750,11 @@
     head.insertAdjacentHTML('beforeend', '<button class="weather-cfg-btn" onclick="renderWeatherSetup(true)">⚙</button>');
   }
 
+  function pickWeatherUnit(btn) {
+    btn.closest('.weather-unit-row').querySelectorAll('.weather-unit-btn').forEach(function(b) {
+      b.classList.toggle('is-active', b === btn);
+    });
+  }
   function renderWeatherSetup(forceShow) {
     const el = $('weatherWidget');
     if (!el) return;
@@ -758,20 +766,21 @@
       '<form class="weather-form" onsubmit="saveWeatherConfig(event)">' +
         '<input id="wxApiKey" type="text" placeholder="OpenWeatherMap API key" autocomplete="off">' +
         '<input id="wxCity" type="text" placeholder="City (e.g. San Francisco)">' +
-        '<div class="weather-unit-row"><label><input type="radio" name="wxUnit" value="metric"> °C</label><label><input type="radio" name="wxUnit" value="imperial"> °F</label></div>' +
+        '<div class="weather-unit-row"><button type="button" class="weather-unit-btn is-active" data-unit="metric" onclick="window.pickWeatherUnit(this)">°C</button><button type="button" class="weather-unit-btn" data-unit="imperial" onclick="window.pickWeatherUnit(this)">°F</button></div>' +
         '<button type="submit" class="weather-save-btn">Save</button>' +
       '</form>';
     const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
     if (cfg.apiKey) el.querySelector('#wxApiKey').value = cfg.apiKey;
     if (cfg.city) el.querySelector('#wxCity').value = cfg.city;
-    const unitRadio = el.querySelector('input[name="wxUnit"][value="' + (cfg.unit || 'metric') + '"]');
-    if (unitRadio) unitRadio.checked = true;
+    el.querySelectorAll('.weather-unit-btn').forEach(function(b) {
+      b.classList.toggle('is-active', b.getAttribute('data-unit') === (cfg.unit || 'metric'));
+    });
   }
   function saveWeatherConfig(e) {
     e.preventDefault();
     const apiKey = document.getElementById('wxApiKey').value.trim();
     const city = document.getElementById('wxCity').value.trim();
-    const unit = document.querySelector('input[name="wxUnit"]:checked')?.value || 'metric';
+    const unit = document.querySelector('.weather-unit-btn.is-active')?.getAttribute('data-unit') || 'metric';
     if (!apiKey || !city) return;
     localStorage.setItem(WEATHER_CONFIG_KEY, JSON.stringify({ apiKey, city, unit }));
     localStorage.removeItem(WEATHER_CACHE_KEY);
@@ -783,7 +792,7 @@
     const cfg = JSON.parse(localStorage.getItem(WEATHER_CONFIG_KEY) || '{}');
     if (!cfg.apiKey || !cfg.city) { renderWeatherSetup(); return; }
     const cache = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null');
-    if (cache && cache.fetchedAt && (Date.now() - cache.fetchedAt) < 30 * 60 * 1000) {
+    if (cache && cache.fetchedAt && (Date.now() - cache.fetchedAt) < WEATHER_TTL) {
       renderWeatherData(cache.data);
       return;
     }
@@ -807,6 +816,7 @@
     });
   }
   window.renderWeatherSetup = renderWeatherSetup;
+  window.pickWeatherUnit = pickWeatherUnit;
   window.saveWeatherConfig = saveWeatherConfig;
   window.renderWeather = renderWeather;
 
@@ -914,6 +924,20 @@
 
   window.renderHomeInsights && window.renderHomeInsights();
   renderWeather();
+  /* Auto-refresh weather every 5 min so it stays current while the page is open */
+  if (weatherRefreshTimer) clearInterval(weatherRefreshTimer);
+  weatherRefreshTimer = setInterval(renderWeather, WEATHER_REFRESH_INTERVAL);
+  /* When user returns to the tab, invalidate cache so it re-fetches immediately */
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      var cached = JSON.parse(localStorage.getItem(WEATHER_CACHE_KEY) || 'null');
+      if (cached && cached.fetchedAt && (Date.now() - cached.fetchedAt) >= WEATHER_TTL / 2) {
+        // Cache is more than halfway to expiry — ditch it so the next call fetches fresh
+        localStorage.removeItem(WEATHER_CACHE_KEY);
+      }
+      renderWeather();
+    }
+  });
   updateHeroNextUp();
   updateHomeBadge();
   window.renderHomeHealthRings ? window.renderHomeHealthRings() : (window.renderHabitFullRings && window.renderHabitFullRings());

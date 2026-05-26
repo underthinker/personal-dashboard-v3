@@ -454,10 +454,11 @@ body {
 /* Activity: compact card + stretch heatmap to fill vertical space */
 .home-grid .a-activity { padding: 12px; gap: 8px; }
 .insights-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; flex: 1; min-height: 0; }
-.ins-card { background: var(--surface-2); border-radius: var(--r-sm); padding: 14px 16px; display: flex; gap: 14px; align-items: center; align-self: stretch; }
-.ins-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ins-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; }
-.ins-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.ins-card { background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 12px; display: flex; gap: 10px; align-items: center; align-self: stretch; min-width: 0; overflow: hidden; }
+.ins-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ins-body { min-width: 0; overflow: hidden; }
+.ins-title { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.4; white-space: nowrap; }
+.ins-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
 .ins-empty { font-size: 12px; color: var(--muted-2); grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 16px; }
 .insights-footer { font-size: 12.5px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
 .home-grid .hm-act-month-lbl { margin-bottom: 3px; }
@@ -1235,8 +1236,21 @@ body {
   outline: none;
 }
 .weather-form input:focus { border-color: var(--line-2); }
-.weather-unit-row { display: flex; gap: 16px; font-size: 12px; padding: 4px 0; }
-.weather-unit-row label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.weather-unit-row { display: flex; gap: 6px; padding: 4px 0; }
+.weather-unit-btn {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.weather-unit-btn:hover { color: var(--text); border-color: var(--line-2); }
+.weather-unit-btn.is-active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .weather-save-btn {
   padding: 7px 14px;
   background: var(--accent);
