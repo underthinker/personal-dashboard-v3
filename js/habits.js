@@ -999,9 +999,7 @@
     var el = document.getElementById('moodWidget');
     if (!el) return;
 
-    var now = new Date();
-    if (now.getHours() < 6) now.setDate(now.getDate() - 1);
-    var ymd = dateToYMD(now);
+    var ymd = dateToYMD(new Date());
     var currentKey = getMood(ymd);
     var def = currentKey ? getMoodDef(currentKey) : null;
 
@@ -1048,7 +1046,7 @@
       const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
       const days = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
+        const d = new Date();
         d.setDate(d.getDate() - i);
         const mk = getMood(dateToYMD(d));
         const def = mk ? getMoodDef(mk) : null;

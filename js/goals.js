@@ -1469,6 +1469,7 @@
     updateDayBar();
     renderStatsPanel();
     window.renderSidebarAtAGlance();
+    window.renderHomeMood && window.renderHomeMood();
     var ringsFn = window.renderHomeHealthRings || window.renderHabitFullRings;
     if (ringsFn) ringsFn();
   }, 60 * 1000);
