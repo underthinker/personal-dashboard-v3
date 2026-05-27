@@ -477,7 +477,7 @@
     const lastDate = state.lastDate;
 
     for (const d of keys) {
-      if (lastDate && d <= lastDate) continue;
+      if (lastDate && d < lastDate) continue;
       const arr = storeGet('goals:' + d) || [];
       const undone = arr.filter(g => g && typeof g === 'object' && !g.done);
       for (const g of undone) {
@@ -1475,5 +1475,21 @@
   }, 60 * 1000);
 
   startTicker();
+
+  // Fire rollover at exactly midnight when the page is kept open
+  function scheduleMidnightRollover() {
+    var now = new Date();
+    var msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+    setTimeout(function() {
+      loadToday();
+      loadTomorrow();
+      renderStreak();
+      checkStreak();
+      updateGreeting();
+      renderCalendar();
+      scheduleMidnightRollover();
+    }, msUntilMidnight);
+  }
+  scheduleMidnightRollover();
 
 })();
