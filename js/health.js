@@ -20,11 +20,6 @@
     return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, protein_goal_g: 118, carbs_goal_g: 250, fat_goal_g: 75, time_format_12h: false, focus_goal_min: 240 };
   }
 
-  function getActiveDate() {
-    const now = new Date();
-    return now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
-  }
-
   window.getFocusMinToday = function() {
     const day = loadDay(getActiveDate());
     return day.focus_min || 0;
@@ -205,9 +200,9 @@
     const R = 40, CX = 52, CY = 52, CIRC = 2 * Math.PI * R;
     const pct = readiness != null ? readiness / 100 : 0;
     const ringColor = readiness == null ? 'rgba(255,255,255,0.06)'
-      : readiness >= 80 ? '#5fd687'
-      : readiness >= 60 ? '#F2C063'
-      : '#FF6B6B';
+      : readiness >= 80 ? 'var(--success, #5fd687)'
+      : readiness >= 60 ? 'var(--amber, #F2C063)'
+      : 'var(--danger, #ff6b6b)';
     const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 104 104" aria-hidden="true">
       <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
       <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="8"
@@ -752,7 +747,7 @@
     // Dots + value labels
     readinessVals.forEach((v, i) => {
       if (v == null) return;
-      const color = v >= 80 ? '#5fd687' : v >= 60 ? '#F2C063' : '#FF6B6B';
+      const color = v >= 80 ? 'var(--success, #5fd687)' : v >= 60 ? 'var(--amber, #F2C063)' : 'var(--danger, #ff6b6b)';
       const cy = yScale(v);
       html += `<circle cx="${pointX[i]}" cy="${cy}" r="4" fill="${color}" stroke="rgba(0,0,0,0.6)" stroke-width="1.5"/>`;
       html += `<text x="${pointX[i]}" y="${cy - 8}" class="htrend-dot-val">${v}</text>`;
@@ -919,8 +914,8 @@
 
     el.innerHTML = `
       <div class="nt-macros">
-        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  '#F2C063')}
-        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', '#6BE3A4')}
+        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber, #F2C063)')}
+        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--success, #6BE3A4)')}
         ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', '#A2D2FF')}
         ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', '#FFB5C2')}
       </div>

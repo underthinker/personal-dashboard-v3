@@ -75,17 +75,6 @@
     return s;
   }
 
-  function tagClass(tag) {
-    const t = tag.toLowerCase();
-    if (t === 'salary') return 'fin-tag-salary';
-    if (t === 'freelance') return 'fin-tag-freelance';
-    if (t === 'dining out') return 'fin-tag-dining';
-    if (t === 'rent/mortgage') return 'fin-tag-rent';
-    if (t === 'utilities') return 'fin-tag-utilities';
-    if (t === 'retail') return 'fin-tag-retail';
-    return 'fin-tag-default';
-  }
-
   function formatDate(dateStr) {
     if (!dateStr) return '—';
     const parts = dateStr.split('-');
@@ -1456,7 +1445,7 @@
 
   function gtTween(el, from, to, fmtFn) { if (el._tween) cancelAnimationFrame(el._tween); const start = performance.now(), dur = 300; function step(t) { const p = Math.min(1, (t - start) / dur); const eased = 1 - Math.pow(1 - p, 3); el.textContent = fmtFn(from + (to - from) * eased); if (p < 1) el._tween = requestAnimationFrame(step); } el._tween = requestAnimationFrame(step); }
 
-  function gtEscape(s) { return String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  const gtEscape = window.escHtml;
 
   let gtPrevPlanEta = null;
   let gtPrevShowDetail = false;
