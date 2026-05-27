@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
 
   const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const GREEN = '#6BE3A4';
+  const GREEN = '#5fd687';
   const RED = '#FF6B6B';
 
   function monthDotColor(income, expenses) {
@@ -205,21 +205,37 @@
   }
 
   let tagPickerState = { scope: '', id: 0, cell: null, currentTags: [], activeColorTag: null };
+  let _pickerResizeObs = null;
+
+  function positionTagPicker(cell) {
+    const picker = $('finTagPicker');
+    const rect = cell.getBoundingClientRect();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const PW = 310;
+    const PH = 320;
+    const GAP = 6;
+    let top = (rect.bottom + GAP + PH <= vh) ? rect.bottom + GAP : Math.max(GAP, rect.top - GAP - PH);
+    let left = rect.left;
+    if (left + PW > vw - GAP) left = vw - PW - GAP;
+    if (left < GAP) left = GAP;
+    picker.style.top = top + 'px';
+    picker.style.left = left + 'px';
+    picker.style.bottom = 'auto';
+    picker.style.right = 'auto';
+  }
 
   function showTagPicker(cell, scope, id, currentTags) {
     const picker = $('finTagPicker');
     tagPickerState = { scope, id, cell, currentTags: currentTags.slice(), activeColorTag: null };
     renderPickerView();
-    const rect = cell.getBoundingClientRect();
-    picker.style.top = (rect.bottom + 6) + 'px';
-    picker.style.left = Math.min(rect.left, window.innerWidth - 310) + 'px';
-    picker.style.bottom = 'auto';
+    positionTagPicker(cell);
     picker.classList.add('is-visible');
-    const pickerRect = picker.getBoundingClientRect();
-    if (pickerRect.bottom > window.innerHeight) {
-      picker.style.top = 'auto';
-      picker.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
-    }
+    if (_pickerResizeObs) _pickerResizeObs.disconnect();
+    _pickerResizeObs = new ResizeObserver(() => {
+      if (picker.classList.contains('is-visible')) positionTagPicker(tagPickerState.cell);
+    });
+    _pickerResizeObs.observe(document.documentElement);
   }
 
   function renderPickerView() {
@@ -1258,6 +1274,19 @@
       input.step = field === 'amount' ? '0.01' : ''; input.min = field === 'amount' ? '0' : '';
       if (field === 'amount') input.value = item.amount;
       else input.value = item.source || '';
+      if (field === 'source') {
+        const listId = 'finSrcList_' + scope;
+        let dl = document.getElementById(listId);
+        if (!dl) { dl = document.createElement('datalist'); dl.id = listId; document.body.appendChild(dl); }
+        const scopeItems = data[scope === 'income' ? 'income' : 'expenses'];
+        const seen = new Set();
+        dl.innerHTML = '';
+        for (let si = 0; si < scopeItems.length; si++) {
+          const s = scopeItems[si].source;
+          if (s && !seen.has(s)) { seen.add(s); const opt = document.createElement('option'); opt.value = s; dl.appendChild(opt); }
+        }
+        input.setAttribute('list', listId);
+      }
       cell.textContent = ''; cell.appendChild(input); cell.classList.add('is-editing');
       input.focus(); input.select && input.select();
       function saveAndClose() {
@@ -1529,18 +1558,16 @@
       const card = root.querySelector('.gt-card');
       if (!card) return;
       const inner = card.querySelector('.gt-card-inner');
+      card.style.transition = 'none';
+      card.style.maxHeight = '0';
       card.classList.add('is-expanded');
+      void card.offsetHeight;
+      card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
       if (inner) requestAnimationFrame(() => { card.style.maxHeight = inner.scrollHeight + 'px'; });
     } else {
       const card = root.querySelector('.gt-card');
       if (card) {
-        const inner = card.querySelector('.gt-card-inner');
-        if (inner) {
-          card.style.transition = 'none';
-          card.style.maxHeight = inner.scrollHeight + 'px';
-          void card.offsetHeight;
-          card.style.transition = '';
-        }
+        card.style.transition = 'none';
         card.style.maxHeight = '0';
         card.classList.remove('is-expanded');
       }
@@ -1599,7 +1626,11 @@
           const card = root.querySelector('.gt-card');
           if (card) {
             const inner = card.querySelector('.gt-card-inner');
-            if (inner) { card.style.transition = 'none'; card.style.maxHeight = inner.scrollHeight + 'px'; void card.offsetHeight; card.style.transition = ''; }
+            const fromH = inner ? inner.scrollHeight : 0;
+            card.style.transition = 'none';
+            card.style.maxHeight = fromH + 'px';
+            void card.offsetHeight;
+            card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
             card.style.maxHeight = '0';
             card.classList.remove('is-expanded');
           }
@@ -1618,8 +1649,12 @@
             const card = root.querySelector('.gt-card');
             if (card) {
               const inner = card.querySelector('.gt-card-inner');
+              card.style.transition = 'none';
+              card.style.maxHeight = '0';
               card.classList.add('is-expanded');
-              if (inner) card.style.maxHeight = inner.scrollHeight + 'px';
+              void card.offsetHeight;
+              card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
+              if (inner) requestAnimationFrame(() => { card.style.maxHeight = inner.scrollHeight + 'px'; });
             }
           }
         }
@@ -1636,7 +1671,11 @@
         const card = root.querySelector('.gt-card');
         if (card) {
           const inner = card.querySelector('.gt-card-inner');
-          if (inner) { card.style.transition = 'none'; card.style.maxHeight = inner.scrollHeight + 'px'; void card.offsetHeight; card.style.transition = ''; }
+          const fromH = inner ? inner.scrollHeight : 0;
+          card.style.transition = 'none';
+          card.style.maxHeight = fromH + 'px';
+          void card.offsetHeight;
+          card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
           card.style.maxHeight = '0';
           card.classList.remove('is-expanded');
         }

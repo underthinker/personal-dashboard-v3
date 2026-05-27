@@ -2307,10 +2307,17 @@ margin-top: 15px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.6);
   min-width: 240px;
   max-width: 300px;
-  display: none;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.fin-tag-picker.is-visible { display: block; }
+.fin-tag-picker.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
 
 .fin-tag-picker-header {
   display: flex;
@@ -2465,7 +2472,7 @@ margin-top: 15px;
   border: 1px solid rgba(255,255,255,0.10);
   color: var(--text);
   font-size: 12px;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   outline: none;
   margin-bottom: 6px;
 }
@@ -2549,7 +2556,7 @@ margin-top: 15px;
   color: #0a0a0a;
   font-size: 10px;
   font-weight: 700;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   border: none;
   cursor: pointer;
 }
@@ -2563,7 +2570,7 @@ margin-top: 15px;
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;
-  font-family: "Inter", sans-serif;
+  font-family: inherit;
   border: 1px solid rgba(255,255,255,0.08);
   cursor: pointer;
 }
@@ -3444,13 +3451,11 @@ margin-top: 15px;
 
 .gt-card {
   border: 1px solid transparent;
-  max-height: 0;
   overflow: hidden;
   background: transparent;
   box-shadow: none;
   border-radius: var(--r);
-  transition: border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease,
-              max-height 0.55s var(--ease-out);
+  transition: border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
 }
 
 .gt-card.is-expanded {
@@ -3458,7 +3463,6 @@ margin-top: 15px;
   margin-bottom: 16px;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
-  max-height: 2000px;
 }
 
 .gt-card.is-expanded .gt-card-inner {
