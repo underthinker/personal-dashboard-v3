@@ -692,7 +692,7 @@ body {
 .add-goal .add-btn {
   width: 32px;
   border-radius: 0 8px 8px 0;
-  background: var(--accent);
+  background: rgba(var(--accent-rgb), 0.28);
   border: 0;
   color: #ffffff;
   font-size: 18px;
