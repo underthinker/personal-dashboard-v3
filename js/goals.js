@@ -435,7 +435,7 @@
     const key = 'goals:' + getTomorrowDateString();
     const goals = storeGet(key) || [];
     gmTomorrowCount.textContent = goals.length + ' planned';
-    tomorrowLabel.textContent = 'Tomorrow — ' + formatDate(getTomorrowDateString());
+    tomorrowLabel.textContent = 'Tomorrow: ' + formatDate(getTomorrowDateString());
   }
 
   // ----------- Render list -----------
@@ -545,9 +545,9 @@
     const done = goals.filter(g => g.done).length;
     let items;
     if (total === 0) {
-      items = [{ status: 'empty', text: 'No goals set for today — add one to get rolling.' }];
+      items = [{ status: 'empty', text: 'No goals set for today. Add one to get rolling.' }];
     } else if (done === total) {
-      items = [{ status: 'done', text: ' All goals done — good shit.' }];
+      items = [{ status: 'done', text: 'All goals done. Good shit.' }];
     } else {
       items = goals.filter(g => !g.done).map(g => ({ status: 'pending', text: g.text }));
     }
@@ -639,11 +639,11 @@
   ];
 
   const BLOCK_STATUS = {
-    Morning:   ['', 'Morning — peak focus window. Perfect time for deep work.'],
-    Afternoon: ['', 'Afternoon — good for collaborative work. Power through the dip.'],
-    Evening:   ['', 'Evening — wind down. Focus on light tasks.'],
-    Night:     ['', 'Night — wind down. Protect your sleep window.'],
-    Sleep:     ['', 'Sleep — rest up']
+    Morning:   ['', 'Morning: peak focus window. Perfect time for deep work.'],
+    Afternoon: ['', 'Afternoon: good for collaborative work. Power through the dip.'],
+    Evening:   ['', 'Evening: wind down. Focus on light tasks.'],
+    Night:     ['', 'Night: wind down. Protect your sleep window.'],
+    Sleep:     ['', 'Sleep: rest up']
   };
 
   const dayRingFill = $('dayRingFill');
@@ -1121,7 +1121,7 @@
 
     if (footerEl) {
       var footerText = 'Things look balanced. Keep building momentum.';
-      if (thisWeekFocus > prevWeekFocus * 1.2) footerText = 'Focus is trending up — nice work.';
+      if (thisWeekFocus > prevWeekFocus * 1.2) footerText = 'Focus is trending up. Nice work.';
       else if (thisWeekSleep < 6) footerText = 'Sleep has been light. Prioritise rest.';
       footerEl.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--muted-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="9,1 3,9 8,9 7,15 13,7 8,7"/></svg> ' + escHtml(footerText);
     }

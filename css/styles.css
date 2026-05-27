@@ -29,9 +29,9 @@
 
   --r: 14px;
   --r-sm: 10px;
-  --pad: 18px;
+  --pad: 20px;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
   --font-serif: 'Cormorant Garamond', 'Georgia', serif;
 
@@ -102,7 +102,7 @@ body {
 .app {
   display: grid;
   grid-template-columns: 210px 1fr;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -306,7 +306,7 @@ body {
 /* ─── Home Grid ─── */
 .home-grid {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
   grid-template-rows: minmax(0, 3.2fr) minmax(0, 2.3fr) minmax(0, 2.5fr);
@@ -8261,3 +8261,240 @@ body {
 .tl-tmpl-item:last-of-type { border-bottom: none; }
 .tl-tmpl-del { background: transparent; border: none; color: var(--text-muted, #acacb5); cursor: pointer; font-size: 14px; padding: 0 4px; transition: color 0.15s; }
 .tl-tmpl-del:hover { color: #e07474; }
+
+/* ─── Card count label (Tomorrow card, replaces eyebrow) ─── */
+.card-count {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+/* ─── Empty card-head cleanup ─── */
+.card-head:empty { display: none; }
+
+/* ─── Card Entry Animation ─── */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .home-grid .card {
+    animation: card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .home-grid .card:nth-child(1)  { animation-delay:   0ms; }
+  .home-grid .card:nth-child(2)  { animation-delay:  50ms; }
+  .home-grid .card:nth-child(3)  { animation-delay: 100ms; }
+  .home-grid .card:nth-child(4)  { animation-delay: 150ms; }
+  .home-grid .card:nth-child(5)  { animation-delay: 200ms; }
+  .home-grid .card:nth-child(6)  { animation-delay: 250ms; }
+  .home-grid .card:nth-child(7)  { animation-delay: 300ms; }
+  .home-grid .card:nth-child(8)  { animation-delay: 350ms; }
+  .home-grid .card:nth-child(9)  { animation-delay: 400ms; }
+  .home-grid .card:nth-child(10) { animation-delay: 450ms; }
+}
+
+/* ─── Mobile Tab Bar ─── */
+.mobile-tabbar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mob-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: 0;
+  color: var(--muted-2);
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 120ms;
+  padding: 8px 4px;
+  letter-spacing: 0.02em;
+}
+.mob-tab.active { color: var(--accent); }
+.mob-tab-icon { width: 20px; height: 20px; flex: 0 0 20px; }
+
+/* ─── First-run Setup Overlay ─── */
+.setup-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 12, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.setup-bg[hidden] { display: none; }
+
+.setup-modal {
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 20px;
+  padding: 32px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setup-header { display: flex; flex-direction: column; gap: 6px; }
+
+.setup-wordmark {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
+.setup-sub {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.setup-input {
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms;
+}
+.setup-input:focus { border-color: var(--accent); }
+.setup-input::placeholder { color: var(--muted-2); }
+
+.setup-hint {
+  font-size: 11px;
+  color: var(--muted-2);
+  line-height: 1.5;
+}
+
+.setup-colors {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.setup-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.setup-skip {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 120ms;
+}
+.setup-skip:hover { color: var(--text); }
+
+.setup-save {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+  border-radius: var(--r-sm);
+  padding: 10px 24px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+.setup-save:hover  { opacity: 0.88; }
+.setup-save:active { opacity: 0.75; }
+
+/* ─── Mobile Layout ─── */
+@media (max-width: 767px) {
+  .mobile-tabbar { display: flex; }
+
+  .app {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .sidebar { display: none; }
+
+  .main {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: auto;
+    padding: 16px 16px calc(60px + env(safe-area-inset-bottom, 0px) + 16px);
+  }
+
+  .topbar { margin-bottom: 12px; }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "session"
+      "goals"
+      "stats"
+      "timeline"
+      "tomorrow"
+      "habits"
+      "mood"
+      "weather"
+      "calendar"
+      "activity";
+    height: auto;
+    gap: 12px;
+  }
+
+  .home-grid .card { overflow: visible; min-height: 180px; }
+  .home-grid .a-stats { min-height: auto; }
+
+  /* Tab content scrolls naturally on mobile */
+  .tab-content { height: auto; overflow: visible; }
+  .tab-content.is-visible { display: flex; flex-direction: column; }
+}

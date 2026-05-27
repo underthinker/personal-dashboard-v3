@@ -1,7 +1,7 @@
 (function() {
   var NAME_KEY = 'sidebar_user_name_v1';
   var AVATAR_KEY = 'sidebar_user_avatar_v1';
-  var DEFAULT_NAME = 'titon';
+  var DEFAULT_NAME = 'you';
 
   var nameEl = document.querySelector('.su-name');
   var avatarEl = document.querySelector('.su-avatar');
