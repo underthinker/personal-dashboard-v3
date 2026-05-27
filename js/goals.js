@@ -1396,6 +1396,11 @@
       if (s.running) _stopFocusSession();
       else _startFocusSession();
     });
+
+    window.addEventListener('beforeunload', function() {
+      var s = getFocusSession();
+      if (s.running) _stopFocusSession();
+    });
   }
 
   // ============ FOCUS DATA FIX + EDIT ============
