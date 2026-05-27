@@ -639,11 +639,11 @@
   ];
 
   const BLOCK_STATUS = {
-    Morning:   ['', 'Morning: peak focus window. Perfect time for deep work.'],
-    Afternoon: ['', 'Afternoon: good for collaborative work. Power through the dip.'],
-    Evening:   ['', 'Evening: wind down. Focus on light tasks.'],
-    Night:     ['', 'Night: wind down. Protect your sleep window.'],
-    Sleep:     ['', 'Sleep: rest up']
+    Morning:   ['', 'Peak focus window. Perfect time for deep work.'],
+    Afternoon: ['', 'Good for collaborative work. Power through the dip.'],
+    Evening:   ['', 'Wind down. Focus on light tasks.'],
+    Night:     ['', 'Get ready for bed. Protect your sleep window.'],
+    Sleep:     ['', 'Rest up']
   };
 
   const dayRingFill = $('dayRingFill');
@@ -890,7 +890,7 @@
         weekFocusMins[todayWeekIdx] += Math.floor((Date.now() - liveFs.startedAt) / 60000);
       }
     } catch(e) {}
-    var weekDeepFlags = weekFocusMins.map(function(m) { return m >= 30; });
+    var weekDeepFlags = weekFocusMins.map(function(m) { return m >= 120; });
 
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
     var barsEl = $('perfWeekBars');
@@ -953,7 +953,7 @@
 
     // ── Deep work consistency dots ──
     var consistencyCount = weekDeepFlags.filter(Boolean).length;
-    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days with 30+ min';
+    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days with 2h+';
 
     var DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     var dotsEl = $('perfDots');

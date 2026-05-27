@@ -183,6 +183,7 @@ body {
 
 .sidebar-user {
   margin-top: auto;
+  margin-left: -5px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -436,7 +437,7 @@ body {
 .home-grid .rm-name { font-size: 12px; }
 .home-grid .rm-sub { font-size: 11px; }
 .home-grid .rm-pct { font-size: 20px; }
-.home-grid .readiness-rings { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; }
+.home-grid .readiness-rings { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; margin-top: 10px; }
 .home-grid .rm-item { gap: 5px; }
 .home-grid .rm-ring-wrap { max-width: none; }
 .home-grid .rm-h-item { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; gap: 2px; padding: 2px 0; }
@@ -501,7 +502,7 @@ body {
 .ring-wrap .pct-lbl { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.18em; margin-top: 2px; text-transform: uppercase; }
 
 .session-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
-.session-status { font-size: 20px; font-weight: 700; margin: 0 0 6px; color: var(--text); }
+.session-status { font-size: 18px; font-weight: 700; margin: 0 0 6px; color: var(--text); }
 .session-range { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
 
 .next-up { display: flex; flex-direction: column; gap: 5px; }
@@ -1014,7 +1015,7 @@ body {
 .cal-day .cal-dot {
   width: 4px; height: 4px;
   border-radius: 99px;
-  background: var(--green);
+  background: var(--accent);
   position: absolute;
   bottom: -2px;
   left: 50%;
@@ -1022,7 +1023,7 @@ body {
 }
 .cal-day.is-today .cal-dot { display: none; }
 .cal-dot-deep { background: var(--accent) !important; }
-.cal-dot-rest { background: var(--green) !important; }
+.cal-dot-rest { background: var(--accent) !important; }
 .cal-day[data-ymd] { cursor: pointer; }
 .cal-bar {
   position: absolute;
@@ -1191,7 +1192,7 @@ body {
 .mood-pick-icon { width: 18px; height: 18px; object-fit: contain; display: block; }
 
 /* ─── Weather Widget ─── */
-#weatherWidget { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+#weatherWidget { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-top: -10px; }
 .weather-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
 .weather-icon-mid { height: 0; display: flex; justify-content: center; overflow: visible; position: relative; z-index: 1; }
 .weather-icon-mid .weather-icon { transform: translateY(-50%); }
@@ -2859,7 +2860,7 @@ body {
 }
 
 .fin-donut-detail {
-  margin-top: 10px;
+margin-top: 15px;
   padding: 0 12px;
   background: rgba(255,255,255,0.03);
   border: 1px solid var(--hairline);
