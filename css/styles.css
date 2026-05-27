@@ -12,9 +12,9 @@
   --text: #ededef;
   --muted: #8b8b95;
   --muted-2: #5e5e68;
-  --accent: #F2587A;
-  --accent-soft: rgba(242,88,122,0.14);
-  --accent-rgb: 242, 88, 122;
+  --accent: #d1809b;
+  --accent-soft: rgba(209,128,155,0.14);
+  --accent-rgb: 209, 128, 155;
   --green: #5fd687;
   --green-soft: rgba(95,214,135,0.14);
   --blue: #5ba8f7;
@@ -109,13 +109,11 @@ body {
 /* ─── Sidebar ─── */
 .sidebar {
   border-right: 1px solid var(--line);
-  padding: 24px 16px;
+  padding: 24px 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  height: 100%;
+  overflow: hidden;
 }
 
 .brand {
@@ -128,11 +126,20 @@ body {
   text-align: center;
   border-bottom: 1px solid var(--line);
   margin-bottom: 4px;
+  color: var(--accent);
 }
 .brand .b1 { color: var(--text); }
 .brand .b2 { color: var(--muted); margin-left: 2px; }
 
-.nav { display: flex; flex-direction: column; gap: 2px; }
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 28px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
 
 .nav-section-label {
   font-size: 10px;
@@ -184,16 +191,15 @@ body {
   padding-top: 22px;
 }
 .su-avatar {
-  width: 48px; height: 48px;
+  width: 64px; height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, #2a2530, #4a3a48);
-  flex: 0 0 48px;
+  flex: 0 0 64px;
   display: grid;
   place-items: center;
   position: relative;
   cursor: pointer;
-  transform: scale(1.33);
-  transform-origin: center;
+  overflow: hidden;
 }
 .su-avatar::after {
   content: '';

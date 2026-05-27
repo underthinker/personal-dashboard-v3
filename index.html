@@ -1247,6 +1247,7 @@
       colorsEl.querySelectorAll('.tweaks-color').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       selectedColor = a.color;
+      applyAccent(selectedColor);
     });
     colorsEl.appendChild(btn);
   });
