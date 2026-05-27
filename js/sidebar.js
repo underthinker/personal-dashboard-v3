@@ -2,6 +2,17 @@
   var NAME_KEY = 'sidebar_user_name_v1';
   var AVATAR_KEY = 'sidebar_user_avatar_v1';
   var DEFAULT_NAME = 'you';
+  var ACCENT_AVATAR_DEFAULTS = {
+    '#d1809b': '9 Hashiras/kanroji.webp',
+    '#a78bfa': '9 Hashiras/Shinobu.jpg',
+    '#5fd687': '9 Hashiras/Sanemi.jpg',
+    '#5ba8f7': '9 Hashiras/Giyu.webp',
+    '#e66a3b': '9 Hashiras/Rengoku.webp',
+    '#2aa198': '9 Hashiras/Iguro.jpg',
+    '#cfa846': '9 Hashiras/Uzui.webp',
+    '#7bc4b2': '9 Hashiras/Tokito.jpg',
+    '#7d8462': '9 Hashiras/Himejima.webp'
+  };
 
   var nameEl = document.querySelector('.su-name');
   var avatarEl = document.querySelector('.su-avatar');
@@ -40,14 +51,16 @@
 
   function loadAvatar() {
     var saved = localStorage.getItem(AVATAR_KEY);
+    var accent = localStorage.getItem('tweak_accent') || '#d1809b';
+    var src = saved || ACCENT_AVATAR_DEFAULTS[accent] || null;
     var existingImg = avatarEl.querySelector('img');
-    if (saved) {
+    if (src) {
       avatarEl.classList.add('has-image');
       if (existingImg) {
-        existingImg.src = saved;
+        existingImg.src = src;
       } else {
         var img = document.createElement('img');
-        img.src = saved;
+        img.src = src;
         img.alt = '';
         img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
         avatarEl.prepend(img);
@@ -93,6 +106,8 @@
       }
     }
   });
+
+  document.addEventListener('accent-changed', loadAvatar);
 
   /* ─── Init ─────────────────────────────────────── */
 
