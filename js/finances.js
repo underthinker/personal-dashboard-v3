@@ -1752,6 +1752,207 @@
     if (sumEl) { const monthsSaved = (isFinite(baseEta) && isFinite(planEta)) ? Math.max(0, baseEta - planEta) : 0; sumEl.innerHTML = '<span>Plan saves <span class="v">' + fmt(planSavings) + '/mo</span></span><span>Finish <span class="v">' + monthsSaved + ' month' + (monthsSaved === 1 ? '' : 's') + '</span> earlier</span>'; }
   }
 
+  // --- Paystub import ---
+  (function() {
+    const bg = $('psModalBg');
+    if (!bg) return;
+
+    const fileInput = $('psFileInput');
+    const drop = $('psDrop');
+    const preview = $('psPreview');
+    const status = $('psStatus');
+    const review = $('psReview');
+    const confirmBtn = $('psConfirmBtn');
+    const cancelBtn = $('psCancelBtn');
+    const importBtn = $('psImportBtn');
+
+    let activeWorker = null;
+    let objectURL = null;
+
+    function openModal() { resetModal(); bg.classList.add('show'); }
+
+    function closeModal() {
+      bg.classList.remove('show');
+      if (activeWorker) { activeWorker.terminate().catch(() => {}); activeWorker = null; }
+      if (objectURL) { URL.revokeObjectURL(objectURL); objectURL = null; }
+    }
+
+    function resetModal() {
+      fileInput.value = '';
+      preview.hidden = true; preview.src = '';
+      status.className = 'ps-status'; status.innerHTML = '';
+      review.className = 'ps-review'; review.innerHTML = '';
+      confirmBtn.disabled = true;
+    }
+
+    function setStatus(msg, isError) {
+      status.className = 'ps-status show' + (isError ? ' is-error' : '');
+      status.innerHTML = msg;
+    }
+
+    importBtn.addEventListener('click', openModal);
+    cancelBtn.addEventListener('click', closeModal);
+    bg.addEventListener('click', (e) => { if (e.target === bg) closeModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && bg.classList.contains('show')) closeModal(); });
+
+    drop.addEventListener('click', () => fileInput.click());
+    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('is-drag'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('is-drag'));
+    drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('is-drag'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+    async function handleFile(file) {
+      if (file.size > 8 * 1024 * 1024) { setStatus('File too large. Max 8 MB.', true); return; }
+      const isPDF = file.type === 'application/pdf';
+      if (!isPDF && !file.type.startsWith('image/')) { setStatus('Unsupported format. Use PNG, JPG, WebP, or PDF.', true); return; }
+
+      resetModal();
+      setStatus('<span class="ps-spinner"></span>Loading…');
+
+      let ocrSource;
+      try {
+        if (isPDF) {
+          const canvas = await renderPDFPage(file);
+          ocrSource = canvas.toDataURL('image/jpeg', 0.92);
+          preview.src = ocrSource; preview.hidden = false;
+        } else {
+          if (objectURL) URL.revokeObjectURL(objectURL);
+          objectURL = URL.createObjectURL(file);
+          preview.src = objectURL; preview.hidden = false;
+          ocrSource = objectURL;
+        }
+      } catch (e) { setStatus('Failed to load file: ' + e.message, true); return; }
+
+      setStatus('<span class="ps-spinner"></span>Running OCR — may take a few seconds…');
+      try {
+        const text = await runOCR(ocrSource);
+        const items = parsePaystub(text);
+        buildReview(items, text);
+        status.className = 'ps-status';
+        confirmBtn.disabled = false;
+        if (!items.length) setStatus('No amounts detected. Edit fields below manually.', false);
+      } catch (e) { setStatus('OCR error: ' + e.message, true); }
+    }
+
+    async function renderPDFPage(file) {
+      const lib = window.pdfjsLib;
+      if (!lib) throw new Error('PDF.js not available');
+      lib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
+      const pdf = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+      const page = await pdf.getPage(1);
+      const vp = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      return canvas;
+    }
+
+    async function runOCR(src) {
+      if (activeWorker) { try { await activeWorker.terminate(); } catch(e) {} activeWorker = null; }
+      const worker = await Tesseract.createWorker('eng', 1, {
+        workerPath: 'vendor/tesseract/worker.min.js',
+        langPath: 'vendor/tesseract',
+        corePath: 'vendor/tesseract/tesseract-core-lstm.wasm.js',
+      });
+      activeWorker = worker;
+      const { data: { text } } = await worker.recognize(src);
+      await worker.terminate();
+      activeWorker = null;
+      return text;
+    }
+
+    function parsePaystub(text) {
+      let amount = null;
+
+      // Try labeled net pay first
+      const netM = text.match(/net\s+(?:pay|wages?)?\s*[:\s]\s*\$?\s*([\d,]+(?:\.\d{2})?)/i)
+                || text.match(/total\s+net\s*[:\s]\s*\$?\s*([\d,]+(?:\.\d{2})?)/i);
+      if (netM) amount = parseFloat(netM[1].replace(/,/g, ''));
+
+      // Fall back to largest explicit $ amount on page
+      if (!amount) {
+        const all = [];
+        const re = /\$\s*([\d,]+(?:\.\d{2})?)/g; let m;
+        while ((m = re.exec(text)) !== null) {
+          const v = parseFloat(m[1].replace(/,/g, ''));
+          if (v > 1 && v < 999999) all.push(v);
+        }
+        if (all.length) amount = Math.max(...all);
+      }
+
+      if (!amount) return [];
+
+      // Employer: first non-trivial line not starting with digit/$
+      let source = '';
+      for (const l of text.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 8)) {
+        if (l.length >= 3 && l.length <= 60 && !/^[\d$]/.test(l) && !/^(pay|check|period|date|from|to)\b/i.test(l)) {
+          source = l; break;
+        }
+      }
+
+      // Pay date
+      let date = todayISO();
+      const dlm = text.match(/(?:pay\s*date|check\s*date|period\s*end(?:ing)?)\s*[:\s]+(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/i)
+               || text.match(/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})\b/);
+      if (dlm) date = normalizeDate(dlm[1]) || date;
+
+      return [{ source, amount: Math.round(amount * 100) / 100, date }];
+    }
+
+    function todayISO() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    }
+
+    function normalizeDate(str) {
+      const p = str.split(/[\/\-]/);
+      if (p.length !== 3) return '';
+      const year = p[2].length === 2 ? '20' + p[2] : p[2];
+      if (year.length !== 4) return '';
+      return year + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
+    }
+
+    const INPUT_STYLE = 'background:rgba(255,255,255,0.04);border:1px solid var(--line);border-radius:6px;padding:6px 8px;color:var(--text);font-family:inherit;font-size:12px;width:100%;box-sizing:border-box;color-scheme:dark';
+
+    function buildReview(items, rawText) {
+      review.className = 'ps-review show';
+      let html = '<div class="ps-review-section-h">Income</div>';
+      html += '<div class="ps-row ps-row-head"><span>Source</span><span>Amount</span><span>✓</span></div>';
+
+      items.forEach((it, i) => {
+        html += '<div class="ps-row is-income">';
+        html += '<input type="text" id="psItemSrc' + i + '" value="' + window.escHtml(it.source) + '" placeholder="Employer">';
+        html += '<input type="number" data-idx="' + i + '" data-field="amount" value="' + it.amount.toFixed(2) + '" min="0" step="0.01">';
+        html += '<input type="checkbox" data-idx="' + i + '" checked>';
+        html += '</div>';
+      });
+
+      const dateVal = items.length ? items[0].date : todayISO();
+      html += '<div class="ps-review-section-h" style="margin-top:12px">Pay Date</div>';
+      html += '<div style="margin-bottom:4px"><input type="date" id="psDate" value="' + dateVal + '" style="' + INPUT_STYLE + '"></div>';
+      html += '<details class="ps-rawocr"><summary>Raw OCR text</summary><pre>' + window.escHtml(rawText) + '</pre></details>';
+      review.innerHTML = html;
+    }
+
+    confirmBtn.addEventListener('click', () => {
+      const data = loadData();
+      const dateVal = ($('psDate') && $('psDate').value) || todayISO();
+      review.querySelectorAll('[data-field="amount"]').forEach((amountEl) => {
+        const i = parseInt(amountEl.getAttribute('data-idx'));
+        const row = amountEl.closest('.ps-row');
+        const cb = row && row.querySelector('input[type="checkbox"]');
+        if (!cb || !cb.checked) return;
+        const amount = parseFloat(amountEl.value);
+        if (!isFinite(amount) || amount <= 0) return;
+        const srcEl = document.getElementById('psItemSrc' + i);
+        data.income.push({ id: uid(), source: (srcEl && srcEl.value.trim()) || 'Paystub', amount, tags: ['Salary'], date: dateVal });
+      });
+      saveData(data);
+      renderFinances();
+      closeModal();
+    });
+  })();
+
   // --- Window-exposed functions ---
 
   window.renderGoals = renderGoals;

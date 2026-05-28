@@ -485,8 +485,6 @@ body {
 .next-up-row .nu-dot { width: 6px; height: 6px; border-radius: 99px; background: var(--accent); flex: 0 0 6px; }
 .next-up-row .nu-text { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-
-
 .hm-settings-btn {
   background: transparent;
   border: 0;
@@ -497,8 +495,6 @@ body {
 .hm-settings-btn:hover { color: var(--text); }
 
 /* ─── Goals Card ─── */
-
-
 .goal-list { display: flex; flex-direction: column; gap: 4px; }
 .goal-list:empty { display: none; }
 
@@ -557,8 +553,6 @@ body {
 
 .goal-text { flex: 1; font-size: 13.5px; outline: none; }
 .goal-drag { color: var(--muted-2); font-size: 12px; cursor: grab; padding: 2px; user-select: none; }
-
-
 .gm-queue-btn {
   background: transparent;
   border: 0;
@@ -679,8 +673,6 @@ body {
 .add-goal .add-btn:hover { filter: brightness(1.08); }
 
 .hm-empty { color: var(--muted-2); font-size: 12.5px; padding: 10px 4px; text-align: center; }
-
-
 
 /* ─── Performance Overview Panel ─── */
 
@@ -1102,8 +1094,6 @@ body {
   font-size: 13px; color: var(--muted); text-align: center;
 }
 
-
-
 /* ─── Activity Heatmap ─── */
 .heatmap-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .heatmap-months { display: grid; grid-template-columns: 36px 1fr; gap: 8px; font-size: 10px; color: var(--muted-2); letter-spacing: 0.08em; }
@@ -1254,11 +1244,7 @@ body {
 .card[data-weather="Mist"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(139,139,149,0.03) 100%); }
 .card[data-weather="Fog"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(139,139,149,0.03) 100%); }
 .card[data-weather="Haze"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(242,192,99,0.03) 100%); }
-
-
 /* ─── Note Bar ─── */
-
-
 /* ═══════════════════════════════════════════════════════════════
    TWEAKS PANEL
    ═══════════════════════════════════════════════════════════════ */
@@ -3591,8 +3577,6 @@ margin-top: 15px;
 /* (Tab bar replaced by sidebar — see APP LAYOUT section above)
    ============================================================ */
 
-
-
 .wip-placeholder {
   display: flex;
   align-items: center;
@@ -4424,124 +4408,6 @@ margin-top: 15px;
    MOOD TRACKER
    ============================================================ */
 
-/* --- Today mood card --- */
-.mt-today {
-  padding: 18px;
-  margin-bottom: 14px;
-  border-radius: var(--r);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--line);
-}
-.mt-today-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 14px;
-}
-.mt-eyebrow {
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--muted-2);
-}
-.mt-today-date {
-  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 11px;
-  color: var(--muted);
-}
-.mt-today-vis {
-  text-align: center;
-  padding: 14px;
-  margin-bottom: 12px;
-  border-radius: var(--r-sm);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--line);
-  cursor: pointer;
-}
-.mt-today-em {
-  font-size: 34px;
-  display: block;
-  margin-bottom: 4px;
-}
-.mt-today-lb {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-}
-.mt-today-ch {
-  display: inline-block;
-  margin-top: 6px;
-  font-size: 10px;
-  color: var(--muted-2);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 600;
-}
-.mt-today-ch:hover { color: var(--muted); }
-.mt-today-empty {
-  font-size: 13px;
-  color: var(--muted-2);
-}
-
-/* Mood pills */
-.mt-pills {
-  display: flex;
-  gap: 4px;
-  flex-wrap: nowrap;
-}
-.mt-pill {
-  flex: 1;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 10px;
-  border-radius: 24px;
-  border: none;
-  background: currentColor;
-  cursor: pointer;
-  transition: all var(--dur-fast) var(--ease-smooth);
-  font-family: inherit;
-}
-.habit-view.is-entering .mt-pill {
-  animation: pill-spring-in 0.4s var(--ease-bounce) both;
-  animation-delay: calc(var(--i, 0) * 0.06s);
-}
-@keyframes pill-spring-in {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
-}
-.mt-pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.mt-pill-on {
-  box-shadow: 0 0 20px currentColor;
-}
-.mt-pill-em {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  object-fit: contain;
-  background: transparent;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.75);
-  padding: 1px;
-}
-.mt-pill-lb {
-  font-size: 12px;
-  font-weight: 700;
-  color: white;
-}
-.mt-pill-dot {
-  display: none;
-}
-
 /* --- Mood calendar --- */
 .mt-cal {
   padding: 16px;
@@ -4935,9 +4801,7 @@ margin-top: 15px;
   .ht-week-name { font-size: 8px; }
   .ht-week-cb { width: 20px; height: 20px; }
   .ht-ep-grid { grid-template-columns: repeat(6, 1fr); }
-  .mt-pill { min-width: 0; padding: 5px 6px; }
-  .mt-pill-em { width: 20px; height: 20px; }
-  .mt-pill-lb { font-size: 9px; }
+
 }
 
 /* ============================================================

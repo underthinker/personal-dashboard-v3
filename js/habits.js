@@ -443,76 +443,6 @@
   // MOOD TRACKER
   // ============================================================
 
-  function renderTodayMood() {
-    const today = todayYMD();
-    const d = new Date();
-    const dateEl = $('mtTodayDate');
-    if (dateEl) dateEl.textContent = getDayName(d.getDay()) + ', ' + getMonthName(d.getMonth()) + ' ' + d.getDate();
-
-    const currentMood = getMood(today);
-    const def = currentMood ? getMoodDef(currentMood) : null;
-
-    const emEl = $('mtTodayEm');
-    const lbEl = $('mtTodayLb');
-    const visEl = $('mtTodayVis');
-    if (emEl) {
-      emEl.innerHTML = '';
-      if (def) {
-        const todayImg = document.createElement('img');
-        todayImg.src = moodSvgUri(def.key);
-        todayImg.alt = def.label;
-        todayImg.width = 48;
-        todayImg.height = 48;
-        todayImg.style.objectFit = 'contain';
-        emEl.appendChild(todayImg);
-      } else {
-        emEl.textContent = '—';
-      }
-    }
-    if (lbEl) lbEl.textContent = def ? def.label : 'Select a mood from the cards below';
-    if (visEl) {
-      visEl.style.cursor = 'default';
-      visEl.onclick = null;
-    }
-
-    const pillsEl = $('mtPills');
-    if (pillsEl) {
-      pillsEl.innerHTML = '';
-      MOOD_DEFS.forEach(function(mood, idx) {
-        const pill = document.createElement('button');
-        pill.className = 'mt-pill' + (currentMood === mood.key ? ' mt-pill-on' : '');
-        pill.setAttribute('aria-label', mood.label);
-        pill.style.setProperty('--i', idx);
-        pill.style.color = mood.color;
-
-        const em = document.createElement('img');
-        em.className = 'mt-pill-em';
-        em.src = moodSvgUri(mood.key);
-        em.alt = mood.label;
-
-        const lb = document.createElement('span');
-        lb.className = 'mt-pill-lb';
-        lb.textContent = mood.label;
-
-        pill.appendChild(em);
-        pill.appendChild(lb);
-
-        pill.addEventListener('click', () => {
-          const existing = getMood(today);
-          if (existing === mood.key) {
-            deleteMood(today);
-          } else {
-            setMood(today, mood.key);
-          }
-          renderTodayMood();
-          renderMoodCalendar();
-        });
-
-        pillsEl.appendChild(pill);
-      });
-    }
-  }
-
   function renderMoodCalendar() {
     const year = moodMonthDate.getFullYear();
     const month = moodMonthDate.getMonth();
@@ -663,7 +593,6 @@
     }
     $('deBg').classList.remove('show');
     editorDate = null;
-    renderTodayMood();
     renderMoodCalendar();
     renderHabitsView();
   }
@@ -697,7 +626,6 @@
           }
           renderDayEditor();
           renderMoodCalendar();
-          renderTodayMood();
         });
 
         pillsEl.appendChild(btn);
@@ -864,7 +792,6 @@
     // Initial render
     renderQuote();
     renderHabitsView();
-    renderTodayMood();
     renderMoodCalendar();
     renderHomeHealthRings();
 
@@ -1102,7 +1029,6 @@
   function render() {
     renderQuote();
     renderHabitsView();
-    renderTodayMood();
     renderMoodCalendar();
 
     // Trigger entrance on visible sub-view
