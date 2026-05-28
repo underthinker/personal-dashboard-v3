@@ -435,14 +435,8 @@
 <!-- ═══ TAB: HABITS ═══ -->
 <div id="tab-habits" class="tab-content">
 
-<div class="habit-sub-nav">
-  <button class="habit-sub-btn is-active" data-habitview="tracker">Habit Tracker</button>
-  <button class="habit-sub-btn" data-habitview="mood">Mood Tracker</button>
-  <button class="habit-sub-btn" data-habitview="activity">Activity</button>
-</div>
-
-<div class="habit-view" id="habitTracker">
 <div class="section">
+
   <div class="ht-panel" id="htWeekPanel">
     <div class="ht-week-hdr" id="htWeekHdr"></div>
     <div class="ht-week-body" id="htWeekBody"></div>
@@ -451,11 +445,6 @@
       <input type="text" class="ht-notes-input" id="htTodayNotes" placeholder="Add a note for today…" />
     </div>
   </div>
-</div>
-</div>
-
-<div class="habit-view" id="moodTracker" style="display:none">
-<div class="section">
 
   <div class="mt-cal glass">
     <div class="mt-cal-hdr">
@@ -463,18 +452,10 @@
       <div class="mt-cal-title" id="mtCalTitle">—</div>
       <button class="mt-cal-nav" id="mtNextBtn">›</button>
     </div>
-    <div class="mt-leg" id="mtLeg"></div>
     <div class="mt-cal-hdr-row" id="mtCalHdr"></div>
     <div class="mt-grid" id="mtGrid"></div>
   </div>
-  </div>
-</div>
 
-<div class="habit-view" id="habitActivity" style="display:none">
-<div class="section">
-  <div class="card-head"><span class="card-label">Activity Heatmap</span></div>
-  <div class="home-heatmap-widget" id="heatmapWidget"></div>
-</div>
 </div>
 
 <!-- Habit Settings Modal -->

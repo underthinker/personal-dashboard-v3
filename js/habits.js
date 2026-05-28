@@ -464,6 +464,7 @@
           const dot = document.createElement('span');
           const cls = pct >= 80 ? 'ht-mdot-green' : pct >= 40 ? 'ht-mdot-amber' : 'ht-mdot-red';
           dot.className = 'ht-mdot ' + cls;
+          dot.title = pct + '% habits completed';
           cell.appendChild(dot);
         }
 
@@ -474,43 +475,6 @@
 
     }
 
-    const legendEl = $('mtLeg');
-    if (legendEl) {
-      legendEl.innerHTML = '';
-
-      const green = document.createElement('div');
-      green.className = 'mt-leg-item';
-      const gDot = document.createElement('span');
-      gDot.className = 'mt-leg-dot';
-      gDot.style.background = '#6BE3A4';
-      const gLb = document.createElement('span');
-      gLb.textContent = '80-100% habits';
-      green.appendChild(gDot);
-      green.appendChild(gLb);
-      legendEl.appendChild(green);
-
-      const amber = document.createElement('div');
-      amber.className = 'mt-leg-item';
-      const aDot = document.createElement('span');
-      aDot.className = 'mt-leg-dot';
-      aDot.style.background = '#FF9F1C';
-      const aLb = document.createElement('span');
-      aLb.textContent = '40-79% habits';
-      amber.appendChild(aDot);
-      amber.appendChild(aLb);
-      legendEl.appendChild(amber);
-
-      const red = document.createElement('div');
-      red.className = 'mt-leg-item';
-      const rDot = document.createElement('span');
-      rDot.className = 'mt-leg-dot';
-      rDot.style.background = '#FF6B6B';
-      const rLb = document.createElement('span');
-      rLb.textContent = '1-39% habits';
-      red.appendChild(rDot);
-      red.appendChild(rLb);
-      legendEl.appendChild(red);
-    }
   }
 
   // ============================================================
@@ -679,46 +643,6 @@
       });
     }
 
-    // Sub-navigation with crossfade
-    var _viewSwitchTimer = null;
-    document.querySelectorAll('.habit-sub-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.habit-sub-btn').forEach(function(b) { b.classList.remove('is-active'); });
-        btn.classList.add('is-active');
-
-        var hv = btn.getAttribute('data-habitview');
-        var targetId = hv === 'tracker' ? 'habitTracker' : hv === 'mood' ? 'moodTracker' : 'habitActivity';
-        var targetView = document.getElementById(targetId);
-        if (!targetView) return;
-
-        var currentView = document.querySelector('.habit-view:not([style*="display: none"])');
-        if (!currentView || currentView === targetView) return;
-
-        if (_viewSwitchTimer) { clearTimeout(_viewSwitchTimer); _viewSwitchTimer = null; }
-
-        // Clear entering from both
-        document.querySelectorAll('.habit-view.is-entering').forEach(function(v) { v.classList.remove('is-entering'); });
-
-        // Fade out current
-        currentView.classList.add('is-exiting');
-        _viewSwitchTimer = setTimeout(function() {
-          currentView.style.display = 'none';
-          currentView.classList.remove('is-exiting');
-
-          // Show and fade in target
-          targetView.style.display = '';
-          targetView.classList.remove('is-entering');
-          void targetView.offsetWidth;
-          targetView.classList.add('is-entering');
-          if (hv === 'activity' && window.renderActivityHeatmap) window.renderActivityHeatmap();
-          _viewSwitchTimer = setTimeout(function() {
-            targetView.classList.remove('is-entering');
-            _viewSwitchTimer = null;
-          }, 1200);
-        }, 300);
-      });
-    });
-
     // Mood navigation
     const mtPrev = $('mtPrevBtn');
     const mtNext = $('mtNextBtn');
@@ -742,13 +666,6 @@
     renderHabitsView();
     renderMoodCalendar();
     renderHomeHealthRings();
-
-    // Trigger entrance animation on initial view
-    var initView = $('habitTracker');
-    if (initView) {
-      initView.classList.add('is-entering');
-      setTimeout(function() { initView.classList.remove('is-entering'); }, 1200);
-    }
 
     // Clear note and re-render when calendar day changes
     let _lastDay = todayYMD();
@@ -977,15 +894,6 @@
   function render() {
     renderHabitsView();
     renderMoodCalendar();
-
-    // Trigger entrance on visible sub-view
-    var visibleView = document.querySelector('.habit-view:not([style*="display: none"])');
-    if (visibleView) {
-      visibleView.classList.remove('is-entering');
-      void visibleView.offsetWidth;
-      visibleView.classList.add('is-entering');
-      setTimeout(function() { visibleView.classList.remove('is-entering'); }, 1200);
-    }
   }
 
   window.renderHabits = render;
