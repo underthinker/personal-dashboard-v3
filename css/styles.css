@@ -3615,7 +3615,7 @@ margin-top: 15px;
   display: none;
 }
 
-   HABITS TAB — Habit Tracker + Mood Tracker
+/* HABITS TAB — Habit Tracker + Mood Tracker
    ============================================================ */
 
 .ht-notes-wrap {
@@ -3647,9 +3647,14 @@ margin-top: 15px;
 }
 
 #htWeekPanel > .ht-notes-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   border-top: 1px solid var(--line);
   padding: 8px 14px 10px;
   margin-top: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ht-vbtn-settings {
@@ -3719,6 +3724,7 @@ margin-top: 15px;
   display: flex;
   flex-direction: column;
   gap: 3px;
+  justify-content: space-evenly;
 }
 .ht-week-row {
   display: grid;
@@ -4300,10 +4306,10 @@ margin-top: 15px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
-  align-content: start;
+  grid-auto-rows: 1fr;
 }
 .mt-gcell {
-  height: 38px;
+  min-height: 38px;
   display: flex;
   flex-direction: column;
   align-items: center;

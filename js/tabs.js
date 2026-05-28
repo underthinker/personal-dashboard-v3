@@ -29,12 +29,6 @@
         window.renderHomeInsights && window.renderHomeInsights();
         window.renderHomeMood && window.renderHomeMood();
       }
-      var tabNames = { main:'Home', finances:'Finances', habits:'Habits', health:'Health', gym:'Gym' };
-      var name = tabNames[tab.getAttribute('data-tab')] || tab.textContent.trim();
-      var statusEl = document.getElementById('topbarStatus');
-      if (statusEl && contentId !== 'tab-main') {
-        statusEl.innerHTML = '<strong>' + name + '</strong>';
-      }
 
       if (contentId === 'tab-finances') {
         window.renderFinances && window.renderFinances();

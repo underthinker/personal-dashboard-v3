@@ -1,8 +1,6 @@
 (function(){
   'use strict';
 
-  const ANTHROPIC_API_KEY = '';
-
   // ----------- Storage helpers -----------
   function storeGet(key) {
     try {
