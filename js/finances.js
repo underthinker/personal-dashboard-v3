@@ -1558,16 +1558,34 @@
       const card = root.querySelector('.gt-card');
       if (!card) return;
       const inner = card.querySelector('.gt-card-inner');
+      if (inner) {
+        inner.style.transition = 'none';
+        inner.style.opacity = '1';
+        inner.style.transform = 'translateY(0) scale(1)';
+      }
       card.style.transition = 'none';
       card.style.maxHeight = '0';
       card.classList.add('is-expanded');
       void card.offsetHeight;
       card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
-      if (inner) requestAnimationFrame(() => { card.style.maxHeight = inner.scrollHeight + 'px'; });
+      if (inner) requestAnimationFrame(() => {
+        card.style.maxHeight = inner.scrollHeight + 'px';
+        card.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName === 'max-height') {
+            card.style.maxHeight = 'none';
+            card.style.transition = '';
+            if (inner) {
+              inner.style.transition = '';
+              inner.style.opacity = '';
+              inner.style.transform = '';
+            }
+            card.removeEventListener('transitionend', handler);
+          }
+        });
+      });
     } else {
       const card = root.querySelector('.gt-card');
       if (card) {
-        card.style.transition = 'none';
         card.style.maxHeight = '0';
         card.classList.remove('is-expanded');
       }
@@ -1649,12 +1667,30 @@
             const card = root.querySelector('.gt-card');
             if (card) {
               const inner = card.querySelector('.gt-card-inner');
+              if (inner) {
+                inner.style.transition = 'none';
+                inner.style.opacity = '1';
+                inner.style.transform = 'translateY(0) scale(1)';
+              }
               card.style.transition = 'none';
               card.style.maxHeight = '0';
               card.classList.add('is-expanded');
               void card.offsetHeight;
               card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
-              if (inner) requestAnimationFrame(() => { card.style.maxHeight = inner.scrollHeight + 'px'; });
+      if (inner) requestAnimationFrame(() => {
+        card.style.maxHeight = inner.scrollHeight + 'px';
+        card.addEventListener('transitionend', function gtReleaseMax(e) {
+          if (e.propertyName === 'max-height') {
+            card.style.maxHeight = 'none';
+            if (inner) {
+              inner.style.transition = '';
+              inner.style.opacity = '';
+              inner.style.transform = '';
+            }
+            card.removeEventListener('transitionend', gtReleaseMax);
+          }
+        });
+      });
             }
           }
         }

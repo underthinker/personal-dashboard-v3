@@ -1499,7 +1499,8 @@ body {
 #tab-finances.is-visible {
   display: flex !important;
   flex-direction: column;
-  height: calc(100vh - 124px);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -1554,6 +1555,7 @@ body {
 
 #finGoals {
   overflow-y: auto;
+  padding-bottom: 24px;
 }
 
 #finData {
@@ -3354,7 +3356,6 @@ margin-top: 15px;
   background: transparent;
   box-shadow: none;
   border-radius: var(--r);
-  transition: border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease;
 }
 
 .gt-card.is-expanded {
@@ -3362,20 +3363,22 @@ margin-top: 15px;
   margin-bottom: 16px;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
+  overflow: visible;
 }
 
 .gt-card.is-expanded .gt-card-inner {
   opacity: 1;
   transform: translateY(0) scale(1);
+  overflow: visible;
 }
 
 .gt-card-inner {
   min-height: 0;
   overflow: hidden;
-  padding: 22px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   opacity: 0;
   transform: translateY(-4px) scale(0.985);
   transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.01s,
@@ -3383,10 +3386,6 @@ margin-top: 15px;
   will-change: opacity, transform;
 }
 
-.gt-card.is-expanded .gt-card-inner {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
 
 .gt-detail { display: grid; grid-template-columns: 200px 1fr; gap: 24px; align-items: center; }
 .gt-ring { width: 200px; height: 200px; position: relative; }
@@ -3469,7 +3468,7 @@ margin-top: 15px;
 .gt-seg button.is-active[data-mode="reduce"] { background: rgba(242,192,99,0.18); color: var(--warning); }
 .gt-seg button.is-active[data-mode="cut"] { background: rgba(255,107,107,0.18); color: var(--danger); }
 
-.gt-plan-summary { font-family: 'JetBrains Mono', monospace; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(107,227,164,0.06); border: 1px solid rgba(107,227,164,0.2); font-size: 12px; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.gt-plan-summary { font-family: 'JetBrains Mono', monospace; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: rgba(107,227,164,0.06); border: 1px solid rgba(107,227,164,0.2); font-size: 12px; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; overflow: hidden; }
 .gt-plan-summary .v { font-family: 'JetBrains Mono', monospace; color: var(--success); }
 
 .gt-empty { font-family: 'JetBrains Mono', monospace; padding: 28px; text-align: center; color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 12px; align-items: center; animation: empty-breathe 3s ease-in-out infinite; }
@@ -3522,10 +3521,6 @@ margin-top: 15px;
     flex: 1;
     min-height: 0;
   }
-}
-
-#tab-finances.is-visible {
-  overflow: hidden;
 }
 
 #tab-habits.is-visible {

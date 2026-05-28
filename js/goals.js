@@ -638,10 +638,10 @@
 
   const BLOCK_STATUS = {
     Morning:   ['', 'Peak focus window. Perfect time for deep work.'],
-    Afternoon: ['', 'Good for collaborative work. Power through the dip.'],
+    Afternoon: ['', 'Re-energize with lunch. Power through the dip.'],
     Evening:   ['', 'Wind down. Focus on light tasks.'],
     Night:     ['', 'Get ready for bed. Protect your sleep window.'],
-    Sleep:     ['', 'Rest up']
+    Sleep:     ['', 'Rest up. Sleep well!']
   };
 
   const dayRingFill = $('dayRingFill');
@@ -1385,7 +1385,11 @@
 
     var session = getFocusSession();
     if (session.running) {
-      _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
+      if (sessionStorage.getItem('focus_refresh_flag')) {
+        _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
+      } else {
+        _stopFocusSession();
+      }
     }
     _updateFocusStatUI();
 
@@ -1396,8 +1400,7 @@
     });
 
     window.addEventListener('beforeunload', function() {
-      var s = getFocusSession();
-      if (s.running) _stopFocusSession();
+      sessionStorage.setItem('focus_refresh_flag', '1');
     });
   }
 
