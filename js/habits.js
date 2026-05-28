@@ -134,21 +134,6 @@
     return null;
   }
 
-  // ----------- Quotes -----------
-  const QUOTES = [
-    '"You don\'t have to be perfect. You just have to keep going."',
-    '"Small progress is still progress."',
-    '"Consistency beats intensity."',
-    '"One day or day one. You decide."',
-    '"Fall seven times, stand up eight."',
-    '"Every day is a fresh start."',
-    '"Done is better than perfect."',
-    '"The only bad workout is the one that didn\'t happen."',
-    '"Keep going. Your future self will thank you."',
-    '"Wishing for it won\'t get you there; working for it will."',
-    '"You were not born to live a mediocre life."',
-  ];
-
   // ----------- State -----------
   let moodMonthDate = new Date();
   let emojiPickerCallback = null;
@@ -158,52 +143,6 @@
   // ============================================================
   // HABIT TRACKER
   // ============================================================
-
-  function renderQuote() {
-    const el = $('htQuote');
-    if (el) {
-      el.style.opacity = '0';
-      clearTimeout(el._quoteTimer);
-      el._quoteTimer = setTimeout(function() {
-        el.textContent = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-        el.style.opacity = '1';
-      }, 120);
-    }
-  }
-
-  function renderProgressPanel() {
-    const today = todayYMD();
-    const defs = getDefinitions().filter((d) => d.active);
-    const data = getDayData(today) || { entries: {}, notes: '' };
-
-    let done = 0;
-    defs.forEach((def) => { if (data.entries[def.id]) done++; });
-    const pct = defs.length ? Math.round((done / defs.length) * 100) : 0;
-
-    const pctEl = $('htTodayPct');
-    if (pctEl) pctEl.textContent = pct + '%';
-
-    const segRow = $('htSegRow');
-    if (segRow) {
-      segRow.innerHTML = '';
-      for (let i = 0; i < defs.length; i++) {
-        const seg = document.createElement('div');
-        seg.className = 'ht-seg' + (i < done ? ' ht-seg-on' : '');
-        seg.style.setProperty('--i', i);
-        segRow.appendChild(seg);
-      }
-    }
-
-    const notesEl = $('htTodayNotes');
-    if (notesEl) {
-      notesEl.value = data.notes || '';
-      notesEl.oninput = () => {
-        const cur = getDayData(today) || { entries: {}, notes: '' };
-        cur.notes = notesEl.value;
-        setDayData(today, cur);
-      };
-    }
-  }
 
   function renderWeekView() {
     const monday = getMonday();
@@ -257,7 +196,6 @@
             const cur = getDayData(ymd) || { entries: {}, notes: '' };
             cur.entries[def.id] = cb.checked;
             setDayData(ymd, cur);
-            if (ymd === today) renderProgressPanel();
           });
 
           cell.appendChild(cb);
@@ -268,10 +206,21 @@
       });
 
     }
+
+    // Notes input
+    const notesEl = $('htTodayNotes');
+    if (notesEl) {
+      const data = getDayData(today) || { entries: {}, notes: '' };
+      notesEl.value = data.notes || '';
+      notesEl.oninput = () => {
+        const cur = getDayData(today) || { entries: {}, notes: '' };
+        cur.notes = notesEl.value;
+        setDayData(today, cur);
+      };
+    }
   }
 
   function renderHabitsView() {
-    renderProgressPanel();
     renderWeekView();
   }
 
@@ -790,7 +739,6 @@
     });
 
     // Initial render
-    renderQuote();
     renderHabitsView();
     renderMoodCalendar();
     renderHomeHealthRings();
@@ -1027,7 +975,6 @@
   window.renderHomeMood = renderHomeMood;
 
   function render() {
-    renderQuote();
     renderHabitsView();
     renderMoodCalendar();
 

@@ -3704,76 +3704,6 @@ margin-top: 15px;
    HABITS TAB — Habit Tracker + Mood Tracker
    ============================================================ */
 
-/* --- Motivational header --- */
-.ht-motiv {
-  padding: 20px;
-  margin-bottom: 16px;
-  text-align: center;
-  border-radius: var(--r);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(107,227,164,0.07), transparent 60%),
-    var(--surface);
-  border: 1px solid var(--line);
-}
-.ht-motiv-tag {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.ht-motiv-quote {
-  font-size: 12px;
-  color: var(--muted-2);
-  font-style: italic;
-  transition: opacity 0.3s var(--ease-smooth);
-}
-
-/* Segmented progress bar */
-.ht-seg-row {
-  flex: 1;
-  display: flex;
-  gap: 6px;
-}
-.habit-view.is-entering .ht-motiv {
-  animation: card-entrance 0.5s var(--ease-out) both;
-}
-.habit-view.is-entering .ht-seg {
-  animation: seg-fade-in 0.4s var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 0.05s);
-}
-@keyframes seg-fade-in {
-  from { opacity: 0; transform: scaleY(0.3); }
-  to { opacity: 1; transform: scaleY(1); }
-}
-.ht-seg {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  background: rgba(255,255,255,0.06);
-  transition: background var(--dur-normal) var(--ease-smooth),
-              box-shadow var(--dur-normal) var(--ease-smooth);
-}
-.ht-seg-on {
-  background: var(--success);
-  box-shadow: 0 0 8px rgba(107,227,164,0.45);
-}
-
-.ht-prog-foot {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-.ht-today-pct {
-  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 18px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--success);
-}
-.ht-today-count { display: none; }
 .ht-notes-wrap {
   display: flex;
   align-items: center;
@@ -3802,18 +3732,6 @@ margin-top: 15px;
   background: rgba(255,255,255,0.06);
 }
 
-.ht-prog-bar {
-  margin-bottom: 14px;
-  padding: 12px 14px;
-  border-radius: var(--r);
-  background: var(--surface);
-  border: 1px solid var(--line);
-}
-.ht-prog-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 #htWeekPanel > .ht-notes-wrap {
   border-top: 1px solid var(--line);
   padding: 14px 18px 16px;
