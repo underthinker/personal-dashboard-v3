@@ -785,6 +785,13 @@
       });
     });
   });
+
+  /* Restore previously active tab across page refreshes */
+  var savedTab = localStorage.getItem('active_tab');
+  if (savedTab && savedTab !== 'main') {
+    var navItem = document.querySelector('.nav-item[data-tab="' + savedTab + '"]');
+    if (navItem) navItem.click();
+  }
 })();
 </script>
 

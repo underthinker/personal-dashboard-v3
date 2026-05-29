@@ -18,6 +18,8 @@
       var el = document.getElementById(contentId);
       if (el) el.classList.add('is-visible');
 
+      localStorage.setItem('active_tab', tab.getAttribute('data-tab'));
+
       if (contentId === 'tab-main') {
         var statusEl = document.getElementById('topbarStatus');
         if (statusEl) statusEl.innerHTML = ''; 
