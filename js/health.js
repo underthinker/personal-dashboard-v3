@@ -60,9 +60,14 @@
   // ---- Date helpers ----
   function dateToYMD(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function getActiveDate() {
-    const now = new Date();
+    const now = new Date(Date.now() - 6 * 3600000);
     return dateToYMD(now);
   }
+
+  // ---- View date state ----
+  let _viewDate = null;
+  function _resolveViewDate() { return _viewDate || getActiveDate(); }
+  function _setViewDate(dateStr) { _viewDate = dateStr || null; }
 
   // ---- Cross-tab reads ----
   function getMoodToday(date) { try { const v = localStorage.getItem('mood:' + date); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
@@ -182,6 +187,45 @@
     ) * 100);
   }
 
+  function calcFactors(date, day, settings) {
+    const N = 0.5;
+    const streak = getConsistencyStreak(date);
+    const sleepScore = day.sleep_hours != null ? Math.min(day.sleep_hours / settings.sleep_goal_hours, 1) : N;
+    const hydration = day.water_oz > 0 ? Math.min(day.water_oz / settings.water_goal_oz, 1) : N;
+    const exercise = getExerciseDoneToday(date) ? 1.0 : N;
+    const mood = getMoodToday(date);
+    const moodScore = mood != null ? (MOOD_SCORES[mood] ?? N) : N;
+    let nutrition = N;
+    if (day.nutrition_totals && day.nutrition_totals.calories > 0) {
+      const calR = day.nutrition_totals.calories / settings.calorie_goal;
+      const calScore = calR >= 0.85 && calR <= 1.10 ? 1 : Math.max(0, 1 - Math.abs(calR - 1) * 2);
+      const protScore = day.nutrition_totals.protein_g ? Math.min(day.nutrition_totals.protein_g / settings.protein_goal_g, 1) : N;
+      nutrition = (calScore + protScore) / 2;
+    }
+    let recovery = N;
+    if (day.recovery) {
+      const r = day.recovery;
+      const scores = [];
+      if (r.soreness       != null) scores.push(1 - (r.soreness - 1) / 6);
+      if (r.stress         != null) scores.push(1 - (r.stress - 1) / 6);
+      if (r.burnout        != null) scores.push(1 - (r.burnout - 1) / 6);
+      if (r.mental_fatigue != null) scores.push(1 - (r.mental_fatigue - 1) / 6);
+      if (r.social_battery != null) scores.push((r.social_battery - 1) / 6);
+      if (r.motivation     != null) scores.push((r.motivation - 1) / 6);
+      if (scores.length) recovery = scores.reduce((a, b) => a + b, 0) / scores.length;
+    }
+    const consistency = Math.min(streak / 7, 1);
+    return {
+      Sleep:       Math.round(sleepScore * 100),
+      Hydration:   Math.round(hydration * 100),
+      Exercise:    Math.round(exercise * 100),
+      Mood:        Math.round(moodScore * 100),
+      Nutrition:   Math.round(nutrition * 100),
+      Recovery:    Math.round(recovery * 100),
+      Consistency: Math.round(consistency * 100),
+    };
+  }
+
   // ---- Snapshot ----
   function renderSnapshot(date, day, settings) {
     const el = $('hlSnapshot');
@@ -240,10 +284,28 @@
     if (cals != null) metrics += row('Calories', cals.toLocaleString(), null, 'from nutrition');
     if (protein != null) metrics += row('Protein', protein + 'g', null, null);
 
+    const factors = calcFactors(date, day, settings);
+    const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
+      const color = pct >= 80 ? 'var(--success, #5fd687)' : pct >= 60 ? 'var(--amber, #F2C063)' : 'var(--danger, #ff6b6b)';
+      return `<div class="hl-factor-row">
+        <span class="hl-factor-label">${name}</span>
+        <div class="hl-factor-bar"><div class="hl-factor-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="hl-factor-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+
     el.innerHTML = `<div class="hl-snap-inner">
       <div class="hl-ring-wrap">${ringSvg}</div>
       <div class="hl-metrics">${metrics}</div>
-    </div>`;
+    </div>
+    <div class="hl-factors">${factorBarsHtml}</div>`;
+  }
+
+  // ---- Throttled render (water rapid-click guard) ----
+  let _lastRender = 0;
+  function _throttledRender() {
+    const now = Date.now();
+    if (now - _lastRender > 200) { _lastRender = now; renderHealth(); }
   }
 
   // ---- Quick Log ----
@@ -263,24 +325,9 @@
     const sleepBed = day.sleep_bedtime || '';
     const sleepWake = day.sleep_waketime || '';
     const waterOz = day.water_oz || 0;
-    const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
-    const rec = day.recovery || {};
-
-    const slidersHtml = RECOVERY_SLIDERS.map(s => {
-      const val = rec[s.key] != null ? rec[s.key] : 4;
-      return `<div class="ql-slider-row">
-        <div class="ql-slider-meta">
-          <span class="ql-slider-label">${s.label}</span>
-          <span class="ql-slider-val" id="qlSv-${s.key}">${val}</span>
-        </div>
-        <div class="ql-slider-range-row">
-          <span class="ql-slider-bound">${s.lo}</span>
-          <input type="range" class="ql-slider" min="1" max="7" value="${val}" data-recovery="${s.key}" id="qlSl-${s.key}">
-          <span class="ql-slider-bound ql-slider-bound-hi">${s.hi}</span>
-        </div>
-      </div>`;
-    }).join('');
-
+    const waterMax = settings.water_goal_oz * 1.3;
+    const waterPct = Math.min(waterOz / waterMax * 100, 100);
+    const waterGoalPct = (settings.water_goal_oz / waterMax * 100).toFixed(1);
     const use12h = settings.time_format_12h;
 
     el.innerHTML = `
@@ -305,6 +352,7 @@
             <div class="ql-water-top">
               <div class="ql-water-bar">
                 <div class="ql-water-fill" style="width:${waterPct.toFixed(1)}%"></div>
+                <div class="ql-water-goal-tick" style="left:${waterGoalPct}%"></div>
               </div>
               <span class="ql-water-val"><span id="qlWaterNum">${waterOz}</span> / ${settings.water_goal_oz} oz</span>
             </div>
@@ -313,14 +361,11 @@
               <button type="button" class="ql-water-btn" data-add="16">+16</button>
               <button type="button" class="ql-water-btn" data-add="32">+32</button>
               <button type="button" class="ql-water-btn ql-water-sub" data-add="-8">−8</button>
+              <input type="number" class="ql-water-custom" id="qlWaterCustom" min="0" placeholder="oz">
             </div>
           </div>
         </div>
-      </div>
-      <div class="ql-divider"></div>
-      <div class="ql-rec-head">Recovery</div>
-      <div class="ql-sliders">${slidersHtml}
-    </div>`;
+      </div>`;
 
     el.querySelectorAll('.ql-sleep-time-disp').forEach(btn => {
       btn.addEventListener('click', () => openSleepModal(btn.dataset.sleepField, date, day, settings));
@@ -339,22 +384,23 @@
       btn.addEventListener('click', () => {
         day.water_oz = Math.max(0, (day.water_oz || 0) + parseInt(btn.dataset.add, 10));
         saveDay(date, day);
-        renderHealth();
+        _throttledRender();
       });
     });
 
-    el.querySelectorAll('.ql-slider').forEach(slider => {
-      slider.addEventListener('input', () => {
-        const key = slider.dataset.recovery;
-        const val = parseInt(slider.value, 10);
-        if (!day.recovery) day.recovery = {};
-        day.recovery[key] = val;
-        const valEl = $('qlSv-' + key);
-        if (valEl) valEl.textContent = val;
+    const customInput = $('qlWaterCustom');
+    if (customInput) {
+      function _addCustomWater() {
+        const val = parseInt(customInput.value, 10);
+        if (!val || val <= 0) return;
+        day.water_oz = Math.max(0, (day.water_oz || 0) + val);
         saveDay(date, day);
-        renderSnapshot(date, day, settings);
-      });
-    });
+        customInput.value = '';
+        renderHealth();
+      }
+      customInput.addEventListener('blur', _addCustomWater);
+      customInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); _addCustomWater(); } });
+    }
   }
 
   // ---- Sleep modal ----
@@ -465,7 +511,7 @@
       if (_spSettings.time_format_12h) {
         const t = _to12h(_spH, _spM);
         t.hour = ((t.hour - 1 + delta + 12) % 12) + 1;
-        _spH = _to24h(t.hour, 0, t.ampm).hour;
+        _spH = _to24h(t.hour, _spM, t.ampm).hour;
       } else {
         _spH = (_spH + delta + 24) % 24;
       }
@@ -474,7 +520,7 @@
     } else if (type === 'a') {
       const t = _to12h(_spH, _spM);
       t.ampm = t.ampm === 'AM' ? 'PM' : 'AM';
-      _spH = _to24h(t.hour, 0, t.ampm).hour;
+      _spH = _to24h(t.hour, _spM, t.ampm).hour;
     }
     _spRefreshDisplay();
   }
@@ -514,19 +560,29 @@
     return `hsl(${hue.toFixed(0)}, 62%, 52%)`;
   }
 
-  function renderRecovery(day) {
+  function renderRecovery(date, day) {
     const el = $('rcCard');
     if (!el) return;
 
-    const rec = day.recovery;
-    const hasData = rec && Object.keys(rec).length > 0;
+    const rec = day.recovery || {};
 
-    if (!hasData) {
-      el.innerHTML = '<div class="rc-empty">Use the recovery sliders in Quick Log above to track how you feel.</div>';
-      return;
-    }
+    const slidersHtml = RECOVERY_SLIDERS.map(s => {
+      const val = rec[s.key] != null ? rec[s.key] : 4;
+      return `<div class="rc-slider-row">
+        <div class="rc-slider-meta">
+          <span class="rc-slider-label">${s.label}</span>
+          <span class="rc-slider-val" id="rcSv-${s.key}">${val}</span>
+        </div>
+        <div class="rc-slider-range-row">
+          <span class="rc-slider-bound">${s.lo}</span>
+          <input type="range" class="rc-slider" min="1" max="7" value="${val}" data-recovery="${s.key}" id="rcSl-${s.key}">
+          <span class="rc-slider-bound rc-slider-bound-hi">${s.hi}</span>
+        </div>
+      </div>`;
+    }).join('');
 
-    const rowsHtml = RC_METRICS.map(m => {
+    const hasBarData = Object.keys(rec).length > 0;
+    const barsHtml = hasBarData ? `<div class="rc-rows">${RC_METRICS.map(m => {
       const val = rec[m.key];
       if (val == null) {
         return `<div class="rc-row rc-row-empty">
@@ -548,9 +604,22 @@
         <span class="rc-bound rc-hi">${m.hi}</span>
         <span class="rc-val">${val}<span class="rc-val-denom">/7</span></span>
       </div>`;
-    }).join('');
+    }).join('')}</div>` : '';
 
-    el.innerHTML = `<div class="rc-rows">${rowsHtml}</div>`;
+    el.innerHTML = `<div class="rc-sliders">${slidersHtml}</div>${barsHtml}`;
+
+    el.querySelectorAll('.rc-slider').forEach(slider => {
+      slider.addEventListener('input', () => {
+        const key = slider.dataset.recovery;
+        const val = parseInt(slider.value, 10);
+        if (!day.recovery) day.recovery = {};
+        day.recovery[key] = val;
+        const valEl = $('rcSv-' + key);
+        if (valEl) valEl.textContent = val;
+        saveDay(date, day);
+        renderSnapshot(date, day, getSettings());
+      });
+    });
   }
 
   // ---- Insights (Phase 5) ----
@@ -897,6 +966,7 @@
                 <span class="nt-meal-time">${escHtml(m.time || '')}</span>
                 <span class="nt-meal-name">${escHtml(m.name)}</span>
                 <span class="nt-meal-cals">${m.calories || 0} cal</span>
+                <button type="button" class="nt-meal-edit" data-edit="${m._i}" aria-label="Edit">✎</button>
                 <button type="button" class="nt-meal-del" data-del="${m._i}" aria-label="Remove">×</button>
               </div>`).join('')}
           </div>`).join('');
@@ -934,6 +1004,13 @@
         saveDay(date, day);
         window.dispatchEvent(new CustomEvent('nutrition-updated'));
         renderHealth();
+      });
+    });
+
+    el.querySelectorAll('.nt-meal-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.edit, 10);
+        openMealModal(date, day, settings, null, idx);
       });
     });
 
@@ -975,30 +1052,33 @@
   // ---- Meal modal ----
   let _escHandler = null;
 
-  function openMealModal(date, day, settings, prefill) {
+  function openMealModal(date, day, settings, prefill, editIndex) {
     const bg = $('ntModalBg');
     if (!bg) return;
+
+    const editing = editIndex != null && day.meals && day.meals[editIndex];
+    const src = editing ? day.meals[editIndex] : prefill;
 
     const GROUPS = ['breakfast', 'lunch', 'dinner', 'snacks'];
     const now = new Date();
     const defaultTime = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
     const h = now.getHours();
     const defaultGroup = h < 10 ? 'breakfast' : h < 13 ? 'lunch' : h < 17 ? 'dinner' : 'snacks';
-    const selGroup = prefill ? (prefill.group || defaultGroup) : defaultGroup;
+    const selGroup = src ? (src.group || defaultGroup) : defaultGroup;
 
     bg.innerHTML = `<div class="nt-modal glass">
-      <div class="nt-modal-title">${prefill ? 'Quick Add' : 'Log Meal'}</div>
+      <div class="nt-modal-title">${editing ? 'Edit Meal' : prefill ? 'Quick Add' : 'Log Meal'}</div>
       <div class="nt-modal-body">
         <div class="nt-form-row">
           <label class="nt-form-label" for="ntfName">Name</label>
           <input type="text" class="nt-form-input" id="ntfName"
-            value="${prefill ? escHtml(prefill.name) : ''}" placeholder="e.g. Oatmeal + banana" autocomplete="off">
+            value="${src ? escHtml(src.name) : ''}" placeholder="e.g. Oatmeal + banana" autocomplete="off">
         </div>
         <div class="nt-form-2col">
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfTime">Time</label>
             <input type="time" class="nt-form-input" id="ntfTime"
-              value="${prefill ? (prefill.time || defaultTime) : defaultTime}">
+              value="${src ? (src.time || defaultTime) : defaultTime}">
           </div>
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfGroup">Meal</label>
@@ -1013,22 +1093,22 @@
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfCal">Calories</label>
             <input type="number" class="nt-form-input" id="ntfCal" min="0"
-              value="${prefill ? (prefill.calories || '') : ''}" placeholder="0">
+              value="${src ? (src.calories || '') : ''}" placeholder="0">
           </div>
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfProt">Protein g</label>
             <input type="number" class="nt-form-input" id="ntfProt" min="0" step="0.1"
-              value="${prefill ? (prefill.protein_g || '') : ''}" placeholder="0">
+              value="${src ? (src.protein_g || '') : ''}" placeholder="0">
           </div>
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfCarbs">Carbs g</label>
             <input type="number" class="nt-form-input" id="ntfCarbs" min="0" step="0.1"
-              value="${prefill ? (prefill.carbs_g || '') : ''}" placeholder="0">
+              value="${src ? (src.carbs_g || '') : ''}" placeholder="0">
           </div>
           <div class="nt-form-row">
             <label class="nt-form-label" for="ntfFat">Fat g</label>
             <input type="number" class="nt-form-input" id="ntfFat" min="0" step="0.1"
-              value="${prefill ? (prefill.fat_g || '') : ''}" placeholder="0">
+              value="${src ? (src.fat_g || '') : ''}" placeholder="0">
           </div>
         </div>
       </div>
@@ -1057,7 +1137,7 @@
         fat_g:     parseFloat($('ntfFat').value)   || 0,
       };
       if (!day.meals) day.meals = [];
-      day.meals.push(meal);
+      if (editing) { day.meals[editIndex] = meal; } else { day.meals.push(meal); }
       recalcTotals(day);
       saveDay(date, day);
       window.dispatchEvent(new CustomEvent('nutrition-updated'));
@@ -1076,18 +1156,176 @@
     if (_escHandler) { document.removeEventListener('keydown', _escHandler); _escHandler = null; }
   }
 
+  // ---- Settings panel ----
+  let _settingsOpen = false;
+
+  function renderSettings() {
+    const el = $('hlSettingsPanel');
+    if (!el) return;
+    el.hidden = !_settingsOpen;
+    if (!_settingsOpen) return;
+
+    const settings = getSettings();
+    const fields = [
+      { key: 'water_goal_oz',    label: 'Water goal (oz)',    min: 0 },
+      { key: 'sleep_goal_hours', label: 'Sleep goal (hrs)',   min: 0, step: 0.5 },
+      { key: 'calorie_goal',     label: 'Calorie goal',       min: 0 },
+      { key: 'protein_goal_g',   label: 'Protein goal (g)',   min: 0 },
+      { key: 'carbs_goal_g',     label: 'Carbs goal (g)',     min: 0 },
+      { key: 'fat_goal_g',       label: 'Fat goal (g)',       min: 0 },
+      { key: 'focus_goal_min',   label: 'Focus goal (min)',   min: 0 },
+    ];
+
+    el.innerHTML = `<div class="hl-settings-inner">
+      <div class="hl-settings-grid">
+        ${fields.map(f => `
+          <div class="hl-settings-field">
+            <label class="hl-settings-label">${f.label}</label>
+            <input type="number" class="hl-settings-input" data-key="${f.key}"
+              value="${settings[f.key]}" min="${f.min}"${f.step ? ` step="${f.step}"` : ''}>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+    el.querySelectorAll('.hl-settings-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const s = getSettings();
+        s[input.dataset.key] = parseFloat(input.value) || 0;
+        localStorage.setItem('health_settings', JSON.stringify(s));
+        renderHealth();
+      });
+    });
+  }
+
+  function initSettings() {
+    const toggle = $('hlSettingsToggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', () => {
+      _settingsOpen = !_settingsOpen;
+      renderSettings();
+    });
+  }
+
+  // ---- Date nav ----
+  function renderDateNav() {
+    const viewDate = _resolveViewDate();
+    const today = getActiveDate();
+    const displayEl = $('hlDateDisplay');
+    const pickerEl = $('hlDatePicker');
+    const nextBtn = $('hlDateNext');
+    if (!displayEl) return;
+    if (viewDate === today) {
+      displayEl.textContent = 'Today';
+    } else {
+      const d = new Date(viewDate + 'T00:00:00');
+      displayEl.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+    if (pickerEl) pickerEl.value = viewDate;
+    if (nextBtn) nextBtn.disabled = viewDate >= today;
+  }
+
+  function initDateNav() {
+    const prev = $('hlDatePrev');
+    const next = $('hlDateNext');
+    const picker = $('hlDatePicker');
+    const todayBtn = $('hlDateToday');
+    if (!prev) return;
+
+    prev.addEventListener('click', () => {
+      const d = new Date(_resolveViewDate() + 'T00:00:00');
+      d.setDate(d.getDate() - 1);
+      _setViewDate(dateToYMD(d));
+      renderHealth();
+    });
+
+    next.addEventListener('click', () => {
+      const d = new Date(_resolveViewDate() + 'T00:00:00');
+      d.setDate(d.getDate() + 1);
+      const newDate = dateToYMD(d);
+      if (newDate <= getActiveDate()) { _setViewDate(newDate); renderHealth(); }
+    });
+
+    picker.addEventListener('input', () => {
+      if (picker.value && picker.value <= getActiveDate()) {
+        _setViewDate(picker.value);
+        renderHealth();
+      }
+    });
+
+    todayBtn.addEventListener('click', () => {
+      _setViewDate(null);
+      renderHealth();
+    });
+  }
+
   // ---- Main render ----
   function renderHealth() {
-    const date = getActiveDate();
+    const date = _resolveViewDate();
     const day = loadDay(date);
     const settings = getSettings();
+    renderDateNav();
+    renderSettings();
     renderSnapshot(date, day, settings);
     renderQuickLog(date, day, settings);
-    renderRecovery(day);
+    renderRecovery(date, day);
     renderNutrition(date, day, settings);
     renderTrends(date, settings);
     renderInsights(date, settings);
   }
 
+  // ---- Export / Import ----
+  function exportHealthData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('health:') || key === 'health_settings') {
+        try { data[key] = JSON.parse(localStorage.getItem(key)); }
+        catch (e) { data[key] = localStorage.getItem(key); }
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'health-export-' + getActiveDate() + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importHealthData(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (typeof data !== 'object' || Array.isArray(data)) throw new Error('invalid');
+        let count = 0;
+        Object.entries(data).forEach(([key, val]) => {
+          if (key.startsWith('health:') || key === 'health_settings') {
+            localStorage.setItem(key, JSON.stringify(val));
+            count++;
+          }
+        });
+        renderHealth();
+        if (window.showAlert) window.showAlert(count + ' entries imported.');
+        else alert(count + ' entries imported.');
+      } catch (err) {
+        if (window.showAlert) window.showAlert('Import failed: invalid JSON file.');
+        else alert('Import failed: invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function initExportImport() {
+    const exportBtn = $('hlExportBtn');
+    const importFile = $('hlImportFile');
+    if (exportBtn) exportBtn.addEventListener('click', exportHealthData);
+    if (importFile) importFile.addEventListener('change', () => {
+      if (importFile.files[0]) { importHealthData(importFile.files[0]); importFile.value = ''; }
+    });
+  }
+
   window.renderHealth = renderHealth;
+
+  document.addEventListener('DOMContentLoaded', () => { initDateNav(); initSettings(); initExportImport(); });
 })();

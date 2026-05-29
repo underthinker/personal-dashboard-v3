@@ -515,8 +515,25 @@
 <!-- ═══ TAB: HEALTH ═══ -->
 <div id="tab-health" class="tab-content">
 
+<div class="hl-date-nav">
+  <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
+  <div class="hl-date-display" id="hlDateDisplay">Today</div>
+  <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
+  <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
+  <button type="button" class="hl-date-today" id="hlDateToday">Today</button>
+  <div class="hl-date-actions">
+    <button type="button" class="hl-export-btn" id="hlExportBtn">Export</button>
+    <label class="hl-import-label" for="hlImportFile">Import
+      <input type="file" id="hlImportFile" accept=".json" style="display:none">
+    </label>
+  </div>
+</div>
+
 <div class="section">
-  <div class="section-title">Today's Snapshot</div>
+  <div class="section-title">Snapshot
+    <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
+  </div>
+  <div id="hlSettingsPanel" hidden></div>
   <div class="hl-snapshot" id="hlSnapshot"></div>
 </div>
 
