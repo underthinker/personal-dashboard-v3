@@ -1558,28 +1558,26 @@
       const card = root.querySelector('.gt-card');
       if (!card) return;
       const inner = card.querySelector('.gt-card-inner');
-      if (inner) {
-        inner.style.transition = 'none';
-        inner.style.opacity = '1';
-        inner.style.transform = 'translateY(0) scale(1)';
-      }
       card.style.transition = 'none';
       card.style.maxHeight = '0';
       card.classList.add('is-expanded');
       void card.offsetHeight;
+      // Measure natural height directly — inner.scrollHeight misses .card base padding
+      card.style.maxHeight = '99999px';
+      void card.offsetHeight;
+      const targetH = Math.round(card.getBoundingClientRect().height);
+      card.style.maxHeight = '0';
+      void card.offsetHeight;
       card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
-      if (inner) requestAnimationFrame(() => {
-        card.style.maxHeight = inner.scrollHeight + 'px';
+      requestAnimationFrame(() => {
+        card.style.maxHeight = targetH + 'px';
         card.addEventListener('transitionend', function handler(e) {
           if (e.propertyName === 'max-height') {
-            card.style.maxHeight = 'none';
-            card.style.transition = '';
-            if (inner) {
-              inner.style.transition = '';
-              inner.style.opacity = '';
-              inner.style.transform = '';
-            }
             card.removeEventListener('transitionend', handler);
+            card.style.transition = 'none';
+            card.style.maxHeight = '';
+            void card.offsetHeight;
+            card.style.transition = '';
           }
         });
       });
@@ -1667,30 +1665,28 @@
             const card = root.querySelector('.gt-card');
             if (card) {
               const inner = card.querySelector('.gt-card-inner');
-              if (inner) {
-                inner.style.transition = 'none';
-                inner.style.opacity = '1';
-                inner.style.transform = 'translateY(0) scale(1)';
-              }
               card.style.transition = 'none';
               card.style.maxHeight = '0';
               card.classList.add('is-expanded');
               void card.offsetHeight;
+              card.style.maxHeight = '99999px';
+              void card.offsetHeight;
+              const targetH2 = Math.round(card.getBoundingClientRect().height);
+              card.style.maxHeight = '0';
+              void card.offsetHeight;
               card.style.transition = 'max-height 0.5s cubic-bezier(0.16,1,0.3,1), border-color 0.4s ease, background 0.4s ease, box-shadow 0.4s ease';
-      if (inner) requestAnimationFrame(() => {
-        card.style.maxHeight = inner.scrollHeight + 'px';
-        card.addEventListener('transitionend', function gtReleaseMax(e) {
-          if (e.propertyName === 'max-height') {
-            card.style.maxHeight = 'none';
-            if (inner) {
-              inner.style.transition = '';
-              inner.style.opacity = '';
-              inner.style.transform = '';
-            }
-            card.removeEventListener('transitionend', gtReleaseMax);
-          }
-        });
-      });
+              requestAnimationFrame(() => {
+                card.style.maxHeight = targetH2 + 'px';
+                card.addEventListener('transitionend', function gtReleaseMax(e) {
+                  if (e.propertyName === 'max-height') {
+                    card.removeEventListener('transitionend', gtReleaseMax);
+                    card.style.transition = 'none';
+                    card.style.maxHeight = '';
+                    void card.offsetHeight;
+                    card.style.transition = '';
+                  }
+                });
+              });
             }
           }
         }

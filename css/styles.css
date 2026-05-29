@@ -3363,13 +3363,11 @@ margin-top: 15px;
   margin-bottom: 16px;
   background: var(--surface);
   box-shadow: var(--shadow-lg);
-  overflow: visible;
 }
 
 .gt-card.is-expanded .gt-card-inner {
   opacity: 1;
   transform: translateY(0) scale(1);
-  overflow: visible;
 }
 
 .gt-card-inner {
