@@ -10,6 +10,7 @@
 <script src="vendor/tesseract/tesseract.min.js"></script>
 <script src="vendor/pdfjs/pdf.min.js"></script>
 <script src="vendor/sortable.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <link rel="stylesheet" href="css/styles.css">
 <script>
   (function() {
@@ -437,20 +438,26 @@
 
 <div class="section">
 
-  <div class="ht-panel" id="htWeekPanel">
+  <div class="card ht-card" id="htWeekPanel">
+    <div class="card-head">
+      <span class="card-label">This Week</span>
+      <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><i data-lucide="settings" width="16" height="16"></i></button>
+    </div>
     <div class="ht-week-hdr" id="htWeekHdr"></div>
     <div class="ht-week-body" id="htWeekBody"></div>
     <div class="ht-notes-wrap">
-      <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       <input type="text" class="ht-notes-input" id="htTodayNotes" placeholder="Add a note for today…" />
     </div>
   </div>
 
-  <div class="mt-cal glass">
-    <div class="mt-cal-hdr">
-      <button class="mt-cal-nav" id="mtPrevBtn">‹</button>
-      <div class="mt-cal-title" id="mtCalTitle">—</div>
-      <button class="mt-cal-nav" id="mtNextBtn">›</button>
+  <div class="card ht-card" id="htCalCard">
+    <div class="card-head">
+      <span class="card-label">History</span>
+      <div class="ht-cal-nav">
+        <button class="mt-cal-nav" id="mtPrevBtn"><i data-lucide="chevron-left" width="18" height="18"></i></button>
+        <span class="mt-cal-title" id="mtCalTitle">—</span>
+        <button class="mt-cal-nav" id="mtNextBtn"><i data-lucide="chevron-right" width="18" height="18"></i></button>
+      </div>
     </div>
     <div class="mt-cal-hdr-row" id="mtCalHdr"></div>
     <div class="mt-grid" id="mtGrid"></div>
@@ -465,7 +472,7 @@
     <div class="ht-set-list" id="htSetList"></div>
     <div class="ht-set-add">
       <input type="text" class="ht-set-add-in" id="htAddName" placeholder="New habit name…">
-      <button class="ht-set-add-emoji" id="htAddEmoji" title="Pick emoji">💤</button>
+      <button class="ht-set-add-emoji" id="htAddEmoji" title="Pick icon"></button>
       <button class="ht-set-add-go" id="htAddBtn">+ Add</button>
     </div>
     <div class="ht-set-done">
@@ -477,7 +484,7 @@
 <!-- Emoji Picker -->
 <div class="ht-ep-bg" id="htEpBg" role="dialog" aria-modal="true" hidden>
   <div class="ht-ep glass">
-    <div class="ht-ep-title">Pick an emoji</div>
+    <div class="ht-ep-title">Pick an icon</div>
     <div class="ht-ep-grid" id="htEpGrid"></div>
     <div class="ht-ep-done">
       <button class="ht-ep-done-btn" id="htEpClose">Done</button>

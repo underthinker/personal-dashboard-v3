@@ -3675,17 +3675,38 @@ margin-top: 15px;
   transform: rotate(60deg);
 }
 
+/* --- Card utility for habits tab --- */
+.ht-card {
+  flex: 1;
+  min-height: 0;
+  animation: card-entrance 0.5s var(--ease-out) both;
+}
+.ht-card + .ht-card {
+  animation-delay: 0.1s;
+}
+
+.ht-cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#htCalCard .card-head {
+  position: relative;
+}
+
+#htCalCard .ht-cal-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 /* --- Panels --- */
 .ht-panel {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  border-radius: var(--r);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  margin-bottom: 0;
   overflow-x: auto;
 }
 
@@ -3710,7 +3731,7 @@ margin-top: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ht-week-hdr-today { color: var(--success) !important; }
+.ht-week-hdr-today { color: var(--accent) !important; }
 
 .ht-week-body {
   flex: 1;
@@ -3734,7 +3755,7 @@ margin-top: 15px;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 .ht-week-cell {
   display: flex;
@@ -3757,24 +3778,18 @@ margin-top: 15px;
   background: rgba(255,255,255,0.04);
 }
 .ht-week-cb:checked {
-  background: var(--success);
-  border-color: var(--success);
-  box-shadow: 0 0 8px rgba(107,227,164,0.35);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
 }
 .ht-week-cb:checked::after {
   content: '';
   position: absolute;
-  left: 5px;
-  top: 2px;
-  width: 4px;
-  height: 8px;
-  border: solid #0A0A0B;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  animation: check-pop 0.25s var(--ease-bounce);
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/12px no-repeat;
 }
 .ht-week-cb.ht-today-marker {
-  border-color: rgba(107,227,164,0.30);
+  border-color: rgba(var(--accent-rgb), 0.30);
 }
 
 /* --- Habit month view --- */
@@ -3907,7 +3922,7 @@ margin-top: 15px;
   width: 100%;
   max-width: 420px;
   background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid var(--line);
   border-radius: var(--r);
   padding: 22px;
   box-shadow: var(--shadow-lg);
@@ -3942,12 +3957,12 @@ margin-top: 15px;
   border-radius: var(--r-sm);
   background: rgba(255,255,255,0.06);
   border: none;
-  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: var(--accent);
 }
 .ht-set-in {
   flex: 1;
@@ -3987,10 +4002,12 @@ margin-top: 15px;
   background: none;
   border: none;
   color: var(--muted-2);
-  font-size: 15px;
   cursor: pointer;
   padding: 2px 4px;
   opacity: 0.5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--dur-fast) var(--ease-smooth);
 }
 .ht-set-del:hover { opacity: 1; color: var(--danger); }
@@ -4020,35 +4037,37 @@ margin-top: 15px;
   border-radius: var(--r-sm);
   background: rgba(255,255,255,0.06);
   border: 1px solid var(--line);
-  font-size: 15px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--accent);
 }
 .ht-set-add-go {
   padding: 8px 14px;
   border-radius: var(--r-sm);
-  background: linear-gradient(180deg, #fff 0%, #e8e5dd 100%);
-  color: #0a0a0b;
+  background: var(--accent);
+  color: #1a0710;
   font-weight: 700;
   font-size: 12px;
   border: none;
   cursor: pointer;
-  transition: transform var(--dur-fast) var(--ease-bounce);
+  transition: transform var(--dur-fast) var(--ease-bounce), opacity var(--dur-fast) var(--ease-smooth);
 }
-.ht-set-add-go:hover { transform: translateY(-1px); }
+.ht-set-add-go:hover { transform: translateY(-1px); opacity: 0.9; }
 .ht-set-done { text-align: center; }
 .ht-set-done-btn {
   padding: 9px 22px;
   border-radius: var(--r-sm);
-  background: linear-gradient(180deg, #fff 0%, #e8e5dd 100%);
-  color: #0a0a0b;
+  background: var(--accent);
+  color: #1a0710;
   font-weight: 700;
   font-size: 12px;
   border: none;
   cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
 }
+.ht-set-done-btn:hover { opacity: 0.9; }
 
 /* --- Day editor modal --- */
 .ht-day-bg {
@@ -4113,21 +4132,27 @@ margin-top: 15px;
   transition: all var(--dur-fast) var(--ease-smooth);
 }
 .ht-day-cb.is-on {
-  background: var(--success);
-  border-color: var(--success);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .ht-day-cb.is-on::after {
-  content: '✓';
-  font-size: 12px;
-  font-weight: 800;
-  color: #0a0a0b;
-  line-height: 1;
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/14px no-repeat;
 }
 .ht-day-label {
   font-size: 13px;
   color: var(--muted);
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
+.ht-day-label .lucide,
+.ht-week-name .lucide,
+.hfr-name .lucide { color: var(--accent); }
+.hfr-name { display: inline-flex; align-items: center; gap: 10px; }
 .ht-day-notes-wrap { margin-bottom: 14px; }
 .ht-day-notes {
   width: 100%;
@@ -4179,7 +4204,7 @@ margin-top: 15px;
   width: 100%;
   max-width: 320px;
   background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid var(--line);
   border-radius: var(--r);
   padding: 18px;
   box-shadow: var(--shadow-lg);
@@ -4212,7 +4237,6 @@ margin-top: 15px;
   border: none;
   background: rgba(255,255,255,0.03);
   border-radius: var(--r-sm);
-  font-size: 17px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -4220,6 +4244,7 @@ margin-top: 15px;
   transition: background var(--dur-fast) var(--ease-smooth);
 }
 .ht-ep-cell:hover { background: rgba(255,255,255,0.10); }
+.ht-ep-cell.is-on { background: var(--accent); color: #1a0710; }
 .ht-ep-done { text-align: center; }
 .ht-ep-done-btn {
   padding: 8px 18px;
@@ -4243,10 +4268,6 @@ margin-top: 15px;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px;
-  border-radius: var(--r);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--line);
 }
 .mt-cal-hdr {
   display: flex;
@@ -4259,10 +4280,12 @@ margin-top: 15px;
   background: none;
   border: 1px solid rgba(255,255,255,0.10);
   color: var(--muted);
-  font-size: 18px;
   padding: 3px 10px;
   border-radius: var(--r-sm);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--dur-fast) var(--ease-smooth);
 }
 .mt-cal-nav:hover {
@@ -4308,8 +4331,8 @@ margin-top: 15px;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.08);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
   border: 1.5px solid var(--line);
   padding: 4px;
   cursor: pointer;
@@ -4317,11 +4340,12 @@ margin-top: 15px;
   position: relative;
 }
 .mt-gcell:hover {
-  background: rgba(255,255,255,0.12);
-  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.18);
 }
 .mt-gcell-today {
   border-width: 2px;
+  border-color: var(--accent);
 }
 .mt-gcell-empty {
   opacity: 0.6;
@@ -4473,7 +4497,7 @@ margin-top: 15px;
   width: 100%;
   max-width: 380px;
   background: var(--surface);
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid var(--line);
   border-radius: var(--r);
   padding: 20px;
   box-shadow: var(--shadow-lg);
@@ -4566,17 +4590,16 @@ margin-top: 15px;
 .de-done {
   padding: 9px 22px;
   border-radius: var(--r-sm);
-  background: linear-gradient(180deg, #fff 0%, #e8e5dd 100%);
-  color: #0a0a0b;
+  background: var(--accent);
+  color: #1a0710;
   font-weight: 700;
   font-size: 12px;
   border: none;
   cursor: pointer;
   font-family: inherit;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
 }
-.de-done:hover {
-  background: linear-gradient(180deg, #f0ede6 0%, #ddd9d0 100%);
-}
+.de-done:hover { opacity: 0.9; }
 
 /* ============================================================
    RESPONSIVE

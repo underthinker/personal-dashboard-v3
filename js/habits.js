@@ -51,27 +51,53 @@
 
   // ----------- Default habit definitions -----------
   const DEFAULT_HABITS = [
-    { id: 'sleep', name: 'Sleep 7-8 hours', emoji: '💤', active: true },
-    { id: 'hygiene', name: 'Personal Hygiene', emoji: '🧼', active: true },
-    { id: 'healthy_meals', name: 'Eat healthy meals', emoji: '🥗', active: true },
-    { id: 'go_outside', name: 'Go outside', emoji: '☀', active: true },
-    { id: 'no_fap', name: 'No fap', emoji: '🚫', active: true },
-    { id: 'water', name: 'Drink 64 oz. water', emoji: '💧', active: true },
-    { id: 'no_alcohol', name: 'No Alcohol', emoji: '🍺', active: true },
-    { id: 'exercise', name: 'Exercise', emoji: '🏋🏻‍♀️', active: true },
-    { id: 'productive', name: 'Productive Tasks', emoji: '🧹', active: true },
-    { id: 'creativity', name: 'Creativity', emoji: '🖋️', active: true },
+    { id: 'sleep', name: 'Sleep 7-8 hours', icon: 'moon', active: true },
+    { id: 'hygiene', name: 'Personal Hygiene', icon: 'sparkles', active: true },
+    { id: 'healthy_meals', name: 'Eat healthy meals', icon: 'utensils', active: true },
+    { id: 'go_outside', name: 'Go outside', icon: 'sun', active: true },
+    { id: 'no_fap', name: 'No fap', icon: 'ban', active: true },
+    { id: 'water', name: 'Drink 64 oz. water', icon: 'droplet', active: true },
+    { id: 'no_alcohol', name: 'No Alcohol', icon: 'wine', active: true },
+    { id: 'exercise', name: 'Exercise', icon: 'dumbbell', active: true },
+    { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
+    { id: 'creativity', name: 'Creativity', icon: 'pen-tool', active: true },
   ];
 
   function generateId(name) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
   }
 
+  const EMOJI_TO_ICON = {
+    '💤': 'moon', '🧼': 'sparkles', '🥗': 'utensils', '☀': 'sun',
+    '☀️': 'sun', '🚫': 'ban', '💧': 'droplet', '🍺': 'beer',
+    '🏋🏻‍♀️': 'dumbbell', '🏋️‍♀️': 'dumbbell', '🧹': 'list-checks',
+    '🖋️': 'pen-tool', '🏃': 'running', '📖': 'book', '🧘': 'leaf',
+    '💪': 'zap', '🎯': 'target', '✅': 'check', '🍎': 'apple',
+    '🥑': 'leaf', '🏄': 'waves', '🚴': 'bike', '⚽': 'circle',
+    '🎨': 'palette', '🎵': 'music', '📝': 'pen-line', '💻': 'monitor',
+    '🌿': 'leaf', '🌅': 'sunrise', '😴': 'moon', '❤️': 'heart',
+    '🔥': 'flame', '⭐': 'star', '🎭': 'theater', '✍️': 'pen-tool',
+    '📚': 'book', '🥦': 'apple', '🍳': 'cooking-pot', '🎸': 'music',
+    '🎮': 'gamepad-2', '🏆': 'trophy', '🌟': 'star', '🐾': 'paw-print',
+    '🍵': 'coffee', '🧠': 'brain', '💡': 'lightbulb', '🌈': 'rainbow',
+    '🎪': 'circus', '🧑‍🤝‍🧑': 'users', '📱': 'smartphone'
+  };
+
   function getDefinitions() {
     let defs = storeGet('habit_definitions');
     if (!defs || !defs.length) {
       defs = DEFAULT_HABITS;
       storeSet('habit_definitions', defs);
+    } else {
+      let migrated = false;
+      defs.forEach(function(d) {
+        if (d.emoji && !d.icon) {
+          d.icon = EMOJI_TO_ICON[d.emoji] || 'circle';
+          delete d.emoji;
+          migrated = true;
+        }
+      });
+      if (migrated) storeSet('habit_definitions', defs);
     }
     return defs;
   }
@@ -118,6 +144,11 @@
     '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/><path d="M15 14a5 5 0 0 0-7.584 2"/><path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/></svg>'
   ];
 
+  function lucideIconHtml(name, size) {
+    size = size || 14;
+    return '<i data-lucide="' + name + '" width="' + size + '" height="' + size + '"></i>';
+  }
+
   function moodSvgUri(key) {
     const svg = MOOD_SVGS[key];
     return svg ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) : '';
@@ -139,6 +170,7 @@
   let emojiPickerCallback = null;
   let lastFocus = null;
   let editorDate = null;
+  let _newHabitIcon = 'moon';
 
   // ============================================================
   // HABIT TRACKER
@@ -175,7 +207,7 @@
 
         const name = document.createElement('div');
         name.className = 'ht-week-name';
-        name.textContent = def.emoji + ' ' + def.name;
+        name.innerHTML = lucideIconHtml(def.icon || 'circle', 14) + ' ' + def.name;
         row.appendChild(name);
 
         for (let d = 0; d < 7; d++) {
@@ -218,6 +250,7 @@
         setDayData(today, cur);
       };
     }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   function renderHabitsView() {
@@ -237,7 +270,7 @@
 
       const emojiBtn = document.createElement('button');
       emojiBtn.className = 'ht-set-eb';
-      emojiBtn.textContent = def.emoji || '💤';
+      emojiBtn.innerHTML = lucideIconHtml(def.icon || 'moon', 15);
 
       const nameInput = document.createElement('input');
       nameInput.type = 'text';
@@ -249,19 +282,19 @@
 
       const delBtn = document.createElement('button');
       delBtn.className = 'ht-set-del';
-      delBtn.textContent = '×';
+      delBtn.innerHTML = lucideIconHtml('trash-2', 13);
 
       emojiBtn.addEventListener('click', () => {
         lastFocus = document.activeElement;
-        emojiPickerCallback = (emoji) => {
-          def.emoji = emoji;
+        emojiPickerCallback = (iconName) => {
+          def.icon = iconName;
           defs[idx] = def;
           setDefinitions(defs);
           renderSettings();
           renderHabitsView();
         };
         $('htEpBg').classList.add('show');
-        renderEmojiPicker(def.emoji || '💤');
+        renderEmojiPicker(def.icon || 'moon');
         setTimeout(() => { const f = $('htEpBg').querySelector('button'); if (f) f.focus(); }, 60);
       });
 
@@ -327,6 +360,7 @@
       row.appendChild(delBtn);
       listEl.appendChild(row);
     });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   function openSettings() {
@@ -355,31 +389,40 @@
       return;
     }
 
-    defs.push({ id, name, emoji: emojiBtn.textContent || '💤', active: true });
+    defs.push({ id, name, icon: _newHabitIcon, active: true });
     setDefinitions(defs);
     nameInput.value = '';
     renderSettings();
     renderHabitsView();
   }
 
-  // ----------- Emoji Picker -----------
-  const EMOJI_LIST = ['💤', '🧼', '🥗', '☀️', '🚫', '💧', '🍺', '🏋️‍♀️', '🧹', '🖋️', '🏃', '📖', '🧘', '💪', '🎯', '✅', '🍎', '🥑', '🏄', '🚴', '⚽', '🎨', '🎵', '📝', '💻', '🌿', '🌅', '😴', '❤️', '🔥', '⭐', '🎭', '✍️', '📚', '🥦', '🍳', '🎸', '🎮', '🏆', '🌟', '🐾', '🍵', '🧠', '💡', '🌈', '🎪', '🧑‍🤝‍🧑', '📱'];
+  // ----------- Icon Picker -----------
+  const ICON_LIST = [
+    'moon', 'sparkles', 'sun', 'ban', 'droplet', 'dumbbell', 'pen-tool', 'list-checks',
+    'utensils', 'book', 'music', 'bike', 'heart', 'star', 'brain', 'coffee',
+    'code', 'palette', 'camera', 'smile', 'zap', 'target', 'compass', 'clock',
+    'calendar', 'leaf', 'eye', 'flag', 'gift', 'home', 'key', 'tree-pine',
+    'cloud', 'mountain', 'users', 'feather', 'search', 'plus', 'cross', 'apple',
+    'wine', 'beer', 'droplets', 'paw-print', 'ruler', 'bell', 'refresh-cw', 'check'
+  ];
 
-  function renderEmojiPicker(currentEmoji) {
+  function renderEmojiPicker(currentIcon) {
     const grid = $('htEpGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    EMOJI_LIST.forEach((em) => {
+    ICON_LIST.forEach(function(iconName) {
       const btn = document.createElement('button');
       btn.className = 'ht-ep-cell';
-      btn.textContent = em;
-      btn.addEventListener('click', () => {
-        if (emojiPickerCallback) emojiPickerCallback(em);
+      btn.innerHTML = lucideIconHtml(iconName, 20);
+      if (iconName === currentIcon) btn.classList.add('is-on');
+      btn.addEventListener('click', function() {
+        if (emojiPickerCallback) emojiPickerCallback(iconName);
         $('htEpBg').classList.remove('show');
         emojiPickerCallback = null;
       });
       grid.appendChild(btn);
     });
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   function closeEmojiPicker() {
@@ -521,6 +564,7 @@
       MOOD_DEFS.forEach((mood) => {
         const btn = document.createElement('button');
         btn.className = 'de-mood-btn' + (currentMood === mood.key ? ' is-on' : '');
+        btn.title = mood.label;
         btn.style.color = mood.color;
 
         const em = document.createElement('img');
@@ -560,7 +604,7 @@
 
         const label = document.createElement('span');
         label.className = 'ht-day-label';
-        label.textContent = def.emoji + ' ' + def.name;
+        label.innerHTML = lucideIconHtml(def.icon || 'circle', 14) + ' ' + def.name;
 
         item.appendChild(cb);
         item.appendChild(label);
@@ -583,6 +627,7 @@
     if (notesEl) {
       notesEl.value = data.notes || '';
     }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   // ============================================================
@@ -610,16 +655,19 @@
       if (e.key === 'Enter') handleAddHabit();
     });
 
-    // Emoji picker button in settings
+    // Icon picker button for new habit
     const addEmojiBtn = $('htAddEmoji');
     if (addEmojiBtn) {
+      addEmojiBtn.innerHTML = lucideIconHtml(_newHabitIcon, 16);
       addEmojiBtn.addEventListener('click', () => {
         lastFocus = document.activeElement;
-        emojiPickerCallback = (emoji) => {
-          addEmojiBtn.textContent = emoji;
+        emojiPickerCallback = (iconName) => {
+          _newHabitIcon = iconName;
+          addEmojiBtn.innerHTML = lucideIconHtml(iconName, 16);
+          if (typeof lucide !== 'undefined') lucide.createIcons();
         };
         $('htEpBg').classList.add('show');
-        renderEmojiPicker(addEmojiBtn.textContent || '💤');
+        renderEmojiPicker(_newHabitIcon);
         setTimeout(() => { const f = $('htEpBg').querySelector('button'); if (f) f.focus(); }, 60);
       });
     }
@@ -666,6 +714,7 @@
     renderHabitsView();
     renderMoodCalendar();
     renderHomeHealthRings();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
     // Clear note and re-render when calendar day changes
     let _lastDay = todayYMD();
@@ -712,12 +761,13 @@
       html += '</svg>';
       html += '<span class="hfr-pct">' + pct + '%</span>';
       html += '</div>';
-      html += '<span class="hfr-name">' + def.emoji + ' ' + def.name + '</span>';
+      html += '<span class="hfr-name">' + lucideIconHtml(def.icon || 'circle', 14) + ' ' + def.name + '</span>';
       html += '<span class="hfr-sublabel">' + done + '/7 days</span>';
       html += '</div>';
     });
 
     el.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
   window.renderHabitFullRings = renderHabitFullRings;
 
