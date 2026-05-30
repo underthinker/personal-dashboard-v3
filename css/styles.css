@@ -4510,6 +4510,7 @@ margin-top: 15px;
   flex-direction: column;
   gap: 0;
   justify-content: space-between;
+  position: relative;
 }
 
 .hl-log-section {
@@ -4744,7 +4745,8 @@ margin-top: 15px;
   font-size: 10px;
   color: var(--muted-2);
   white-space: nowrap;
-  min-width: 54px;
+  width: 76px;
+  flex-shrink: 0;
 }
 .rc-slider-bound-hi { text-align: right; }
 
@@ -4932,7 +4934,7 @@ margin-top: 15px;
   background: rgba(255,255,255,0.04);
   border: 1px dashed rgba(255,255,255,0.12);
   border-radius: var(--r-sm);
-  color: var(--muted);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -4943,9 +4945,9 @@ margin-top: 15px;
   font-family: inherit;
 }
 .nt-add-btn:hover {
-  background: rgba(107,227,164,0.07);
-  border-color: rgba(107,227,164,0.3);
-  color: var(--success);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ---------- Meal modal ---------- */
@@ -5471,7 +5473,7 @@ margin-top: 15px;
 }
 .hl-settings-toggle:hover { color: var(--text); background: rgba(255,255,255,0.07); }
 
-.nt-card .hl-settings-toggle {
+.hl-log-card .hl-settings-toggle {
   position: absolute;
   top: 14px;
   right: 14px;

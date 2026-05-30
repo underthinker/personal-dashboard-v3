@@ -1481,6 +1481,8 @@
       checkStreak();
       updateGreeting();
       renderCalendar();
+      window.renderHabits && window.renderHabits();
+      window.renderHealth && window.renderHealth();
       scheduleMidnightRollover();
     }, msUntilMidnight);
   }

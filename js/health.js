@@ -60,7 +60,7 @@
   // ---- Date helpers ----
   function dateToYMD(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function getActiveDate() {
-    const now = new Date(Date.now() - 6 * 3600000);
+    const now = new Date();
     return dateToYMD(now);
   }
 
@@ -306,6 +306,7 @@
     }).join('');
 
     el.innerHTML = `
+      <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -345,6 +346,9 @@
         <div class="hl-log-section-label">Recovery</div>
         <div class="rc-sliders">${slidersHtml}</div>
       </div>`;
+
+    const settingsBtn = $('hlSettingsToggle');
+    if (settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
 
     el.querySelectorAll('.ql-sleep-time-disp').forEach(btn => {
       btn.addEventListener('click', () => openSleepModal(btn.dataset.sleepField, date, day, settings));
@@ -889,7 +893,6 @@
       : '';
 
     el.innerHTML = `
-      <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
       <div class="nt-macros">
         ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber, #F2C063)')}
         ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', '#A2D2FF')}
@@ -902,9 +905,6 @@
 
     const addBtn = $('ntAddBtn');
     if (addBtn) addBtn.addEventListener('click', () => openMealModal(date, day, settings));
-
-    const settingsBtn = $('hlSettingsToggle');
-    if (settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
 
     el.querySelectorAll('.nt-meal-del').forEach(btn => {
       btn.addEventListener('click', () => {
