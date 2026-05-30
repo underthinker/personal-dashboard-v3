@@ -173,8 +173,9 @@
       if (scores.length) recovery = scores.reduce((a, b) => a + b, 0) / scores.length;
     }
 
-    // consistency streak × 0.10
-    const consistency = Math.min(streak / 7, 1);
+    // energy level × 0.10
+    const energy = (day.recovery && day.recovery.energy != null)
+      ? (day.recovery.energy - 1) / 6 : N;
 
     return Math.round((
       sleepScore  * 0.20 +
@@ -183,13 +184,12 @@
       moodScore   * 0.15 +
       nutrition   * 0.10 +
       recovery    * 0.10 +
-      consistency * 0.10
+      energy      * 0.10
     ) * 100);
   }
 
   function calcFactors(date, day, settings) {
     const N = 0.5;
-    const streak = getConsistencyStreak(date);
     const sleepScore = day.sleep_hours != null ? Math.min(day.sleep_hours / settings.sleep_goal_hours, 1) : N;
     const hydration = day.water_oz > 0 ? Math.min(day.water_oz / settings.water_goal_oz, 1) : N;
     const exercise = getExerciseDoneToday(date) ? 1.0 : N;
@@ -214,7 +214,8 @@
       if (r.motivation     != null) scores.push((r.motivation - 1) / 6);
       if (scores.length) recovery = scores.reduce((a, b) => a + b, 0) / scores.length;
     }
-    const consistency = Math.min(streak / 7, 1);
+    const energy = (day.recovery && day.recovery.energy != null)
+      ? (day.recovery.energy - 1) / 6 : N;
     return {
       Sleep:       Math.round(sleepScore * 100),
       Hydration:   Math.round(hydration * 100),
@@ -222,7 +223,7 @@
       Mood:        Math.round(moodScore * 100),
       Nutrition:   Math.round(nutrition * 100),
       Recovery:    Math.round(recovery * 100),
-      Consistency: Math.round(consistency * 100),
+      Energy:      Math.round(energy * 100),
     };
   }
 
@@ -313,6 +314,7 @@
     { key: 'soreness',       label: 'Soreness',       lo: 'Fresh',     hi: 'Wrecked'     },
     { key: 'stress',         label: 'Stress',         lo: 'Calm',      hi: 'Overwhelmed' },
     { key: 'burnout',        label: 'Burnout',        lo: 'Energized', hi: 'Empty'       },
+    { key: 'energy',         label: 'Energy',         lo: 'Drained',   hi: 'Charged'     },
     { key: 'mental_fatigue', label: 'Mental Fatigue', lo: 'Sharp',     hi: 'Foggy'       },
     { key: 'social_battery', label: 'Social Battery', lo: 'Drained',   hi: 'Full'        },
     { key: 'motivation',     label: 'Motivation',     lo: 'Zero',      hi: 'Fire'        },
@@ -550,6 +552,7 @@
     { key: 'soreness',       label: 'Soreness',       lo: 'Fresh',     hi: 'Wrecked',     neg: true  },
     { key: 'stress',         label: 'Stress',          lo: 'Calm',      hi: 'Overwhelmed', neg: true  },
     { key: 'burnout',        label: 'Burnout',         lo: 'Energized', hi: 'Empty',       neg: true  },
+    { key: 'energy',         label: 'Energy',          lo: 'Drained',   hi: 'Charged',     neg: false },
     { key: 'mental_fatigue', label: 'Mental Fatigue',  lo: 'Sharp',     hi: 'Foggy',       neg: true  },
     { key: 'social_battery', label: 'Social Battery',  lo: 'Drained',   hi: 'Full',        neg: false },
     { key: 'motivation',     label: 'Motivation',      lo: 'Zero',      hi: 'Fire',        neg: false },
@@ -1326,6 +1329,9 @@
   }
 
   window.renderHealth = renderHealth;
+  window.calcReadiness = calcReadiness;
+  window.getSettings = getSettings;
+  window.renderStatsPanel && window.renderStatsPanel();
 
   document.addEventListener('DOMContentLoaded', () => { initDateNav(); initSettings(); initExportImport(); });
 })();

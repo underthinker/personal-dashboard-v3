@@ -814,24 +814,6 @@
   window.updateGreeting = updateTopbarStatus; // Keep alias for tab switching compatibility
 
   // ============ PERFORMANCE OVERVIEW PANEL ============
-  function calcReadinessScore(now, todayYmd, health) {
-    var settings = {}; try { settings = JSON.parse(localStorage.getItem('health_settings') || '{}'); } catch(e) {}
-    var sleepGoal = settings.sleep_goal_hours || 8;
-    var focusGoal = settings.focus_goal_min || 240;
-    var yd = new Date(now); yd.setDate(yd.getDate() - 1);
-    var ydGoals = storeGet('goals:' + dateToYMD(yd)) || [];
-    var ydDone = ydGoals.filter(function(g) { return g && g.done; }).length;
-    var ydRate = ydGoals.length > 0 ? ydDone / ydGoals.length : null;
-    var todayMood = null;
-    try { todayMood = localStorage.getItem('mood:' + todayYmd); } catch(e) {}
-    var factors = [];
-    if (health.sleep_hours != null) factors.push(Math.min(health.sleep_hours / sleepGoal, 1));
-    if (health.focus_min > 0) factors.push(Math.min(health.focus_min / focusGoal, 1));
-    if (ydRate != null) factors.push(ydRate);
-    if (todayMood != null) factors.push(window.MOOD_SCORE_MAP[todayMood] || 0.5);
-    return factors.length > 0 ? Math.round((factors.reduce(function(a,b){return a+b;},0) / factors.length) * 100) : null;
-  }
-
   function renderStatsPanel() {
     var now = new Date();
     var todayYmd = dateToYMD(now);
@@ -941,8 +923,9 @@
     var taskSubEl = $('perfTaskSub'); if (taskSubEl) taskSubEl.textContent = doneTasks + ' / ' + totalTasks + ' tasks';
     var taskFillEl = $('perfTaskFill'); if (taskFillEl) taskFillEl.style.width = taskRate + '%';
 
-    // ── Readiness (sleep + focus + yesterday tasks + mood) ──
-    var readinessScore = calcReadinessScore(now, todayYmd, health);
+    // ── Readiness (7-factor weighted, shared with health tab) ──
+    var settings = window.getSettings ? window.getSettings() : { sleep_goal_hours: 8, water_goal_oz: 64, calorie_goal: 2200, protein_goal_g: 118 };
+    var readinessScore = window.calcReadiness ? window.calcReadiness(todayYmd, health, settings) : null;
     var readinessLabel = readinessScore == null ? '—' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
 
     var readEl = $('perfReadiness'); if (readEl) readEl.textContent = readinessScore != null ? readinessScore : '—';
@@ -1003,8 +986,6 @@
     var streakData = storeGet(STREAK_KEY) || { count: 0 };
     var todayAllDone = total > 0 && todayGoals.every(function(g) { return g && g.done; });
     var streak = streakData.count + (todayAllDone ? 1 : 0);
-
-    var readinessScore = calcReadinessScore(now, todayYmd, health);
 
   };
 
