@@ -17,7 +17,7 @@
     } catch (e) { return defaultSettings(); }
   }
   function defaultSettings() {
-    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, protein_goal_g: 118, carbs_goal_g: 250, fat_goal_g: 75, time_format_12h: false, focus_goal_min: 240 };
+    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, carbs_goal_g: 250, fat_goal_g: 75, protein_goal_g: 118, time_format_12h: false, focus_goal_min: 240 };
   }
 
   window.getFocusMinToday = function() {
@@ -229,12 +229,12 @@
     const readiness = calcReadiness(date, day, settings);
 
     // Ring SVG
-    const R = 40, CX = 52, CY = 52, CIRC = 2 * Math.PI * R;
+    const R = 48, CX = 62, CY = 62, CIRC = 2 * Math.PI * R;
     const pct = readiness != null ? readiness / 100 : 0;
     const ringColor = readiness == null ? 'rgba(255,255,255,0.06)' : 'var(--accent)';
-    const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 104 104" aria-hidden="true">
-      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="8"
+    const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 124 124" aria-hidden="true">
+      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
+      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="9"
         stroke-dasharray="${(pct * CIRC).toFixed(2)} ${CIRC.toFixed(2)}"
         stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})"/>
     </svg>
@@ -288,7 +288,6 @@
     const waterMax = settings.water_goal_oz * 1.3;
     const waterPct = Math.min(waterOz / waterMax * 100, 100);
     const waterGoalPct = (settings.water_goal_oz / waterMax * 100).toFixed(1);
-    const use12h = settings.time_format_12h;
     const rec = day.recovery || {};
 
     const slidersHtml = RECOVERY_SLIDERS.map(s => {
@@ -313,13 +312,12 @@
           <div class="ql-sleep-wrap">
             <div class="ql-sleep-sub">
               <span class="ql-sleep-sub-label">Bed</span>
-              <button type="button" class="ql-sleep-time-disp" data-sleep-field="bed">${_fmtDisplay(sleepBed, use12h)}</button>
+              <button type="button" class="ql-sleep-time-disp" data-sleep-field="bed">${_fmtDisplay(sleepBed, false)}</button>
             </div>
             <div class="ql-sleep-sub">
               <span class="ql-sleep-sub-label">Wake</span>
-              <button type="button" class="ql-sleep-time-disp" data-sleep-field="wake">${_fmtDisplay(sleepWake, use12h)}</button>
+              <button type="button" class="ql-sleep-time-disp" data-sleep-field="wake">${_fmtDisplay(sleepWake, false)}</button>
             </div>
-            <button type="button" class="ql-sleep-fmt" id="qlSleepFmt">${use12h ? '12h' : '24h'}</button>
           </div>
         </div>
         <div class="ql-row">
@@ -351,15 +349,6 @@
     el.querySelectorAll('.ql-sleep-time-disp').forEach(btn => {
       btn.addEventListener('click', () => openSleepModal(btn.dataset.sleepField, date, day, settings));
     });
-
-    const fmtBtn = $('qlSleepFmt');
-    if (fmtBtn) {
-      fmtBtn.addEventListener('click', () => {
-        settings.time_format_12h = !settings.time_format_12h;
-        localStorage.setItem('health_settings', JSON.stringify(settings));
-        renderLog(date, day, settings);
-      });
-    }
 
     el.querySelectorAll('.ql-water-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -900,11 +889,12 @@
       : '';
 
     el.innerHTML = `
+      <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
       <div class="nt-macros">
         ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber, #F2C063)')}
-        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--success, #6BE3A4)')}
         ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', '#A2D2FF')}
         ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', '#FFB5C2')}
+        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--success, #6BE3A4)')}
       </div>
       <div class="nt-meal-list">${mealListHtml}</div>
       ${recentHtml}
@@ -912,6 +902,9 @@
 
     const addBtn = $('ntAddBtn');
     if (addBtn) addBtn.addEventListener('click', () => openMealModal(date, day, settings));
+
+    const settingsBtn = $('hlSettingsToggle');
+    if (settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
 
     el.querySelectorAll('.nt-meal-del').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -960,9 +953,9 @@
     const meals = day.meals || [];
     day.nutrition_totals = {
       calories:  meals.reduce((s, m) => s + (m.calories  || 0), 0),
-      protein_g: meals.reduce((s, m) => s + (m.protein_g || 0), 0),
       carbs_g:   meals.reduce((s, m) => s + (m.carbs_g   || 0), 0),
       fat_g:     meals.reduce((s, m) => s + (m.fat_g     || 0), 0),
+      protein_g: meals.reduce((s, m) => s + (m.protein_g || 0), 0),
     };
   }
 
@@ -1013,11 +1006,6 @@
               value="${src ? (src.calories || '') : ''}" placeholder="0">
           </div>
           <div class="nt-form-row">
-            <label class="nt-form-label" for="ntfProt">Protein g</label>
-            <input type="number" class="nt-form-input" id="ntfProt" min="0" step="0.1"
-              value="${src ? (src.protein_g || '') : ''}" placeholder="0">
-          </div>
-          <div class="nt-form-row">
             <label class="nt-form-label" for="ntfCarbs">Carbs g</label>
             <input type="number" class="nt-form-input" id="ntfCarbs" min="0" step="0.1"
               value="${src ? (src.carbs_g || '') : ''}" placeholder="0">
@@ -1026,6 +1014,11 @@
             <label class="nt-form-label" for="ntfFat">Fat g</label>
             <input type="number" class="nt-form-input" id="ntfFat" min="0" step="0.1"
               value="${src ? (src.fat_g || '') : ''}" placeholder="0">
+          </div>
+          <div class="nt-form-row">
+            <label class="nt-form-label" for="ntfProt">Protein g</label>
+            <input type="number" class="nt-form-input" id="ntfProt" min="0" step="0.1"
+              value="${src ? (src.protein_g || '') : ''}" placeholder="0">
           </div>
         </div>
       </div>
@@ -1049,9 +1042,9 @@
         group:     $('ntfGroup').value,
         name,
         calories:  parseInt($('ntfCal').value,    10) || 0,
-        protein_g: parseFloat($('ntfProt').value)  || 0,
         carbs_g:   parseFloat($('ntfCarbs').value) || 0,
         fat_g:     parseFloat($('ntfFat').value)   || 0,
+        protein_g: parseFloat($('ntfProt').value)  || 0,
       };
       if (!day.meals) day.meals = [];
       if (editing) { day.meals[editIndex] = meal; } else { day.meals.push(meal); }
@@ -1085,9 +1078,9 @@
       { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
       { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
       { key: 'calorie_goal',     label: 'Calories',      min: 0 },
-      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
       { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
       { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
+      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
       { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
     ];
 
