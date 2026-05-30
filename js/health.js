@@ -229,7 +229,7 @@
 
   // ---- Snapshot ----
   function renderSnapshot(date, day, settings) {
-    const el = $('hlSnapshot');
+    const el = $('hlSnapshotBody');
     if (!el) return;
 
     const readiness = calcReadiness(date, day, settings);
@@ -244,10 +244,7 @@
     // Ring SVG
     const R = 40, CX = 52, CY = 52, CIRC = 2 * Math.PI * R;
     const pct = readiness != null ? readiness / 100 : 0;
-    const ringColor = readiness == null ? 'rgba(255,255,255,0.06)'
-      : readiness >= 80 ? 'var(--success, #5fd687)'
-      : readiness >= 60 ? 'var(--amber, #F2C063)'
-      : 'var(--danger, #ff6b6b)';
+    const ringColor = readiness == null ? 'rgba(255,255,255,0.06)' : 'var(--accent)';
     const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 104 104" aria-hidden="true">
       <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
       <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="8"
@@ -274,16 +271,13 @@
     if (sleepH != null) {
       const h = Math.floor(sleepH), m = Math.round((sleepH % 1) * 60);
       metrics += row('Sleep', h + 'h' + (m ? ' ' + m + 'm' : ''),
-        sleepH >= settings.sleep_goal_hours * 0.875, settings.sleep_goal_hours + 'h goal');
+        sleepH >= settings.sleep_goal_hours * 0.875, null);
     } else {
-      metrics += row('Sleep', '—', null, 'not logged');
+      metrics += row('Sleep', '—', null, null);
     }
-    metrics += row('Water', waterOz ? waterOz + ' oz' : '—', waterOz ? waterOz >= settings.water_goal_oz : null,
-      settings.water_goal_oz + 'oz goal');
-    metrics += row('Exercise', exerciseDone ? 'Done' : '—', exerciseDone || null, exerciseDone ? 'from gym' : null);
-    metrics += row('Mood', moodInfo ? moodSvgImg(mood) || moodInfo.emoji : '—', null, null);
-    if (cals != null) metrics += row('Calories', cals.toLocaleString(), null, 'from nutrition');
-    if (protein != null) metrics += row('Protein', protein + 'g', null, null);
+    metrics += row('Water', waterOz ? waterOz + ' oz' : '—', waterOz ? waterOz >= settings.water_goal_oz : null, null);
+    metrics += row('Calories', cals != null ? cals.toLocaleString() : '—', null, null);
+    metrics += row('Protein', protein != null ? protein + 'g' : '—', null, null);
 
     const factors = calcFactors(date, day, settings);
     const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
@@ -1136,38 +1130,46 @@
     if (_escHandler) { document.removeEventListener('keydown', _escHandler); _escHandler = null; }
   }
 
-  // ---- Settings panel ----
-  let _settingsOpen = false;
+  // ---- Settings modal ----
+  let _hsEscHandler = null;
 
-  function renderSettings() {
-    const el = $('hlSettingsPanel');
-    if (!el) return;
-    el.hidden = !_settingsOpen;
-    if (!_settingsOpen) return;
+  function openSettingsModal() {
+    const bg = $('hlSettingsModalBg');
+    if (!bg) return;
 
     const settings = getSettings();
     const fields = [
-      { key: 'water_goal_oz',    label: 'Water goal (oz)',    min: 0 },
-      { key: 'sleep_goal_hours', label: 'Sleep goal (hrs)',   min: 0, step: 0.5 },
-      { key: 'calorie_goal',     label: 'Calorie goal',       min: 0 },
-      { key: 'protein_goal_g',   label: 'Protein goal (g)',   min: 0 },
-      { key: 'carbs_goal_g',     label: 'Carbs goal (g)',     min: 0 },
-      { key: 'fat_goal_g',       label: 'Fat goal (g)',       min: 0 },
-      { key: 'focus_goal_min',   label: 'Focus goal (min)',   min: 0 },
+      { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
+      { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
+      { key: 'calorie_goal',     label: 'Calories',      min: 0 },
+      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
+      { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
+      { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
+      { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
     ];
 
-    el.innerHTML = `<div class="hl-settings-inner">
-      <div class="hl-settings-grid">
+    bg.innerHTML = `<div class="setup-modal">
+      <div class="setup-header">
+        <span class="setup-wordmark">Health Goals</span>
+        <p class="setup-sub">Adjust your daily health targets.</p>
+      </div>
+      <div class="hl-settings-modal-grid">
         ${fields.map(f => `
-          <div class="hl-settings-field">
-            <label class="hl-settings-label">${f.label}</label>
-            <input type="number" class="hl-settings-input" data-key="${f.key}"
+          <div class="setup-field">
+            <label class="setup-label">${f.label}</label>
+            <input type="number" class="setup-input hl-settings-mono-input" data-key="${f.key}"
               value="${settings[f.key]}" min="${f.min}"${f.step ? ` step="${f.step}"` : ''}>
           </div>`).join('')}
       </div>
+      <div class="setup-actions" style="justify-content:flex-end">
+        <button type="button" class="setup-skip" id="hlSettingsCancel">Cancel</button>
+        <button type="button" class="setup-save" id="hlSettingsSave">Done</button>
+      </div>
     </div>`;
 
-    el.querySelectorAll('.hl-settings-input').forEach(input => {
+    bg.hidden = false;
+
+    bg.querySelectorAll('.hl-settings-mono-input').forEach(input => {
       input.addEventListener('change', () => {
         const s = getSettings();
         s[input.dataset.key] = parseFloat(input.value) || 0;
@@ -1175,15 +1177,27 @@
         renderHealth();
       });
     });
+
+    $('hlSettingsCancel').addEventListener('click', closeSettingsModal);
+    $('hlSettingsSave').addEventListener('click', closeSettingsModal);
+
+    bg.addEventListener('click', e => { if (e.target === bg) closeSettingsModal(); });
+
+    if (_hsEscHandler) document.removeEventListener('keydown', _hsEscHandler);
+    _hsEscHandler = e => { if (e.key === 'Escape') closeSettingsModal(); };
+    document.addEventListener('keydown', _hsEscHandler);
+  }
+
+  function closeSettingsModal() {
+    const bg = $('hlSettingsModalBg');
+    if (bg) { bg.hidden = true; bg.innerHTML = ''; }
+    if (_hsEscHandler) { document.removeEventListener('keydown', _hsEscHandler); _hsEscHandler = null; }
   }
 
   function initSettings() {
     const toggle = $('hlSettingsToggle');
     if (!toggle) return;
-    toggle.addEventListener('click', () => {
-      _settingsOpen = !_settingsOpen;
-      renderSettings();
-    });
+    toggle.addEventListener('click', openSettingsModal);
   }
 
   // ---- Date nav ----
@@ -1244,7 +1258,6 @@
     const day = loadDay(date);
     const settings = getSettings();
     renderDateNav();
-    renderSettings();
     renderSnapshot(date, day, settings);
     renderLog(date, day, settings);
     renderNutrition(date, day, settings);

@@ -1330,7 +1330,7 @@ body {
    HEALTH TAB
    ═══════════════════════════════════════════════════════════════ */
 
-.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card, .hl-log-card {
+.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card, .hl-log-card, .hl-snapshot {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -5771,6 +5771,9 @@ margin-top: 15px;
   padding: 10px 20px 4px;
   flex-wrap: wrap;
 }
+.hl-snapshot > .hl-date-nav {
+  padding: 0;
+}
 
 .hl-date-prev, .hl-date-next, .hl-date-today {
   background: rgba(255,255,255,0.05);
@@ -5833,7 +5836,7 @@ margin-top: 15px;
   color: var(--text);
 }
 
-/* ---------- Health: Settings panel ---------- */
+/* ---------- Health: Settings toggle ---------- */
 .hl-settings-toggle {
   background: none;
   border: none;
@@ -5848,42 +5851,21 @@ margin-top: 15px;
 }
 .hl-settings-toggle:hover { color: var(--text); background: rgba(255,255,255,0.07); }
 
-.hl-settings-inner {
-  padding: 16px 0 12px;
-}
-
-.hl-settings-grid {
+/* Health settings modal grid — reuses .setup-field, .setup-label, .setup-input from setup wizard */
+.hl-settings-modal-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.hl-settings-field { display: flex; flex-direction: column; gap: 5px; }
-
-.hl-settings-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--muted-2);
-  letter-spacing: 0.04em;
-}
-
-.hl-settings-input {
-  background: rgba(0,0,0,0.28);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--text);
-  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 6px 8px;
-  outline: none;
-  transition: border-color var(--dur-fast) var(--ease-smooth);
-  -moz-appearance: textfield;
+.hl-settings-mono-input {
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
+  font-weight: 700 !important;
   width: 100%;
+  -moz-appearance: textfield;
 }
-.hl-settings-input::-webkit-outer-spin-button,
-.hl-settings-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.hl-settings-input:focus { border-color: rgba(255,255,255,0.22); }
+.hl-settings-mono-input::-webkit-outer-spin-button,
+.hl-settings-mono-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* ---------- Health: Factor breakdown bars ---------- */
 .hl-factors-toggle {
