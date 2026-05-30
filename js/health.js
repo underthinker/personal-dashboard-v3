@@ -547,22 +547,6 @@
     if (_spEscHandler) { document.removeEventListener('keydown', _spEscHandler); _spEscHandler = null; }
   }
 
-  // ---- Recovery metrics card ----
-  const RC_METRICS = [
-    { key: 'soreness',       label: 'Soreness',       lo: 'Fresh',     hi: 'Wrecked',     neg: true  },
-    { key: 'stress',         label: 'Stress',          lo: 'Calm',      hi: 'Overwhelmed', neg: true  },
-    { key: 'burnout',        label: 'Burnout',         lo: 'Energized', hi: 'Empty',       neg: true  },
-    { key: 'energy',         label: 'Energy',          lo: 'Drained',   hi: 'Charged',     neg: false },
-    { key: 'mental_fatigue', label: 'Mental Fatigue',  lo: 'Sharp',     hi: 'Foggy',       neg: true  },
-    { key: 'social_battery', label: 'Social Battery',  lo: 'Drained',   hi: 'Full',        neg: false },
-    { key: 'motivation',     label: 'Motivation',      lo: 'Zero',      hi: 'Fire',        neg: false },
-  ];
-
-  function rcColor(val, neg) {
-    const hue = neg ? 120 * (1 - (val - 1) / 6) : 120 * ((val - 1) / 6);
-    return `hsl(${hue.toFixed(0)}, 62%, 52%)`;
-  }
-
   function renderRecovery(date, day) {
     const el = $('rcCard');
     if (!el) return;
@@ -584,32 +568,7 @@
       </div>`;
     }).join('');
 
-    const hasBarData = Object.keys(rec).length > 0;
-    const barsHtml = hasBarData ? `<div class="rc-rows">${RC_METRICS.map(m => {
-      const val = rec[m.key];
-      if (val == null) {
-        return `<div class="rc-row rc-row-empty">
-          <span class="rc-label">${m.label}</span>
-          <span class="rc-bound rc-lo">${m.lo}</span>
-          <div class="rc-bar-track"><div class="rc-bar-fill rc-bar-unset"></div></div>
-          <span class="rc-bound rc-hi">${m.hi}</span>
-          <span class="rc-val rc-val-unset">—</span>
-        </div>`;
-      }
-      const pct = ((val - 1) / 6 * 100).toFixed(1);
-      const color = rcColor(val, m.neg);
-      return `<div class="rc-row">
-        <span class="rc-label">${m.label}</span>
-        <span class="rc-bound rc-lo">${m.lo}</span>
-        <div class="rc-bar-track">
-          <div class="rc-bar-fill" style="width:${pct}%;background:${color}"></div>
-        </div>
-        <span class="rc-bound rc-hi">${m.hi}</span>
-        <span class="rc-val">${val}<span class="rc-val-denom">/7</span></span>
-      </div>`;
-    }).join('')}</div>` : '';
-
-    el.innerHTML = `<div class="rc-sliders">${slidersHtml}</div>${barsHtml}`;
+    el.innerHTML = `<div class="rc-sliders">${slidersHtml}</div>`;
 
     el.querySelectorAll('.rc-slider').forEach(slider => {
       slider.addEventListener('input', () => {
