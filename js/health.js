@@ -142,10 +142,7 @@
     // hydration × 0.15
     const hydration = day.water_oz > 0 ? Math.min(day.water_oz / settings.water_goal_oz, 1) : N;
 
-    // exercise × 0.20  (rest days are neutral, not penalised)
-    const exercise = getExerciseDoneToday(date) ? 1.0 : N;
-
-    // mood × 0.15
+    // mood × 0.1875
     const mood = getMoodToday(date);
     const moodScore = mood != null ? (MOOD_SCORES[mood] ?? N) : N;
 
@@ -178,13 +175,12 @@
       ? (day.recovery.energy - 1) / 6 : N;
 
     return Math.round((
-      sleepScore  * 0.20 +
+      sleepScore  * 0.25 +
       hydration   * 0.15 +
-      exercise    * 0.20 +
-      moodScore   * 0.15 +
-      nutrition   * 0.10 +
-      recovery    * 0.10 +
-      energy      * 0.10
+      moodScore   * 0.1875 +
+      nutrition   * 0.125 +
+      recovery    * 0.125 +
+      energy      * 0.125
     ) * 100);
   }
 
@@ -192,7 +188,6 @@
     const N = 0.5;
     const sleepScore = day.sleep_hours != null ? Math.min(day.sleep_hours / settings.sleep_goal_hours, 1) : N;
     const hydration = day.water_oz > 0 ? Math.min(day.water_oz / settings.water_goal_oz, 1) : N;
-    const exercise = getExerciseDoneToday(date) ? 1.0 : N;
     const mood = getMoodToday(date);
     const moodScore = mood != null ? (MOOD_SCORES[mood] ?? N) : N;
     let nutrition = N;
@@ -219,7 +214,6 @@
     return {
       Sleep:       Math.round(sleepScore * 100),
       Hydration:   Math.round(hydration * 100),
-      Exercise:    Math.round(exercise * 100),
       Mood:        Math.round(moodScore * 100),
       Nutrition:   Math.round(nutrition * 100),
       Recovery:    Math.round(recovery * 100),
@@ -233,13 +227,6 @@
     if (!el) return;
 
     const readiness = calcReadiness(date, day, settings);
-    const mood = getMoodToday(date);
-    const moodInfo = mood ? (MOOD_MAP[mood] || { label: mood, emoji: '•' }) : null;
-    const exerciseDone = getExerciseDoneToday(date);
-    const sleepH = day.sleep_hours;
-    const waterOz = day.water_oz || 0;
-    const cals = day.nutrition_totals ? day.nutrition_totals.calories : null;
-    const protein = day.nutrition_totals ? day.nutrition_totals.protein_g : null;
 
     // Ring SVG
     const R = 40, CX = 52, CY = 52, CIRC = 2 * Math.PI * R;
@@ -256,29 +243,6 @@
       <div class="hl-ring-word">Readiness</div>
     </div>`;
 
-    function row(label, value, check, note) {
-      const checkEl = check === true ? '<span class="hl-check">✓</span>'
-        : check === false ? '<span class="hl-x">✗</span>' : '';
-      const noteEl = note ? `<div class="hl-metric-note">${note}</div>` : '';
-      return `<div class="hl-metric">
-        <div class="hl-metric-label">${label}</div>
-        <div class="hl-metric-row">${value}${checkEl}</div>
-        ${noteEl}
-      </div>`;
-    }
-
-    let metrics = '';
-    if (sleepH != null) {
-      const h = Math.floor(sleepH), m = Math.round((sleepH % 1) * 60);
-      metrics += row('Sleep', h + 'h' + (m ? ' ' + m + 'm' : ''),
-        sleepH >= settings.sleep_goal_hours * 0.875, null);
-    } else {
-      metrics += row('Sleep', '—', null, null);
-    }
-    metrics += row('Water', waterOz ? waterOz + ' oz' : '—', waterOz ? waterOz >= settings.water_goal_oz : null, null);
-    metrics += row('Calories', cals != null ? cals.toLocaleString() : '—', null, null);
-    metrics += row('Protein', protein != null ? protein + 'g' : '—', null, null);
-
     const factors = calcFactors(date, day, settings);
     const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
       const color = pct >= 80 ? 'var(--success, #5fd687)' : pct >= 60 ? 'var(--amber, #F2C063)' : 'var(--danger, #ff6b6b)';
@@ -291,29 +255,8 @@
 
     el.innerHTML = `<div class="hl-snap-inner">
       <div class="hl-ring-wrap">${ringSvg}</div>
-      <div class="hl-metrics">${metrics}</div>
-    </div>
-    <button type="button" class="hl-factors-toggle" id="hlFactorsToggle">
-      <span class="hl-factors-toggle-label">Factor breakdown</span>
-      <span class="hl-factors-toggle-icon" id="hlFactorsToggleIcon">▶</span>
-    </button>
-    <div class="hl-factors" id="hlFactors">${factorBarsHtml}</div>`;
-
-    const toggle = $('hlFactorsToggle');
-    const factorsEl = $('hlFactors');
-    const iconEl = $('hlFactorsToggleIcon');
-    if (toggle && factorsEl) {
-      const wasOpen = localStorage.getItem('hl_factors_open') === 'true';
-      if (wasOpen) {
-        factorsEl.classList.add('is-open');
-        if (iconEl) iconEl.classList.add('is-open');
-      }
-      toggle.addEventListener('click', () => {
-        const now = factorsEl.classList.toggle('is-open');
-        if (iconEl) iconEl.classList.toggle('is-open', now);
-        localStorage.setItem('hl_factors_open', now);
-      });
-    }
+      <div class="hl-factors">${factorBarsHtml}</div>
+    </div>`;
   }
 
   // ---- Throttled render (water rapid-click guard) ----
