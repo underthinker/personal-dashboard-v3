@@ -1165,11 +1165,16 @@
       var isDeepWork = (dayHealth.focus_min || 0) > 30;
       var isRestorative = (dayHealth.sleep_hours || 0) >= calSleepGoal * 0.8;
 
+      var moodKey = storeGet('mood:' + ymd);
+      var moodColors = {happy:'#FFD166',calm:'#4EA8DE',motivated:'#FF9F1C',tired:'#B5179E',anxious:'#4361EE',frustrated:'#F72585',sad:'#3A0CA3',numb:'#6C757D'};
+      var moodColor = moodKey && moodColors[moodKey] ? moodColors[moodKey] : null;
+      var moodStyle = moodColor ? ' style="background:' + moodColor + '"' : '';
+
       var hasTimedGoals = goals && goals.some(function(g) { return g && g.timeSlot && g.timeSlot.start; });
       html += '<div class="cal-day' + (isToday ? ' is-today' : '') + (hasTimedGoals ? ' cal-has-timed' : '') + '" data-ymd="' + ymd + '">' + day;
-      if (isDeepWork) html += '<span class="cal-dot cal-dot-deep"></span>';
-      else if (isRestorative) html += '<span class="cal-dot cal-dot-rest"></span>';
-      else if (hasGoals) html += '<span class="cal-dot"></span>';
+      if (isDeepWork) html += '<span class="cal-dot cal-dot-deep"' + moodStyle + '></span>';
+      else if (isRestorative) html += '<span class="cal-dot cal-dot-rest"' + moodStyle + '></span>';
+      else if (hasGoals) html += '<span class="cal-dot"' + moodStyle + '></span>';
       if (hasTimedGoals) html += '<span class="cal-bar"></span>';
       html += '</div>';
     }

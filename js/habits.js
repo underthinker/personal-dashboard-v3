@@ -37,8 +37,6 @@
   // ----------- Date helpers -----------
   function dateToYMD(d) { return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
   function todayYMD() { return dateToYMD(new Date()); }
-  function getDaysInMonth(year, month) { return new Date(year, month + 1, 0).getDate(); }
-  function getMonthName(m) { return ['January','February','March','April','May','June','July','August','September','October','November','December'][m]; }
   function getDayName(d) { return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d]; }
 
   // Get Monday of current week
@@ -166,10 +164,8 @@
   }
 
   // ----------- State -----------
-  let moodMonthDate = new Date();
   let emojiPickerCallback = null;
   let lastFocus = null;
-  let editorDate = null;
   let _newHabitIcon = 'moon';
 
   // ============================================================
@@ -432,205 +428,6 @@
   }
 
   // ============================================================
-  // MOOD TRACKER
-  // ============================================================
-
-  function renderMoodCalendar() {
-    const year = moodMonthDate.getFullYear();
-    const month = moodMonthDate.getMonth();
-    const today = todayYMD();
-    const daysInMonth = getDaysInMonth(year, month);
-
-    const titleEl = $('mtCalTitle');
-    if (titleEl) titleEl.textContent = getMonthName(month) + ' ' + year;
-
-    const hdrEl = $('mtCalHdr');
-    if (hdrEl) {
-      hdrEl.innerHTML = '';
-      ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((day) => {
-        const d = document.createElement('div');
-        d.textContent = day;
-        hdrEl.appendChild(d);
-      });
-    }
-
-    const gridEl = $('mtGrid');
-    if (gridEl) {
-      gridEl.innerHTML = '';
-
-      const firstDay = new Date(year, month, 1).getDay();
-      const offset = firstDay === 0 ? 6 : firstDay - 1;
-
-      for (let i = 0; i < offset; i++) {
-        const spacer = document.createElement('div');
-        spacer.className = 'mt-gcell mt-gcell-empty';
-        gridEl.appendChild(spacer);
-      }
-
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const ymd = dateToYMD(date);
-        const cell = document.createElement('div');
-        cell.className = 'mt-gcell';
-        cell.style.setProperty('--i', day);
-        if (ymd === today) cell.classList.add('mt-gcell-today');
-
-        const mood = getMood(ymd);
-        const moodDef = mood ? getMoodDef(mood) : null;
-
-        if (moodDef) {
-          cell.style.background = moodDef.color + '88';
-          cell.style.borderColor = moodDef.color;
-
-          const numEl = document.createElement('span');
-          numEl.className = 'mt-gcell-num';
-          numEl.textContent = day;
-          numEl.style.color = 'white';
-          cell.appendChild(numEl);
-        } else {
-          cell.classList.add('mt-gcell-empty');
-          const numEl = document.createElement('span');
-          numEl.className = 'mt-gcell-num';
-          numEl.textContent = day;
-          cell.appendChild(numEl);
-        }
-
-        // Habit completion dot
-        const habitDefs = getDefinitions().filter((d) => d.active);
-        const hDayData = getDayData(ymd);
-        let hDone = 0;
-        habitDefs.forEach((def) => {
-          if (hDayData && hDayData.entries[def.id]) hDone++;
-        });
-        const pct = habitDefs.length ? Math.round((hDone / habitDefs.length) * 100) : 0;
-        if (pct > 0) {
-          const dot = document.createElement('span');
-          const cls = pct >= 80 ? 'ht-mdot-green' : pct >= 40 ? 'ht-mdot-amber' : 'ht-mdot-red';
-          dot.className = 'ht-mdot ' + cls;
-          dot.title = pct + '% habits completed';
-          cell.appendChild(dot);
-        }
-
-        cell.addEventListener('click', () => openDayEditor(ymd));
-
-        gridEl.appendChild(cell);
-      }
-
-    }
-
-  }
-
-  // ============================================================
-  // COMBINED DAY EDITOR
-  // ============================================================
-
-  function openDayEditor(ymd) {
-    editorDate = ymd;
-    const bg = $('deBg');
-    bg.classList.add('show');
-    setTimeout(() => { const f = bg.querySelector('button, input, textarea'); if (f) f.focus(); }, 60);
-
-    const parts = ymd.split('-');
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
-    const titleEl = $('deTitle');
-    if (titleEl) titleEl.textContent = getDayName(d.getDay()) + ', ' + getMonthName(d.getMonth()) + ' ' + d.getDate() + ', ' + d.getFullYear();
-
-    renderDayEditor();
-  }
-
-  function closeDayEditor() {
-    if (editorDate) {
-      const notesEl = $('deNotes');
-      if (notesEl) {
-        const cur = getDayData(editorDate) || { entries: {}, notes: '' };
-        cur.notes = notesEl.value;
-        setDayData(editorDate, cur);
-      }
-    }
-    $('deBg').classList.remove('show');
-    editorDate = null;
-    renderMoodCalendar();
-    renderHabitsView();
-  }
-
-  function renderDayEditor() {
-    if (!editorDate) return;
-
-    // Mood buttons
-    const pillsEl = $('dePills');
-    if (pillsEl) {
-      const currentMood = getMood(editorDate);
-      pillsEl.innerHTML = '';
-      MOOD_DEFS.forEach((mood) => {
-        const btn = document.createElement('button');
-        btn.className = 'de-mood-btn' + (currentMood === mood.key ? ' is-on' : '');
-        btn.title = mood.label;
-        btn.style.color = mood.color;
-
-        const em = document.createElement('img');
-        em.className = 'de-mood-em';
-        em.src = moodSvgUri(mood.key);
-        em.alt = mood.label;
-
-        btn.appendChild(em);
-
-        btn.addEventListener('click', () => {
-          const existing = getMood(editorDate);
-          if (existing === mood.key) {
-            deleteMood(editorDate);
-          } else {
-            setMood(editorDate, mood.key);
-          }
-          renderDayEditor();
-          renderMoodCalendar();
-        });
-
-        pillsEl.appendChild(btn);
-      });
-    }
-
-    // Habit checkboxes
-    const defs = getDefinitions().filter((d) => d.active);
-    const data = getDayData(editorDate) || { entries: {}, notes: '' };
-    const listEl = $('deHabits');
-    if (listEl) {
-      listEl.innerHTML = '';
-      defs.forEach((def) => {
-        const item = document.createElement('div');
-        item.className = 'ht-day-item';
-
-        const cb = document.createElement('div');
-        cb.className = 'ht-day-cb' + (data.entries[def.id] ? ' is-on' : '');
-
-        const label = document.createElement('span');
-        label.className = 'ht-day-label';
-        label.innerHTML = lucideIconHtml(def.icon || 'circle', 14) + ' ' + def.name;
-
-        item.appendChild(cb);
-        item.appendChild(label);
-
-        item.addEventListener('click', () => {
-          const cur = getDayData(editorDate) || { entries: {}, notes: '' };
-          cur.entries[def.id] = !cur.entries[def.id];
-          setDayData(editorDate, cur);
-          cb.classList.toggle('is-on');
-          renderMoodCalendar();
-          renderHabitsView();
-        });
-
-        listEl.appendChild(item);
-      });
-    }
-
-    // Notes
-    const notesEl = $('deNotes');
-    if (notesEl) {
-      notesEl.value = data.notes || '';
-    }
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }
-
-  // ============================================================
   // INITIALIZATION
   // ============================================================
 
@@ -681,38 +478,14 @@
       });
     }
 
-    // Day editor
-    const deDone = $('deDone');
-    if (deDone) deDone.addEventListener('click', closeDayEditor);
-    const deBg = $('deBg');
-    if (deBg) {
-      deBg.addEventListener('click', (e) => {
-        if (e.target === deBg) closeDayEditor();
-      });
-    }
-
-    // Mood navigation
-    const mtPrev = $('mtPrevBtn');
-    const mtNext = $('mtNextBtn');
-    if (mtPrev) mtPrev.addEventListener('click', () => {
-      moodMonthDate.setMonth(moodMonthDate.getMonth() - 1);
-      renderMoodCalendar();
-    });
-    if (mtNext) mtNext.addEventListener('click', () => {
-      moodMonthDate.setMonth(moodMonthDate.getMonth() + 1);
-      renderMoodCalendar();
-    });
-
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
       if ($('htSetBg').classList.contains('show')) { closeSettings(); return; }
       if ($('htEpBg').classList.contains('show')) { closeEmojiPicker(); return; }
-      if ($('deBg').classList.contains('show')) { closeDayEditor(); return; }
     });
 
     // Initial render
     renderHabitsView();
-    renderMoodCalendar();
     renderHomeHealthRings();
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -943,7 +716,6 @@
 
   function render() {
     renderHabitsView();
-    renderMoodCalendar();
   }
 
   window.renderHabits = render;
