@@ -1330,7 +1330,7 @@ body {
    HEALTH TAB
    ═══════════════════════════════════════════════════════════════ */
 
-.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card {
+.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card, .hl-log-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -3498,6 +3498,23 @@ margin-top: 15px;
   background: var(--bg-home-deep);
 }
 
+/* ---------- Section groups (generic tab layout) ---------- */
+.section-group {
+  margin-bottom: 32px;
+}
+.section-group:last-child {
+  margin-bottom: 0;
+}
+.section-group-header {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
 @keyframes tab-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
@@ -4849,6 +4866,34 @@ margin-top: 15px;
 /* ---------- Quick log ---------- */
 .ql-card { padding: 18px; }
 
+/* ---------- Log card (merged: sleep + water + recovery) ---------- */
+.hl-log-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hl-log-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hl-log-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.hl-log-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 12px 0 16px;
+}
+
 .ql-section { display: flex; flex-direction: column; gap: 16px; }
 
 .ql-row {
@@ -5841,13 +5886,45 @@ margin-top: 15px;
 .hl-settings-input:focus { border-color: rgba(255,255,255,0.22); }
 
 /* ---------- Health: Factor breakdown bars ---------- */
-.hl-factors {
+.hl-factors-toggle {
   display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  color: var(--muted-2);
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 0 0;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.hl-factors-toggle:hover {
+  color: var(--text);
+}
+.hl-factors-toggle-icon {
+  font-size: 9px;
+  transition: transform 0.2s ease;
+  will-change: transform;
+}
+.hl-factors-toggle-icon.is-open {
+  transform: rotate(90deg);
+}
+
+.hl-factors {
+  display: none;
   flex-direction: column;
   gap: 7px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+.hl-factors.is-open {
+  display: flex;
 }
 
 .hl-factor-row {

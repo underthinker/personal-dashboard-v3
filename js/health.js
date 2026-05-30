@@ -299,7 +299,27 @@
       <div class="hl-ring-wrap">${ringSvg}</div>
       <div class="hl-metrics">${metrics}</div>
     </div>
-    <div class="hl-factors">${factorBarsHtml}</div>`;
+    <button type="button" class="hl-factors-toggle" id="hlFactorsToggle">
+      <span class="hl-factors-toggle-label">Factor breakdown</span>
+      <span class="hl-factors-toggle-icon" id="hlFactorsToggleIcon">▶</span>
+    </button>
+    <div class="hl-factors" id="hlFactors">${factorBarsHtml}</div>`;
+
+    const toggle = $('hlFactorsToggle');
+    const factorsEl = $('hlFactors');
+    const iconEl = $('hlFactorsToggleIcon');
+    if (toggle && factorsEl) {
+      const wasOpen = localStorage.getItem('hl_factors_open') === 'true';
+      if (wasOpen) {
+        factorsEl.classList.add('is-open');
+        if (iconEl) iconEl.classList.add('is-open');
+      }
+      toggle.addEventListener('click', () => {
+        const now = factorsEl.classList.toggle('is-open');
+        if (iconEl) iconEl.classList.toggle('is-open', now);
+        localStorage.setItem('hl_factors_open', now);
+      });
+    }
   }
 
   // ---- Throttled render (water rapid-click guard) ----
@@ -320,8 +340,9 @@
     { key: 'motivation',     label: 'Motivation',     lo: 'Zero',      hi: 'Fire'        },
   ];
 
-  function renderQuickLog(date, day, settings) {
-    const el = $('qlCard');
+  // ---- Log (merged: sleep + water + recovery) ----
+  function renderLog(date, day, settings) {
+    const el = $('hlLogCard');
     if (!el) return;
 
     const sleepBed = day.sleep_bedtime || '';
@@ -331,9 +352,25 @@
     const waterPct = Math.min(waterOz / waterMax * 100, 100);
     const waterGoalPct = (settings.water_goal_oz / waterMax * 100).toFixed(1);
     const use12h = settings.time_format_12h;
+    const rec = day.recovery || {};
+
+    const slidersHtml = RECOVERY_SLIDERS.map(s => {
+      const val = rec[s.key] != null ? rec[s.key] : 4;
+      return `<div class="rc-slider-row">
+        <div class="rc-slider-meta">
+          <span class="rc-slider-label">${s.label}</span>
+          <span class="rc-slider-val" id="rcSv-${s.key}">${val}</span>
+        </div>
+        <div class="rc-slider-range-row">
+          <span class="rc-slider-bound">${s.lo}</span>
+          <input type="range" class="rc-slider" min="1" max="7" value="${val}" data-recovery="${s.key}" id="rcSl-${s.key}">
+          <span class="rc-slider-bound rc-slider-bound-hi">${s.hi}</span>
+        </div>
+      </div>`;
+    }).join('');
 
     el.innerHTML = `
-      <div class="ql-section">
+      <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
           <div class="ql-sleep-wrap">
@@ -367,6 +404,11 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="hl-log-divider"></div>
+      <div class="hl-log-section">
+        <div class="hl-log-section-label">Recovery</div>
+        <div class="rc-sliders">${slidersHtml}</div>
       </div>`;
 
     el.querySelectorAll('.ql-sleep-time-disp').forEach(btn => {
@@ -378,7 +420,7 @@
       fmtBtn.addEventListener('click', () => {
         settings.time_format_12h = !settings.time_format_12h;
         localStorage.setItem('health_settings', JSON.stringify(settings));
-        renderQuickLog(date, day, settings);
+        renderLog(date, day, settings);
       });
     }
 
@@ -403,6 +445,19 @@
       customInput.addEventListener('blur', _addCustomWater);
       customInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); _addCustomWater(); } });
     }
+
+    el.querySelectorAll('.rc-slider').forEach(slider => {
+      slider.addEventListener('input', () => {
+        const key = slider.dataset.recovery;
+        const val = parseInt(slider.value, 10);
+        if (!day.recovery) day.recovery = {};
+        day.recovery[key] = val;
+        const valEl = $('rcSv-' + key);
+        if (valEl) valEl.textContent = val;
+        saveDay(date, day);
+        renderSnapshot(date, day, getSettings());
+      });
+    });
   }
 
   // ---- Sleep modal ----
@@ -545,43 +600,6 @@
     const bg = $('sleepModalBg');
     if (bg) { bg.hidden = true; bg.innerHTML = ''; }
     if (_spEscHandler) { document.removeEventListener('keydown', _spEscHandler); _spEscHandler = null; }
-  }
-
-  function renderRecovery(date, day) {
-    const el = $('rcCard');
-    if (!el) return;
-
-    const rec = day.recovery || {};
-
-    const slidersHtml = RECOVERY_SLIDERS.map(s => {
-      const val = rec[s.key] != null ? rec[s.key] : 4;
-      return `<div class="rc-slider-row">
-        <div class="rc-slider-meta">
-          <span class="rc-slider-label">${s.label}</span>
-          <span class="rc-slider-val" id="rcSv-${s.key}">${val}</span>
-        </div>
-        <div class="rc-slider-range-row">
-          <span class="rc-slider-bound">${s.lo}</span>
-          <input type="range" class="rc-slider" min="1" max="7" value="${val}" data-recovery="${s.key}" id="rcSl-${s.key}">
-          <span class="rc-slider-bound rc-slider-bound-hi">${s.hi}</span>
-        </div>
-      </div>`;
-    }).join('');
-
-    el.innerHTML = `<div class="rc-sliders">${slidersHtml}</div>`;
-
-    el.querySelectorAll('.rc-slider').forEach(slider => {
-      slider.addEventListener('input', () => {
-        const key = slider.dataset.recovery;
-        const val = parseInt(slider.value, 10);
-        if (!day.recovery) day.recovery = {};
-        day.recovery[key] = val;
-        const valEl = $('rcSv-' + key);
-        if (valEl) valEl.textContent = val;
-        saveDay(date, day);
-        renderSnapshot(date, day, getSettings());
-      });
-    });
   }
 
   // ---- Insights (Phase 5) ----
@@ -1228,8 +1246,7 @@
     renderDateNav();
     renderSettings();
     renderSnapshot(date, day, settings);
-    renderQuickLog(date, day, settings);
-    renderRecovery(date, day);
+    renderLog(date, day, settings);
     renderNutrition(date, day, settings);
     renderTrends(date, settings);
     renderInsights(date, settings);
