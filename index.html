@@ -494,12 +494,6 @@
         <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
         <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
         <button type="button" class="hl-date-today" id="hlDateToday">Today</button>
-        <div class="hl-date-actions">
-          <button type="button" class="hl-export-btn" id="hlExportBtn">Export</button>
-          <label class="hl-import-label" for="hlImportFile">Import
-            <input type="file" id="hlImportFile" accept=".json" style="display:none">
-          </label>
-        </div>
       </div>
       <div id="hlSnapshotBody"></div>
     </div>
@@ -665,6 +659,7 @@
   </div>
   <ul class="day-flyout-list" id="dayFlyoutList"></ul>
   <div class="day-flyout-empty" id="dayFlyoutEmpty">No goals for this day.</div>
+  <div class="df-mood-section" id="dayFlyoutMood"></div>
 </aside>
 
 <!-- ═══ SCRIPTS ═══ -->

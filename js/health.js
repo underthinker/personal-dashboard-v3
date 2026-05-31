@@ -1201,62 +1201,10 @@
     renderInsights(date, settings);
   }
 
-  // ---- Export / Import ----
-  function exportHealthData() {
-    const data = {};
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key.startsWith('health:') || key === 'health_settings') {
-        try { data[key] = JSON.parse(localStorage.getItem(key)); }
-        catch (e) { data[key] = localStorage.getItem(key); }
-      }
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'health-export-' + getActiveDate() + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function importHealthData(file) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (typeof data !== 'object' || Array.isArray(data)) throw new Error('invalid');
-        let count = 0;
-        Object.entries(data).forEach(([key, val]) => {
-          if (key.startsWith('health:') || key === 'health_settings') {
-            localStorage.setItem(key, JSON.stringify(val));
-            count++;
-          }
-        });
-        renderHealth();
-        if (window.showAlert) window.showAlert(count + ' entries imported.');
-        else alert(count + ' entries imported.');
-      } catch (err) {
-        if (window.showAlert) window.showAlert('Import failed: invalid JSON file.');
-        else alert('Import failed: invalid JSON file.');
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  function initExportImport() {
-    const exportBtn = $('hlExportBtn');
-    const importFile = $('hlImportFile');
-    if (exportBtn) exportBtn.addEventListener('click', exportHealthData);
-    if (importFile) importFile.addEventListener('change', () => {
-      if (importFile.files[0]) { importHealthData(importFile.files[0]); importFile.value = ''; }
-    });
-  }
-
   window.renderHealth = renderHealth;
   window.calcReadiness = calcReadiness;
   window.getSettings = getSettings;
   window.renderStatsPanel && window.renderStatsPanel();
 
-  document.addEventListener('DOMContentLoaded', () => { initDateNav(); initSettings(); initExportImport(); });
+  document.addEventListener('DOMContentLoaded', () => { initDateNav(); initSettings(); });
 })();

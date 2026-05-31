@@ -713,6 +713,11 @@
     }
   }
   window.renderHomeMood = renderHomeMood;
+  window.moodSvgUri = moodSvgUri;
+  window.MOOD_DEFS = MOOD_DEFS;
+  window.getMood = getMood;
+  window.setMood = setMood;
+  window.deleteMood = deleteMood;
 
   function render() {
     renderHabitsView();

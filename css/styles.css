@@ -1093,6 +1093,11 @@ body {
   display: none; padding: 24px var(--pad);
   font-size: 13px; color: var(--muted); text-align: center;
 }
+.df-mood-section {
+  padding: 10px var(--pad) var(--pad);
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
 
 /* ─── Activity Heatmap ─── */
 .heatmap-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
@@ -5440,26 +5445,6 @@ margin-top: 15px;
   cursor: pointer;
 }
 
-.hl-date-actions { display: flex; gap: 6px; margin-left: auto; }
-
-.hl-export-btn, .hl-import-label {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  color: var(--muted);
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 10px;
-  cursor: pointer;
-  transition: background var(--dur-fast), color var(--dur-fast);
-  display: inline-flex;
-  align-items: center;
-}
-.hl-export-btn:hover, .hl-import-label:hover {
-  background: rgba(255,255,255,0.09);
-  color: var(--text);
-}
 
 /* ---------- Health: Settings toggle ---------- */
 .hl-settings-toggle {

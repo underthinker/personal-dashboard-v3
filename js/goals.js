@@ -1240,6 +1240,7 @@
       titleEl.textContent = dayNames[d.getDay()] + ', ' + monthNames[d.getMonth()] + ' ' + d.getDate();
     }
     renderDayFlyoutGoals(ymd);
+    renderDayFlyoutMood(ymd);
     var flyout = $('dayFlyout');
     var backdrop = $('dayFlyoutBackdrop');
     if (flyout) { flyout.classList.add('is-open'); flyout.setAttribute('aria-hidden', 'false'); }
@@ -1252,6 +1253,27 @@
     if (flyout) { flyout.classList.remove('is-open'); flyout.setAttribute('aria-hidden', 'true'); }
     if (backdrop) backdrop.classList.remove('is-visible');
     _flyoutYmd = null;
+  }
+
+  function renderDayFlyoutMood(ymd) {
+    var el = $('dayFlyoutMood');
+    if (!el) return;
+    var moodDefs = window.MOOD_DEFS;
+    var svgUri = window.moodSvgUri;
+    if (!moodDefs || !svgUri) return;
+    var current = storeGet('mood:' + ymd);
+    var def = null;
+    for (var i = 0; i < moodDefs.length; i++) {
+      if (moodDefs[i].key === current) { def = moodDefs[i]; break; }
+    }
+    var pickerHtml = '<div class="mood-picker">' +
+      moodDefs.map(function(m) {
+        return '<button class="mood-pick' + (m.key === current ? ' active' : '') +
+          '" data-mood="' + m.key + '" title="' + m.label + '">' +
+          '<img class="mood-pick-icon" src="' + svgUri(m.key) + '" alt="' + m.label + '"></button>';
+      }).join('') +
+    '</div>';
+    el.innerHTML = pickerHtml;
   }
 
   function renderDayFlyoutGoals(ymd) {
@@ -1311,6 +1333,22 @@
         storeSet(key, goals);
         renderDayFlyoutGoals(_flyoutYmd);
         renderCalendar();
+      });
+    }
+
+    var moodSection = $('dayFlyoutMood');
+    if (moodSection) {
+      moodSection.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-mood]');
+        if (!btn || !_flyoutYmd) return;
+        var key = btn.getAttribute('data-mood');
+        var current = storeGet('mood:' + _flyoutYmd);
+        if (key === current) {
+          storeDelete('mood:' + _flyoutYmd);
+        } else {
+          storeSet('mood:' + _flyoutYmd, key);
+        }
+        renderDayFlyoutMood(_flyoutYmd);
       });
     }
   }
