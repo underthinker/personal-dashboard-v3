@@ -5799,7 +5799,7 @@ margin-top: 15px;
 }
 
 /* Overview card */
-.ht-overview-card { overflow: hidden; }
+.ht-overview-card { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
 .ht-ov-hdr {
   display: grid;
   grid-template-columns: 1fr 140px 80px 130px;
@@ -5812,9 +5812,6 @@ margin-top: 15px;
 }
 .ht-ov-body {
   flex: 1; min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.08) transparent;
 }
 .ht-ov-row {
   display: grid;
@@ -5830,7 +5827,8 @@ margin-top: 15px;
   font-size: 13px; font-weight: 500; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.ht-ov-cons { display: flex; align-items: center; gap: 7px; }
+.ht-ov-cons { display: flex; align-items: center; gap: 7px; margin-left: -5px; }
+.ht-ov-h-cons { margin-left: -5px; }
 .ht-ov-bar {
   flex: 1; height: 4px; border-radius: 99px;
   background: var(--surface-2); overflow: hidden;
@@ -5848,22 +5846,6 @@ margin-top: 15px;
 .ht-ov-trend { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; }
 
 
-/* Add habit button */
-.ht-add-row {
-  padding-top: 10px; border-top: 1px solid var(--line); flex-shrink: 0;
-  margin-top: auto;
-}
-.ht-add-habit-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: var(--r-sm);
-  background: var(--surface-2); border: 1px dashed var(--line-2);
-  color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer;
-  transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast);
-  font-family: inherit;
-}
-.ht-add-habit-btn:hover {
-  background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
-}
 
 /* Weekly heatmap card */
 .ht-week-card { overflow: hidden; }
@@ -5934,7 +5916,7 @@ margin-top: 15px;
 /* Bottom row */
 .ht-bot-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1.1fr;
   gap: 12px;
   flex-shrink: 0;
 }
@@ -5942,17 +5924,19 @@ margin-top: 15px;
 /* Insights card inner layout */
 .ht-insights-inner {
   display: grid;
-  grid-template-columns: 1fr 148px;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
   flex: 1;
 }
-.ht-insights-left { display: flex; flex-direction: column; gap: 10px; }
+.ht-insights-left { display: flex; flex-direction: column; justify-content: space-evenly; flex: 1; min-height: 0; }
 .ht-insights-right {
   border-left: 1px solid var(--line);
   padding-left: 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  justify-content: space-evenly;
+  flex: 1;
+  min-height: 0;
 }
 .ht-ins2-item { display: flex; align-items: flex-start; gap: 10px; }
 .ht-ins2-icon {
