@@ -4207,6 +4207,42 @@ margin-top: 15px;
 }
 .ht-day-notes:focus { border-color: rgba(255,255,255,0.20); }
 .ht-day-done { text-align: center; }
+
+/* --- Habits analytics --- */
+.ht-chip-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 8px; }
+.ht-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 99px;
+  background: var(--surface-2); border: 1.5px solid var(--line);
+  color: var(--muted); font-size: 12.5px; font-weight: 500;
+  cursor: pointer; transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.ht-chip.is-done { background: var(--accent-soft); border-color: var(--accent); color: var(--text); }
+.ht-chip .lucide { flex-shrink: 0; color: var(--muted-2); }
+.ht-chip.is-done .lucide { color: var(--accent); }
+.ht-hm-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.ht-hm-row:last-child { border-bottom: none; }
+.ht-hm-label {
+  display: flex; align-items: center; gap: 5px;
+  min-width: 130px; max-width: 130px; flex-shrink: 0;
+  font-size: 12px; color: var(--muted);
+}
+.ht-hm-label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ht-hm-cells { display: flex; gap: 3px; flex: 1; min-width: 0; }
+.ht-hm-cell {
+  flex: 1; aspect-ratio: 1; min-width: 0; border-radius: 3px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  cursor: pointer; transition: background 0.2s, border-color 0.2s;
+}
+.ht-hm-cell.done { background: rgba(var(--accent-rgb), 0.55); border-color: rgba(var(--accent-rgb), 0.35); }
+.ht-hm-cell.today { border-color: var(--accent); }
+.ht-hm-cell.today.done { background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.4); }
+.ht-hm-cell.future { opacity: 0.2; cursor: default; pointer-events: none; }
+#htRingsBody { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 12px; }
+.ht-ins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ht-trend-svg { width: 100%; height: 72px; display: block; }
+.ht-trend-svg path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ht-trend-svg circle { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }
 .ht-day-done-btn {
   padding: 9px 22px;
   border-radius: var(--r-sm);

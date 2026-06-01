@@ -438,16 +438,49 @@
 
 <div class="section">
 
-  <div class="card ht-card" id="htWeekPanel">
+  <!-- Summary -->
+  <div class="card" id="htSummaryCard">
     <div class="card-head">
-      <span class="card-label">This Week</span>
-      <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><i data-lucide="settings" width="16" height="16"></i></button>
+      <span class="card-label">Habits</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="pill pill-streak" id="htStreakPill"></span>
+        <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><i data-lucide="settings" width="16" height="16"></i></button>
+      </div>
     </div>
-    <div class="ht-week-hdr" id="htWeekHdr"></div>
-    <div class="ht-week-body" id="htWeekBody"></div>
+    <div id="htSummaryBody"></div>
+  </div>
+
+  <!-- Today -->
+  <div class="card" id="htTodayCard">
+    <div class="card-head"><span class="card-label">Today</span></div>
+    <div class="ht-chip-row" id="htChipRow"></div>
     <div class="ht-notes-wrap">
       <input type="text" class="ht-notes-input" id="htTodayNotes" placeholder="Add a note for today…" />
     </div>
+  </div>
+
+  <!-- 28-day heatmaps -->
+  <div class="card" id="htHeatmapCard">
+    <div class="card-head"><span class="card-label">28-Day History</span></div>
+    <div id="htHeatmapBody"></div>
+  </div>
+
+  <!-- 7-day rings -->
+  <div class="card" id="htRingsCard">
+    <div class="card-head"><span class="card-label">7-Day Completion</span></div>
+    <div id="htRingsBody"></div>
+  </div>
+
+  <!-- 30-day trend -->
+  <div class="card" id="htTrendCard">
+    <div class="card-head"><span class="card-label">30-Day Trend</span></div>
+    <svg class="ht-trend-svg" id="htTrendSvg" viewBox="0 0 300 80" preserveAspectRatio="none"></svg>
+  </div>
+
+  <!-- Insights -->
+  <div class="card" id="htInsightsCard">
+    <div class="card-head"><span class="card-label">Insights</span></div>
+    <div class="ht-ins-grid" id="htInsightsBody"></div>
   </div>
 
 </div>
