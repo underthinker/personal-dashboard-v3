@@ -5876,7 +5876,8 @@ margin-top: 15px;
 }
 .ht-wk-day-label.is-today { color: var(--accent); }
 .ht-wk-cell {
-  aspect-ratio: 1; border-radius: 7px;
+  aspect-ratio: 1; width: 100%; max-width: 34px; max-height: 34px;
+  border-radius: 6px; justify-self: center;
   background: var(--surface-2); border: 1px solid var(--line);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: transparent;
