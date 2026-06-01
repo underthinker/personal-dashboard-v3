@@ -196,6 +196,12 @@
     if (bodyEl) {
       bodyEl.innerHTML = '';
 
+      if (defs.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'hm-empty';
+        empty.textContent = 'No habits defined yet. Click the settings icon to add one.';
+        bodyEl.appendChild(empty);
+      } else {
       defs.forEach(function(def, idx) {
         const row = document.createElement('div');
         row.className = 'ht-week-row';
@@ -232,7 +238,7 @@
 
         bodyEl.appendChild(row);
       });
-
+      }
     }
 
     // Notes input

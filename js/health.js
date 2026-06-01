@@ -853,10 +853,11 @@
 
     function macroBar(label, val, goal, unit, color) {
       const pct = goal > 0 ? Math.min(val / goal * 100, 100) : 0;
+      const display = unit === '' ? Math.round(val) : Math.round(val * 10) / 10;
       return `<div class="nt-macro-row">
         <span class="nt-macro-label">${label}</span>
         <div class="nt-macro-bar"><div class="nt-macro-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
-        <span class="nt-macro-val">${val}<span class="nt-macro-goal">/${goal}${unit}</span></span>
+        <span class="nt-macro-val">${display}<span class="nt-macro-goal">/${goal}${unit}</span></span>
       </div>`;
     }
 
@@ -952,10 +953,10 @@
   function recalcTotals(day) {
     const meals = day.meals || [];
     day.nutrition_totals = {
-      calories:  meals.reduce((s, m) => s + (m.calories  || 0), 0),
-      carbs_g:   meals.reduce((s, m) => s + (m.carbs_g   || 0), 0),
-      fat_g:     meals.reduce((s, m) => s + (m.fat_g     || 0), 0),
-      protein_g: meals.reduce((s, m) => s + (m.protein_g || 0), 0),
+      calories:  Math.round(meals.reduce((s, m) => s + (m.calories  || 0), 0)),
+      carbs_g:   Math.round(meals.reduce((s, m) => s + (m.carbs_g   || 0), 0) * 10) / 10,
+      fat_g:     Math.round(meals.reduce((s, m) => s + (m.fat_g     || 0), 0) * 10) / 10,
+      protein_g: Math.round(meals.reduce((s, m) => s + (m.protein_g || 0), 0) * 10) / 10,
     };
   }
 

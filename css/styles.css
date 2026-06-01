@@ -3655,10 +3655,12 @@ margin-top: 15px;
   min-width: 0;
   padding: 9px 12px;
   border-radius: var(--r-sm);
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   font-family: inherit;
   outline: none;
   transition: border-color var(--dur-fast) var(--ease-smooth),
@@ -3666,8 +3668,7 @@ margin-top: 15px;
 }
 .ht-notes-input::placeholder { color: var(--muted-2); }
 .ht-notes-input:focus {
-  border-color: rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
 }
 
 #htWeekPanel > .ht-notes-wrap {
@@ -3710,10 +3711,6 @@ margin-top: 15px;
 .ht-card {
   flex: 1;
   min-height: 0;
-  animation: card-entrance 0.5s var(--ease-out) both;
-}
-.ht-card + .ht-card {
-  animation-delay: 0.1s;
 }
 
 .ht-cal-nav {
@@ -3760,17 +3757,33 @@ margin-top: 15px;
   flex-direction: column;
   gap: 3px;
   justify-content: space-evenly;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.10) transparent;
 }
+.ht-week-body::-webkit-scrollbar { width: 4px; }
+.ht-week-body::-webkit-scrollbar-track { background: transparent; }
+.ht-week-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 2px; }
 .ht-week-row {
   display: grid;
   grid-template-columns: 140px repeat(7, 1fr);
   gap: 8px;
   align-items: center;
-  padding: 3px 0;
+  padding: 6px 4px;
+  border-radius: 8px;
+  transition: background var(--dur-normal) var(--ease-smooth),
+              transform var(--dur-normal) var(--ease-smooth),
+              box-shadow var(--dur-normal) var(--ease-smooth);
+}
+.ht-week-row:hover {
+  background: var(--surface-2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 }
 .ht-week-name {
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3785,13 +3798,15 @@ margin-top: 15px;
 .ht-week-cb {
   appearance: none;
   -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 1.5px solid var(--line-2);
   border-radius: 4px;
-  border: 1.5px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.02);
+  background: transparent;
+  display: grid;
+  place-items: center;
   cursor: pointer;
-  position: relative;
   transition: all var(--dur-fast) var(--ease-smooth);
 }
 .ht-week-cb:hover {
@@ -3801,13 +3816,15 @@ margin-top: 15px;
 .ht-week-cb:checked {
   background: var(--accent);
   border-color: var(--accent);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.35);
 }
 .ht-week-cb:checked::after {
   content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%230a0a0b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center/12px no-repeat;
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid #08120c;
+  border-bottom: 2px solid #08120c;
+  transform: rotate(-45deg);
+  margin-top: -2px;
 }
 .ht-week-cb.ht-today-marker {
   border-color: rgba(var(--accent-rgb), 0.30);
