@@ -49,16 +49,15 @@
 
   // ----------- Default habit definitions -----------
   const DEFAULT_HABITS = [
-    { id: 'sleep', name: 'Sleep 7-8 hours', icon: 'moon', active: true },
+    { id: 'journal', name: 'Journal', icon: 'notebook', active: true },
+    { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
     { id: 'hygiene', name: 'Personal Hygiene', icon: 'sparkles', active: true },
     { id: 'healthy_meals', name: 'Eat healthy meals', icon: 'utensils', active: true },
-    { id: 'go_outside', name: 'Go outside', icon: 'sun', active: true },
-    { id: 'no_fap', name: 'No fap', icon: 'ban', active: true },
-    { id: 'water', name: 'Drink 64 oz. water', icon: 'droplet', active: true },
     { id: 'no_alcohol', name: 'No Alcohol', icon: 'wine', active: true },
-    { id: 'exercise', name: 'Exercise', icon: 'dumbbell', active: true },
-    { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
+    { id: 'go_outside', name: 'Go outside', icon: 'sun', active: true },
     { id: 'creativity', name: 'Creativity', icon: 'pen-tool', active: true },
+    { id: 'no_fap', name: 'No fap', icon: 'ban', active: true },
+    { id: 'reading', name: 'Reading', icon: 'book', active: true },
   ];
 
   function generateId(name) {
@@ -245,245 +244,485 @@
   // HABIT TRACKER — ANALYTICS RENDERERS
   // ============================================================
 
-  function renderHabitsSummary() {
-    var el = $('htSummaryBody');
-    if (!el) return;
+  // ============================================================
+  // NEW ANALYTICS HELPERS
+  // ============================================================
+
+  function consistencyLastWeek() {
+    var monday = getMonday();
+    var lastMonday = new Date(monday); lastMonday.setDate(lastMonday.getDate() - 7);
     var defs = getDefinitions().filter(function(d) { return d.active; });
-    var pillEl = $('htStreakPill');
-    if (!defs.length) {
-      el.innerHTML = '<div class="hm-empty">No habits defined. Click ⚙ to add one.</div>';
-      if (pillEl) { pillEl.textContent = ''; pillEl.classList.remove('gm-streak-active'); }
-      return;
+    if (!defs.length) return 0;
+    var done = 0, total = 0;
+    for (var d = 0; d < 7; d++) {
+      var day = new Date(lastMonday); day.setDate(day.getDate() + d);
+      var ymd = dateToYMD(day);
+      var data = getDayData(ymd);
+      defs.forEach(function(def) {
+        total++;
+        if (data && data.entries && data.entries[def.id]) done++;
+      });
     }
-    var weekPct = consistencyForWeek();
-    var bestStreakVal = 0, bestStreakDef = null, activeStreaks = 0;
-    defs.forEach(function(def) {
-      var s = streakFor(def.id);
-      if (s.current > 0) activeStreaks++;
-      if (s.current > bestStreakVal) { bestStreakVal = s.current; bestStreakDef = def; }
-    });
-    if (pillEl) {
-      if (bestStreakVal > 0) { pillEl.textContent = '🔥 ' + bestStreakVal + 'd'; pillEl.classList.add('gm-streak-active'); }
-      else { pillEl.textContent = 'No streak'; pillEl.classList.remove('gm-streak-active'); }
-    }
-    el.innerHTML =
-      '<div style="display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 2px;">' +
-        '<div class="po-metric">' +
-          '<div class="po-metric-title">This Week</div>' +
-          '<div class="po-metric-val">' + weekPct + '<span style="font-size:14px;font-weight:500;color:var(--muted)">%</span></div>' +
-          '<div class="po-bar" style="margin-top:6px"><div class="po-bar-fill po-bar-green" style="width:' + weekPct + '%"></div></div>' +
-          '<div class="po-metric-sub">consistency</div>' +
-        '</div>' +
-        '<div class="po-metric-sep"></div>' +
-        '<div class="po-metric">' +
-          '<div class="po-metric-title">On Streak</div>' +
-          '<div class="po-metric-val">' + activeStreaks + '<span style="font-size:14px;font-weight:500;color:var(--muted)">/' + defs.length + '</span></div>' +
-          '<div class="po-metric-sub">active habits</div>' +
-        '</div>' +
-        '<div class="po-metric-sep"></div>' +
-        '<div class="po-metric">' +
-          '<div class="po-metric-title">Best Streak</div>' +
-          '<div class="po-metric-val">' + bestStreakVal + '<span style="font-size:14px;font-weight:500;color:var(--muted)">d</span></div>' +
-          '<div class="po-metric-sub">' + (bestStreakDef ? escHtml(bestStreakDef.name) : '—') + '</div>' +
-        '</div>' +
-      '</div>';
+    return total > 0 ? Math.round((done / total) * 100) : 0;
   }
 
-  function renderTodayChips() {
-    var el = $('htChipRow');
+  function weeklySparklinePts(weeks) {
+    var defs = getDefinitions().filter(function(d) { return d.active; });
+    var pts = [];
+    var today = todayYMD();
+    for (var w = weeks - 1; w >= 0; w--) {
+      var monday = getMonday(); monday.setDate(monday.getDate() - w * 7);
+      var done = 0, total = 0;
+      for (var d = 0; d < 7; d++) {
+        var day = new Date(monday); day.setDate(day.getDate() + d);
+        var ymd = dateToYMD(day);
+        if (ymd > today) continue;
+        var data = getDayData(ymd);
+        defs.forEach(function(def) {
+          total++;
+          if (data && data.entries && data.entries[def.id]) done++;
+        });
+      }
+      pts.push(total > 0 ? Math.round((done / total) * 100) : 0);
+    }
+    return pts;
+  }
+
+  function habitSparklinePts(habitId, days) {
+    var pts = [];
+    for (var i = days - 1; i >= 0; i--) {
+      var d = new Date(); d.setDate(d.getDate() - i);
+      var data = getDayData(dateToYMD(d));
+      pts.push(data && data.entries && data.entries[habitId] ? 1 : 0);
+    }
+    return pts;
+  }
+
+  function miniSparklineSvg(pts, w, h, color) {
+    if (!pts || pts.length < 2) return '';
+    var max = Math.max.apply(null, pts);
+    var min = Math.min.apply(null, pts);
+    var range = max - min || 1;
+    var pad = 2;
+    var xStep = (w - 2 * pad) / (pts.length - 1);
+    var coords = pts.map(function(v, i) {
+      return {
+        x: (pad + i * xStep).toFixed(1),
+        y: (h - pad - ((v - min) / range) * (h - 2 * pad)).toFixed(1)
+      };
+    });
+    var d = coords.map(function(c, i) { return (i === 0 ? 'M' : 'L') + c.x + ',' + c.y; }).join(' ');
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" class="ht-spark-svg"><path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  // ============================================================
+  // RENDER: TOP METRICS ROW
+  // ============================================================
+
+  function renderTopMetrics() {
+    var el = $('htTopRow');
     if (!el) return;
     var defs = getDefinitions().filter(function(d) { return d.active; });
     var today = todayYMD();
-    if (!defs.length) { el.innerHTML = '<div class="hm-empty">No active habits.</div>'; return; }
-    el.innerHTML = defs.map(function(def) {
-      var data = getDayData(today);
-      var done = !!(data && data.entries && data.entries[def.id]);
-      return '<button class="ht-chip' + (done ? ' is-done' : '') + '" data-id="' + def.id + '">' +
-        lucideIconHtml(def.icon || 'circle', 14) + ' ' + escHtml(def.name) + '</button>';
-    }).join('');
-    el.querySelectorAll('.ht-chip').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var id = btn.getAttribute('data-id');
-        var cur = getDayData(today) || { entries: {}, notes: '' };
-        cur.entries[id] = !cur.entries[id];
-        setDayData(today, cur);
-        renderTodayChips();
-        renderHabitHeatmaps();
-        renderHabitsSummary();
-        renderHabitRings();
-        renderHabitTrend();
-      });
+
+    var weekPct = consistencyForWeek();
+
+    var bestStreakVal = 0, bestStreakDef = null;
+    defs.forEach(function(def) {
+      var s = streakFor(def.id);
+      if (s.current > bestStreakVal) { bestStreakVal = s.current; bestStreakDef = def; }
     });
+
+    var dayData = getDayData(today);
+    var doneToday = 0;
+    defs.forEach(function(def) { if (dayData && dayData.entries && dayData.entries[def.id]) doneToday++; });
+    var todayPct = defs.length > 0 ? Math.round((doneToday / defs.length) * 100) : 0;
+
+    var monday = getMonday();
+    var totalPossible = 0, totalDone = 0;
+    for (var d = 0; d < 7; d++) {
+      var day = new Date(monday); day.setDate(day.getDate() + d);
+      var ymd = dateToYMD(day);
+      if (ymd > today) continue;
+      var data = getDayData(ymd);
+      defs.forEach(function(def) {
+        totalPossible++;
+        if (data && data.entries && data.entries[def.id]) totalDone++;
+      });
+    }
+    var missed = totalPossible - totalDone;
+
+    var lastWeekPct = consistencyLastWeek();
+    var trendDiff = weekPct - lastWeekPct;
+    var trendSign = trendDiff >= 0 ? '+' : '';
+    var trendColor = trendDiff >= 0 ? 'var(--green)' : 'var(--danger)';
+    var missedColor = missed === 0 ? 'var(--green)' : missed <= 3 ? 'var(--amber)' : 'var(--danger)';
+    var missedLabel = missed === 0 ? 'On track!' : missed <= 3 ? 'Below avg.' : 'Needs work';
+
+    var trendSpark = miniSparklineSvg(weeklySparklinePts(6), 64, 28, trendDiff >= 0 ? 'var(--green)' : 'var(--danger)');
+
+    var ringR = 28, ringC = 2 * Math.PI * ringR;
+    var ringOffset = ringC * (1 - weekPct / 100);
+    var ringSvg = '<svg class="ht-mc-ring" viewBox="0 0 72 72">' +
+      '<circle class="ht-ring-track" cx="36" cy="36" r="' + ringR + '"/>' +
+      '<circle class="ht-ring-fill" cx="36" cy="36" r="' + ringR + '" stroke-dasharray="' + ringC.toFixed(1) + '" stroke-dashoffset="' + ringOffset.toFixed(1) + '" transform="rotate(-90 36 36)"/>' +
+      '</svg>';
+
+    var dailyPts = [];
+    for (var i = 6; i >= 0; i--) {
+      var dd = new Date(); dd.setDate(dd.getDate() - i);
+      var ddymd = dateToYMD(dd);
+      var dddata = getDayData(ddymd);
+      var ddDone = 0;
+      defs.forEach(function(def) { if (dddata && dddata.entries && dddata.entries[def.id]) ddDone++; });
+      dailyPts.push(defs.length > 0 ? ddDone / defs.length : 0);
+    }
+    var consSpark = miniSparklineSvg(dailyPts, 54, 28, 'var(--accent)');
+
+    var html = '';
+
+    html += '<div class="card ht-mc">' +
+      '<div class="ht-mc-head">' + lucideIconHtml('activity', 13) + '<span>HABIT CONSISTENCY</span></div>' +
+      '<div class="ht-mc-body">' +
+        '<div>' +
+          '<div class="ht-mc-num">' + weekPct + '<span class="ht-mc-unit">%</span></div>' +
+          '<div class="ht-mc-sub">This Week</div>' +
+        '</div>' +
+        '<div class="ht-mc-visual">' + ringSvg + consSpark + '</div>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div class="card ht-mc">' +
+      '<div class="ht-mc-head">' + lucideIconHtml('flame', 13) + '<span>LONGEST STREAK</span></div>' +
+      '<div class="ht-mc-body">' +
+        '<div>' +
+          '<div class="ht-mc-num">' + bestStreakVal + '<span class="ht-mc-unit"> days</span></div>' +
+          '<div class="ht-mc-sub">' + (bestStreakDef ? escHtml(bestStreakDef.name) : 'None yet') + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div class="card ht-mc">' +
+      '<div class="ht-mc-head">' + lucideIconHtml('check-circle', 13) + '<span>HABITS COMPLETED TODAY</span></div>' +
+      '<div class="ht-mc-body">' +
+        '<div>' +
+          '<div class="ht-mc-num">' + doneToday + '<span class="ht-mc-unit"> / ' + defs.length + '</span></div>' +
+          '<div class="ht-mc-sub">' + todayPct + '%</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div class="card ht-mc">' +
+      '<div class="ht-mc-head">' + lucideIconHtml('x-circle', 13) + '<span>MISSED THIS WEEK</span></div>' +
+      '<div class="ht-mc-body">' +
+        '<div>' +
+          '<div class="ht-mc-num">' + missed + '</div>' +
+          '<div class="ht-mc-sub" style="color:' + missedColor + '">' + escHtml(missedLabel) + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+    html += '<div class="card ht-mc">' +
+      '<div class="ht-mc-head">' + lucideIconHtml('trending-up', 13) + '<span>TREND VS LAST WEEK</span></div>' +
+      '<div class="ht-mc-body">' +
+        '<div>' +
+          '<div class="ht-mc-num" style="color:' + trendColor + '">' + trendSign + trendDiff + '<span class="ht-mc-unit">%</span></div>' +
+          '<div class="ht-mc-sub">Consistency</div>' +
+        '</div>' +
+        trendSpark +
+      '</div>' +
+    '</div>';
+
+    el.innerHTML = html;
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  function renderHabitHeatmaps() {
-    var el = $('htHeatmapBody');
+  // ============================================================
+  // RENDER: HABITS OVERVIEW TABLE
+  // ============================================================
+
+  function renderOverviewTable() {
+    var el = $('htOverviewBody');
+    if (!el) return;
+    var defs = getDefinitions().filter(function(d) { return d.active; });
+
+    if (!defs.length) {
+      el.innerHTML = '<div class="hm-empty" style="padding:20px 0;text-align:center">No habits. Open settings to add some.</div>';
+      return;
+    }
+
+    var html = '';
+    defs.forEach(function(def) {
+      var pct30 = completionPct(def.id, 30);
+      var streak = streakFor(def.id).current;
+
+      var pts14 = habitSparklinePts(def.id, 14);
+      var recentPct = completionPct(def.id, 14);
+      var prevDone = 0;
+      for (var k = 14; k < 28; k++) {
+        var dd = new Date(); dd.setDate(dd.getDate() - k);
+        var dddata = getDayData(dateToYMD(dd));
+        if (dddata && dddata.entries && dddata.entries[def.id]) prevDone++;
+      }
+      var prevPct = Math.round((prevDone / 14) * 100);
+      var trendDiff = recentPct - prevPct;
+      var trendColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
+      var trendArrow = trendDiff > 0 ? '↑' : trendDiff < 0 ? '↓' : '—';
+      var trendStr = trendDiff !== 0 ? (trendDiff > 0 ? '+' : '') + trendDiff + '%' : '0%';
+      var sparkColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
+      var sparkSvg = miniSparklineSvg(pts14, 56, 20, sparkColor);
+
+      html += '<div class="ht-ov-row">' +
+        '<div class="ht-ov-habit">' +
+          '<span class="ht-ov-icon">' + lucideIconHtml(def.icon || 'circle', 14) + '</span>' +
+          '<span class="ht-ov-name">' + escHtml(def.name) + '</span>' +
+        '</div>' +
+        '<div class="ht-ov-cons">' +
+          '<div class="ht-ov-bar"><div class="ht-ov-bar-fill" style="width:' + pct30 + '%"></div></div>' +
+          '<span class="ht-ov-pct">' + pct30 + '%</span>' +
+        '</div>' +
+        '<div class="ht-ov-streak">' + streak + ' days</div>' +
+        '<div class="ht-ov-trend">' + sparkSvg + '<span style="color:' + trendColor + '">' + trendArrow + ' ' + trendStr + '</span></div>' +
+      '</div>';
+    });
+
+    el.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  // ============================================================
+  // RENDER: WEEKLY HEATMAP
+  // ============================================================
+
+  function renderWeeklyHeatmap() {
+    var el = $('htWeekHeatmapBody');
     if (!el) return;
     var defs = getDefinitions().filter(function(d) { return d.active; });
     var today = todayYMD();
-    if (!defs.length) { el.innerHTML = '<div class="hm-empty">No active habits.</div>'; return; }
-    var dates = [];
-    for (var i = 27; i >= 0; i--) {
-      var d = new Date(); d.setDate(d.getDate() - i);
-      dates.push(dateToYMD(d));
+
+    if (!defs.length) { el.innerHTML = '<div class="hm-empty" style="padding:16px 0">No active habits.</div>'; return; }
+
+    var monday = getMonday();
+    var weekDays = [];
+    for (var d = 0; d < 7; d++) {
+      var day = new Date(monday); day.setDate(day.getDate() + d);
+      weekDays.push(dateToYMD(day));
     }
-    var html = '';
+
+    var DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    var checkSvg = '<svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5l3 3 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    var html = '<div class="ht-wk-body"><div class="ht-wk-grid">';
+
+    html += '<div class="ht-wk-row ht-wk-header">';
+    html += '<div class="ht-wk-icon-col"></div>';
+    DAY_LABELS.forEach(function(name, i) {
+      var isToday = weekDays[i] === today;
+      html += '<div class="ht-wk-day-label' + (isToday ? ' is-today' : '') + '">' + name + '</div>';
+    });
+    html += '</div>';
+
     defs.forEach(function(def) {
-      html += '<div class="ht-hm-row"><div class="ht-hm-label">' +
-        lucideIconHtml(def.icon || 'circle', 13) + '<span>' + escHtml(def.name) + '</span></div><div class="ht-hm-cells">';
-      dates.forEach(function(ymd) {
+      html += '<div class="ht-wk-row">';
+      html += '<div class="ht-wk-icon-col">' + lucideIconHtml(def.icon || 'circle', 13) + '</div>';
+      weekDays.forEach(function(ymd) {
+        var isFuture = ymd > today;
         var data = getDayData(ymd);
         var done = !!(data && data.entries && data.entries[def.id]);
-        var cls = 'ht-hm-cell' + (done ? ' done' : '') + (ymd === today ? ' today' : '') + (ymd > today ? ' future' : '');
-        html += '<div class="' + cls + '" data-id="' + def.id + '" data-ymd="' + ymd + '" title="' + ymd + '"></div>';
+        var isToday = ymd === today;
+        var cls = 'ht-wk-cell';
+        if (done) cls += ' done';
+        if (isToday) cls += ' today';
+        if (isFuture) cls += ' future';
+        html += '<div class="' + cls + '" data-id="' + def.id + '" data-ymd="' + ymd + '">' +
+          (done ? checkSvg : '') + '</div>';
       });
-      html += '</div></div>';
+      html += '</div>';
     });
+
+    html += '</div></div>';
     el.innerHTML = html;
-    el.querySelectorAll('.ht-hm-cell:not(.future)').forEach(function(cell) {
+
+    el.querySelectorAll('.ht-wk-cell:not(.future)').forEach(function(cell) {
       cell.addEventListener('click', function() {
         var id = cell.getAttribute('data-id');
         var ymd = cell.getAttribute('data-ymd');
         var cur = getDayData(ymd) || { entries: {}, notes: '' };
         cur.entries[id] = !cur.entries[id];
         setDayData(ymd, cur);
-        renderHabitHeatmaps();
-        renderTodayChips();
-        renderHabitsSummary();
-        renderHabitRings();
-        renderHabitTrend();
+        renderWeeklyHeatmap();
+        renderTopMetrics();
+        renderOverviewTable();
       });
     });
+
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  function renderHabitRings() {
-    var el = $('htRingsBody');
-    if (!el) return;
-    var defs = getDefinitions().filter(function(d) { return d.active; });
-    if (!defs.length) { el.innerHTML = '<div class="hm-empty">No active habits.</div>'; return; }
-    var today = new Date();
-    var weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 6);
-    var html = '';
-    defs.forEach(function(def) {
-      var done = 0;
-      for (var d = new Date(weekAgo); d <= today; d.setDate(d.getDate() + 1)) {
-        var data = getDayData(dateToYMD(d));
-        if (data && data.entries && data.entries[def.id]) done++;
-      }
-      var pct = Math.round((done / 7) * 100);
-      var r = 31, c = 2 * Math.PI * r;
-      html += '<div class="hfr-item"><div class="hfr-ring"><svg viewBox="0 0 72 72">' +
-        '<circle class="hfr-track" cx="36" cy="36" r="' + r + '"/>' +
-        '<circle class="hfr-fill" cx="36" cy="36" r="' + r + '" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + (c * (1 - pct / 100)).toFixed(1) + '"/>' +
-        '</svg><span class="hfr-pct">' + pct + '%</span></div>' +
-        '<span class="hfr-name">' + lucideIconHtml(def.icon || 'circle', 14) + ' ' + escHtml(def.name) + '</span>' +
-        '<span class="hfr-sublabel">' + done + '/7 days</span></div>';
-    });
-    el.innerHTML = html;
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  }
+  // ============================================================
+  // RENDER: INSIGHTS CARD
+  // ============================================================
 
-  function renderHabitTrend() {
-    var el = $('htTrendSvg');
-    if (!el) return;
-    var defs = getDefinitions().filter(function(d) { return d.active; });
-    if (!defs.length) { el.innerHTML = ''; return; }
-    var pts = [];
-    for (var i = 29; i >= 0; i--) {
-      var d = new Date(); d.setDate(d.getDate() - i);
-      var ymd = dateToYMD(d);
-      var data = getDayData(ymd);
-      var done = 0;
-      defs.forEach(function(def) { if (data && data.entries && data.entries[def.id]) done++; });
-      pts.push({ ymd: ymd, pct: Math.round((done / defs.length) * 100) });
-    }
-    var W = 300, H = 80, pX = 8, pY = 10;
-    var xOf = function(i) { return pX + (i / 29) * (W - 2 * pX); };
-    var yOf = function(p) { return H - pY - (p / 100) * (H - 2 * pY); };
-    var pathD = pts.map(function(p, i) { return (i === 0 ? 'M' : 'L') + xOf(i).toFixed(1) + ',' + yOf(p.pct).toFixed(1); }).join(' ');
-    var circles = pts.map(function(p, i) {
-      return '<circle cx="' + xOf(i).toFixed(1) + '" cy="' + yOf(p.pct).toFixed(1) + '" r="3" data-tip="' + p.ymd + ': ' + p.pct + '%"/>';
-    }).join('');
-    el.innerHTML = '<path d="' + pathD + '"/>' + circles;
-  }
-
-  function renderHabitInsights() {
+  function renderInsightsCard() {
     var el = $('htInsightsBody');
     if (!el) return;
     var defs = getDefinitions().filter(function(d) { return d.active; });
     if (!defs.length) { el.innerHTML = ''; return; }
-    var DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var dowC = [0,0,0,0,0,0,0], dowT = [0,0,0,0,0,0,0];
+
+    var DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var MON_SUN = [1, 2, 3, 4, 5, 6, 0];
+
+    var dowDone = [0, 0, 0, 0, 0, 0, 0];
+    var dowTotal = [0, 0, 0, 0, 0, 0, 0];
     for (var i = 0; i < 90; i++) {
       var d = new Date(); d.setDate(d.getDate() - i);
-      var dow = d.getDay(); var data = getDayData(dateToYMD(d));
+      var dow = d.getDay();
+      var data = getDayData(dateToYMD(d));
       defs.forEach(function(def) {
-        dowT[dow]++;
-        if (data && data.entries && data.entries[def.id]) dowC[dow]++;
+        dowTotal[dow]++;
+        if (data && data.entries && data.entries[def.id]) dowDone[dow]++;
       });
     }
-    var bestDow = 0, bestRate = 0;
-    for (var j = 0; j < 7; j++) {
-      var rate = dowT[j] > 0 ? dowC[j] / dowT[j] : 0;
-      if (rate > bestRate) { bestRate = rate; bestDow = j; }
+    var dowRates = dowDone.map(function(done, i) { return dowTotal[i] > 0 ? done / dowTotal[i] : 0; });
+
+    var bestDow = 0, worstDow = 0;
+    for (var j = 1; j < 7; j++) {
+      if (dowRates[j] > dowRates[bestDow]) bestDow = j;
+      if (dowRates[j] < dowRates[worstDow]) worstDow = j;
     }
+
+    var sortedDows = [0, 1, 2, 3, 4, 5, 6].sort(function(a, b) { return dowRates[b] - dowRates[a]; });
+    var top3Names = sortedDows.slice(0, 3).map(function(d) { return DAY_SHORT[d]; });
+
     var bestStreakVal = 0, bestStreakDef = null;
     defs.forEach(function(def) {
       var s = streakFor(def.id);
       if (s.current > bestStreakVal) { bestStreakVal = s.current; bestStreakDef = def; }
     });
-    var slipDef = null, slipDrop = 0;
+
+    var perfectHabit = null, perfectStreak = 0;
     defs.forEach(function(def) {
-      var recent = completionPct(def.id, 14);
-      var oldDone = 0;
-      for (var k = 30; k < 60; k++) {
-        var dd = new Date(); dd.setDate(dd.getDate() - k);
-        var ddata = getDayData(dateToYMD(dd));
-        if (ddata && ddata.entries && ddata.entries[def.id]) oldDone++;
-      }
-      var old = Math.round((oldDone / 30) * 100);
-      var drop = old - recent;
-      if (old >= 40 && drop > slipDrop) { slipDrop = drop; slipDef = def; }
+      var p = completionPct(def.id, 30);
+      var s = streakFor(def.id).current;
+      if (p >= 95 && s > perfectStreak) { perfectStreak = s; perfectHabit = def; }
     });
-    var corr = moodHabitCorrelation();
-    var ins = function(icon, bg, title, sub) {
-      return '<div class="ins-card"><div class="ins-icon" style="background:' + bg + '">' + lucideIconHtml(icon, 16) + '</div>' +
-        '<div style="min-width:0"><div class="ins-title">' + title + '</div><div class="ins-sub">' + sub + '</div></div></div>';
+
+    var COLOR_MAP = {
+      green: { icon: 'rgba(95,214,135,0.18)', text: 'var(--green)' },
+      amber: { icon: 'rgba(232,163,69,0.18)', text: 'var(--amber)' },
+      accent: { icon: 'rgba(209,128,155,0.18)', text: 'var(--accent)' },
+      blue: { icon: 'rgba(91,168,247,0.18)', text: 'var(--blue)' },
+      danger: { icon: 'rgba(255,107,107,0.18)', text: 'var(--danger)' }
     };
-    var html = ins('calendar', 'rgba(var(--accent-rgb),0.15)', 'Best Day', DAY_NAMES[bestDow] + ' — ' + Math.round(bestRate * 100) + '%');
-    html += (bestStreakVal > 0 && bestStreakDef)
-      ? ins('flame', 'rgba(255,159,28,0.15)', 'Top Streak', bestStreakVal + 'd — ' + escHtml(bestStreakDef.name))
-      : ins('flame', 'rgba(255,159,28,0.15)', 'Top Streak', 'Start one today!');
-    html += slipDef
-      ? ins('trending-down', 'rgba(247,37,133,0.15)', 'Needs Attention', escHtml(slipDef.name) + ' (' + slipDrop + '% drop)')
-      : ins('trending-up', 'rgba(95,214,135,0.15)', 'All Steady', 'No habits slipping');
-    html += corr
-      ? ins('brain', 'rgba(67,97,238,0.15)', escHtml(corr.def.name), corr.diff > 0 ? '→ better mood days' : '→ lower mood days')
-      : ins('brain', 'rgba(67,97,238,0.15)', 'Mood Link', 'Log mood to see patterns');
-    el.innerHTML = html;
+
+    var insights = [];
+
+    if (perfectHabit) {
+      insights.push({ color: 'green', lucide: 'check-circle',
+        title: escHtml(perfectHabit.name) + ' has been perfect for ' + perfectStreak + ' days',
+        sub: 'Amazing consistency!' });
+    }
+
+    insights.push({ color: 'amber', lucide: 'alert-triangle',
+      title: escHtml(DAY_FULL[worstDow]) + ' tends to be your hardest day',
+      sub: 'Consider adjusting your schedule' });
+
+    var productiveDef = defs.find(function(d) { return d.id === 'productive'; });
+    if (productiveDef) {
+      var prodRecent = completionPct(productiveDef.id, 7);
+      var prodOlder = completionPct(productiveDef.id, 14);
+      var prodChange = prodRecent - prodOlder;
+      if (Math.abs(prodChange) >= 3) {
+        insights.push({ color: prodChange > 0 ? 'green' : 'danger',
+          lucide: prodChange > 0 ? 'trending-up' : 'trending-down',
+          title: 'Productive tasks are ' + (prodChange > 0 ? 'up' : 'down') + ' ' + Math.abs(Math.round(prodChange)) + '% from last week',
+          sub: prodChange > 0 ? 'Great momentum' : 'Try blocking time for tasks' });
+      }
+    }
+
+    if (bestStreakDef && bestStreakVal > 0) {
+      insights.push({ color: 'accent', lucide: 'flame',
+        title: escHtml(bestStreakDef.name) + ' streak is your longest this month',
+        sub: 'Keep nurturing this habit' });
+    }
+
+    var outsideDef = defs.find(function(d) { return d.id === 'go_outside'; });
+    if (outsideDef) {
+      var outsideRecent = completionPct(outsideDef.id, 14);
+      if (outsideRecent < 60) {
+        insights.push({ color: 'danger', lucide: 'sun',
+          title: 'Going outside is down ' + (100 - outsideRecent) + '%',
+          sub: 'Try pairing it with a habit you already do' });
+      }
+    }
+
+    if (insights.length < 3) {
+      insights.push({ color: 'blue', lucide: 'calendar',
+        title: top3Names.join(', ') + ' are your most consistent days',
+        sub: 'Schedule key habits on these days' });
+    }
+
+    insights = insights.slice(0, 5);
+
+    var insHtml = insights.map(function(ins) {
+      var c = COLOR_MAP[ins.color] || COLOR_MAP.blue;
+      return '<div class="ht-ins2-item">' +
+        '<div class="ht-ins2-icon" style="background:' + c.icon + ';color:' + c.text + '">' + lucideIconHtml(ins.lucide, 14) + '</div>' +
+        '<div class="ht-ins2-text">' +
+          '<div class="ht-ins2-title" style="color:' + c.text + '">' + ins.title + '</div>' +
+          '<div class="ht-ins2-sub">' + ins.sub + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    var maxRate = Math.max.apply(null, dowRates) || 1;
+    function buildBarChart(highlightDow, highlightColor) {
+      var h = '<div class="ht-mini-bar-chart">';
+      MON_SUN.forEach(function(di) {
+        var rate = dowRates[di];
+        var hPx = Math.max(2, Math.round((rate / maxRate) * 28));
+        var isHL = di === highlightDow;
+        var barColor = isHL ? highlightColor : 'rgba(var(--accent-rgb),0.35)';
+        h += '<div class="ht-mini-bar-wrap">' +
+          '<div class="ht-mini-bar" style="height:' + hPx + 'px;background:' + barColor + '"></div>' +
+          '<span class="ht-mini-bar-lbl">' + DAY_SHORT[di][0] + '</span>' +
+        '</div>';
+      });
+      h += '</div>';
+      return h;
+    }
+
+    var rightHtml =
+      '<div class="ht-days-block">' +
+        '<div class="ht-days-lbl">BEST DAYS</div>' +
+        '<div class="ht-days-val">' + top3Names.join(', ') + '</div>' +
+        '<div class="ht-days-sub">Most consistent</div>' +
+        buildBarChart(bestDow, 'var(--accent)') +
+      '</div>' +
+      '<div class="ht-days-block">' +
+        '<div class="ht-days-lbl">HARDEST DAY</div>' +
+        '<div class="ht-days-val" style="color:var(--amber)">' + DAY_FULL[worstDow] + '</div>' +
+        '<div class="ht-days-sub">Lowest consistency</div>' +
+        buildBarChart(worstDow, 'var(--amber)') +
+      '</div>';
+
+    el.innerHTML = '<div class="ht-insights-left">' + insHtml + '</div>' +
+      '<div class="ht-insights-right">' + rightHtml + '</div>';
+
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
+  // ============================================================
+  // RENDER: MAIN VIEW
+  // ============================================================
+
   function renderHabitsView() {
-    renderHabitsSummary();
-    renderTodayChips();
-    renderHabitHeatmaps();
-    renderHabitRings();
-    renderHabitTrend();
-    renderHabitInsights();
-    var notesEl = $('htTodayNotes');
-    var today = todayYMD();
-    if (notesEl) {
-      var data = getDayData(today) || { entries: {}, notes: '' };
-      notesEl.value = data.notes || '';
-      notesEl.oninput = function() {
-        var cur = getDayData(today) || { entries: {}, notes: '' };
-        cur.notes = notesEl.value;
-        setDayData(today, cur);
-      };
-    }
+    renderTopMetrics();
+    renderOverviewTable();
+    renderWeeklyHeatmap();
+    renderInsightsCard();
+
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
@@ -678,7 +917,11 @@
       });
     }
 
-    // Add habit
+    // Add new habit button (main view)
+    const addNewBtn = $('htAddNewBtn');
+    if (addNewBtn) addNewBtn.addEventListener('click', openSettings);
+
+    // Add habit (inside modal)
     const addBtn = $('htAddBtn');
     if (addBtn) addBtn.addEventListener('click', handleAddHabit);
     const addNameInput = $('htAddName');
@@ -783,8 +1026,9 @@
     var el = document.getElementById(containerId);
     if (!el) return;
 
-    var ymd = getTodayYmd();
-    var day = getHealthData(ymd);
+    var ymd = todayYMD();
+    var day;
+    try { day = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) { day = {}; }
 
     var settings = { water_goal_oz: 64, sleep_goal_hours: 8, protein_goal_g: 118 };
     try {

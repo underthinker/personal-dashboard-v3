@@ -438,49 +438,55 @@
 
 <div class="section">
 
-  <!-- Summary -->
-  <div class="card" id="htSummaryCard">
-    <div class="card-head">
-      <span class="card-label">Habits</span>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span class="pill pill-streak" id="htStreakPill"></span>
+  <!-- Row 1: Top metric cards -->
+  <div class="ht-top-row" id="htTopRow"></div>
+
+  <!-- Row 2: Overview + Weekly Heatmap -->
+  <div class="ht-mid-row">
+    <div class="card ht-overview-card">
+      <div class="card-head">
+        <span class="card-label">Habits Overview</span>
         <button class="ht-vbtn-settings" id="htSettingsBtn" aria-label="Manage habits"><i data-lucide="settings" width="16" height="16"></i></button>
       </div>
+      <div class="ht-ov-hdr">
+        <span class="ht-ov-h-habit">Habit</span>
+        <span class="ht-ov-h-cons">Consistency</span>
+        <span class="ht-ov-h-streak">Streak</span>
+        <span class="ht-ov-h-trend">Trend (30d)</span>
+      </div>
+      <div class="ht-ov-body" id="htOverviewBody"></div>
+      <div class="ht-add-row">
+        <button class="ht-add-habit-btn" id="htAddNewBtn">
+          <i data-lucide="plus" width="13" height="13"></i> Add new habit
+        </button>
+      </div>
     </div>
-    <div id="htSummaryBody"></div>
-  </div>
-
-  <!-- Today -->
-  <div class="card" id="htTodayCard">
-    <div class="card-head"><span class="card-label">Today</span></div>
-    <div class="ht-chip-row" id="htChipRow"></div>
-    <div class="ht-notes-wrap">
-      <input type="text" class="ht-notes-input" id="htTodayNotes" placeholder="Add a note for today…" />
+    <div class="card ht-week-card">
+      <div class="card-head">
+        <span class="card-label">Weekly Consistency Heatmap</span>
+        <span class="ht-week-badge">This Week</span>
+      </div>
+      <div id="htWeekHeatmapBody"></div>
+      <div class="ht-hm-legend">
+        <span class="ht-hm-leg-item"><span class="ht-hm-leg-done-cell">&#10003;</span> Completed</span>
+        <span class="ht-hm-leg-item"><span class="ht-hm-leg-miss-cell"></span> Missed</span>
+        <span class="ht-hm-leg-item"><span class="ht-hm-leg-dash">&#8212;</span> Not tracked</span>
+      </div>
     </div>
   </div>
 
-  <!-- 28-day heatmaps -->
-  <div class="card" id="htHeatmapCard">
-    <div class="card-head"><span class="card-label">28-Day History</span></div>
-    <div id="htHeatmapBody"></div>
+  <!-- Row 3: Insights -->
+  <div class="ht-bot-row">
+    <div class="card ht-insights-card">
+      <div class="card-head"><span class="card-label">Habit Insights</span></div>
+      <div class="ht-insights-inner" id="htInsightsBody"></div>
+    </div>
   </div>
 
-  <!-- 7-day rings -->
-  <div class="card" id="htRingsCard">
-    <div class="card-head"><span class="card-label">7-Day Completion</span></div>
-    <div id="htRingsBody"></div>
-  </div>
-
-  <!-- 30-day trend -->
-  <div class="card" id="htTrendCard">
-    <div class="card-head"><span class="card-label">30-Day Trend</span></div>
-    <svg class="ht-trend-svg" id="htTrendSvg" viewBox="0 0 300 80" preserveAspectRatio="none"></svg>
-  </div>
-
-  <!-- Insights -->
-  <div class="card" id="htInsightsCard">
-    <div class="card-head"><span class="card-label">Insights</span></div>
-    <div class="ht-ins-grid" id="htInsightsBody"></div>
+  <!-- Footer tagline -->
+  <div class="ht-footer-bar">
+    <i data-lucide="zap" width="12" height="12"></i>
+    Consistency compounds. Small actions. Big life.
   </div>
 
 </div>
