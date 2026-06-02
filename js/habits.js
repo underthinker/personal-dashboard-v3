@@ -361,13 +361,6 @@
 
     var trendSpark = miniSparklineSvg(weeklySparklinePts(6), 64, 28, trendDiff >= 0 ? 'var(--green)' : 'var(--danger)');
 
-    var ringR = 28, ringC = 2 * Math.PI * ringR;
-    var ringOffset = ringC * (1 - weekPct / 100);
-    var ringSvg = '<svg class="ht-mc-ring" viewBox="0 0 72 72">' +
-      '<circle class="ht-ring-track" cx="36" cy="36" r="' + ringR + '"/>' +
-      '<circle class="ht-ring-fill" cx="36" cy="36" r="' + ringR + '" stroke-dasharray="' + ringC.toFixed(1) + '" stroke-dashoffset="' + ringOffset.toFixed(1) + '" transform="rotate(-90 36 36)"/>' +
-      '</svg>';
-
     var dailyPts = [];
     for (var i = 6; i >= 0; i--) {
       var dd = new Date(); dd.setDate(dd.getDate() - i);
@@ -388,7 +381,7 @@
           '<div class="ht-mc-num">' + weekPct + '<span class="ht-mc-unit">%</span></div>' +
           '<div class="ht-mc-sub">This Week</div>' +
         '</div>' +
-        '<div class="ht-mc-visual">' + ringSvg + consSpark + '</div>' +
+        '<div class="ht-mc-visual">' + consSpark + '</div>' +
       '</div>' +
     '</div>';
 

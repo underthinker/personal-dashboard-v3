@@ -3563,7 +3563,7 @@ margin-top: 15px;
 /* ─── Habits tab: full-height grid at wide screens ─── */
 @media (min-width: 1401px) {
   #tab-habits.is-visible {
-    overflow-y: auto;
+    overflow: hidden;
     flex: 1;
     min-height: 0;
   }
@@ -5744,9 +5744,10 @@ margin-top: 15px;
     display: flex !important;
     flex-direction: column !important;
     gap: 12px;
-    min-height: 100%;
+    flex: 1;
+    min-height: 0;
   }
-  #tab-habits .card { min-height: 0; }
+  #tab-habits .card { overflow: hidden; min-height: 0; }
 }
 
 /* Top metrics row */
@@ -5778,12 +5779,6 @@ margin-top: 15px;
 .ht-mc-visual { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 
 /* Ring in metric card */
-.ht-mc-ring { width: 60px; height: 60px; flex-shrink: 0; }
-.ht-ring-track { fill: none; stroke: var(--surface-2); stroke-width: 5; }
-.ht-ring-fill {
-  fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round;
-  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
 /* Sparkline SVG (inline) */
 .ht-spark-svg { display: block; flex-shrink: 0; }
@@ -5793,7 +5788,8 @@ margin-top: 15px;
   display: grid;
   grid-template-columns: 1fr 1.1fr;
   gap: 12px;
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Overview card */
@@ -5820,7 +5816,7 @@ margin-top: 15px;
   letter-spacing: 0.06em; text-transform: uppercase;
   flex-shrink: 0;
 }
-.ht-ov-body {}
+.ht-ov-body { flex: 1; min-height: 0; overflow-y: auto; }
 .ht-ov-row {
   display: grid;
   grid-template-columns: 16px 1fr 140px 80px 130px;
@@ -5863,28 +5859,28 @@ margin-top: 15px;
   background: var(--surface-2); border: 1px solid var(--line);
 }
 .ht-wk-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-.ht-wk-grid { display: flex; flex-direction: column; gap: 5px; }
+.ht-wk-grid { display: flex; flex-direction: column; gap: 3px; }
 .ht-wk-row {
   display: grid;
   grid-template-columns: 28px repeat(7, 1fr);
-  gap: 5px; align-items: center;
+  gap: 4px; align-items: center;
 }
 .ht-wk-header {
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--line);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .ht-wk-icon-col {
   display: flex; align-items: center; justify-content: center;
   color: var(--muted);
 }
 .ht-wk-day-label {
-  text-align: center; font-size: 10.5px; font-weight: 700;
+  text-align: center; font-size: 10px; font-weight: 700;
   color: var(--muted-2); letter-spacing: 0.04em;
 }
 .ht-wk-day-label.is-today { color: var(--accent); }
 .ht-wk-cell {
-  aspect-ratio: 1; width: 100%; max-width: 34px; max-height: 34px;
+  aspect-ratio: 1; width: 100%; max-width: 35px; max-height: 35px;
   border-radius: 6px; justify-self: center;
   background: var(--surface-2); border: 1px solid var(--line);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
