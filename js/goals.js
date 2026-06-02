@@ -1034,7 +1034,8 @@
 
     var cards = [];
 
-    var SVG_TREND   = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,11 5,7 9,9 15,3"/><polyline points="11,3 15,3 15,7"/></svg>';
+    var SVG_TREND      = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,5 5,9 9,7 15,13"/><polyline points="11,13 15,13 15,9"/></svg>';
+    var SVG_TREND_UP   = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,11 5,7 9,9 15,3"/><polyline points="11,3 15,3 15,7"/></svg>';
     var SVG_MORNING = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><line x1="8" y1="1" x2="8" y2="3"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="1" y1="8" x2="3" y2="8"/><line x1="13" y1="8" x2="15" y2="8"/></svg>';
     var SVG_SLEEP   = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 10A6 6 0 0 1 6 2a6 6 0 1 0 8 8z"/></svg>';
     var SVG_CHECK   = '<svg viewBox="0 0 16 16" width="20" height="20" fill="none" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>';
@@ -1054,7 +1055,8 @@
         trendText = pctDiff > 0 ? 'up ' + pctDiff + '%' : 'down ' + Math.abs(pctDiff) + '%';
         subText = Math.round(thisWeekFocus) + 'm vs ' + Math.round(prevWeekFocus) + 'm';
       }
-      cards.push({ icon: SVG_TREND, iconBg: 'var(--accent-soft)', title: 'Deep work is ' + trendText + ' this week', sub: subText });
+      var focusIcon = (pctDiff !== null && pctDiff < 0) ? SVG_TREND : SVG_TREND_UP;
+      cards.push({ icon: focusIcon, iconBg: 'var(--accent-soft)', title: 'Deep work is ' + trendText + ' this week', sub: subText });
     }
 
     // Card 2: Best performance time
@@ -1071,11 +1073,14 @@
       cards.push({ icon: SVG_SLEEP, iconBg: 'rgba(95,214,135,0.18)', title: 'Sleep is ' + sleepText + ' vs last week', sub: thisWeekSleep >= 7 ? 'Great recovery' : 'Room for improvement' });
     }
 
-    // Card 4: Completion rate
+    // Card 4: Completion rate (Mon-Sun calendar week)
     var doneCount = 0; var totalCount = 0;
+    var dow = now.getDay();
+    var mondayOffset = dow === 0 ? -6 : 1 - dow;
+    var monday = new Date(now); monday.setDate(monday.getDate() + mondayOffset);
     for (var gi = 0; gi < 7; gi++) {
-      var d2 = new Date(now); d2.setDate(d2.getDate() - gi);
-      var gYmd = dateToYMD(d2);
+      var wd = new Date(monday); wd.setDate(monday.getDate() + gi);
+      var gYmd = dateToYMD(wd);
       var gs = storeGet('goals:' + gYmd) || [];
       totalCount += gs.length;
       doneCount += gs.filter(function(g) { return g && g.done; }).length;
