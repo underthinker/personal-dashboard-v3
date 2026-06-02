@@ -25,3 +25,14 @@ UI Aesthetic Polish Progress.md
 *.sublime-workspace
 *.sublime-project
 *.code-workspace
+
+# Agent configs
+.agents/
+.claude/
+.opencode/
+
+# Project notes
+health-tab-plan.md
+
+# Test output
+test-results/
