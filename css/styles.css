@@ -5800,9 +5800,21 @@ margin-top: 15px;
 
 /* Overview card */
 .ht-overview-card { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; gap: 0; }
+.ht-ov-drag {
+  color: var(--muted-2);
+  cursor: grab;
+  font-size: 11px;
+  letter-spacing: -1px;
+  padding: 0 2px;
+  flex-shrink: 0;
+  user-select: none;
+  align-self: center;
+}
+.ht-ov-drag:active { cursor: grabbing; }
+.ht-ov-drag-ghost { opacity: 0.4; }
 .ht-ov-hdr {
   display: grid;
-  grid-template-columns: 1fr 140px 80px 130px;
+  grid-template-columns: 16px 1fr 140px 80px 130px;
   gap: 12px;
   padding: 14px 0 8px;
   border-bottom: 1px solid var(--line);
@@ -5815,7 +5827,7 @@ margin-top: 15px;
 }
 .ht-ov-row {
   display: grid;
-  grid-template-columns: 1fr 140px 80px 130px;
+  grid-template-columns: 16px 1fr 140px 80px 130px;
   gap: 12px; align-items: center;
   padding: 8px 0;
   border-bottom: 1px solid var(--line);

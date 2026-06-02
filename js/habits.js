@@ -441,6 +441,8 @@
   // RENDER: HABITS OVERVIEW TABLE
   // ============================================================
 
+  var _overviewSortable = null;
+
   function renderOverviewTable() {
     var el = $('htOverviewBody');
     if (!el) return;
@@ -472,7 +474,8 @@
       var sparkColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
       var sparkSvg = miniSparklineSvg(pts14, 56, 20, sparkColor);
 
-      html += '<div class="ht-ov-row">' +
+      html += '<div class="ht-ov-row" data-habit-id="' + escHtml(def.id) + '">' +
+        '<span class="ht-ov-drag">⋮⋮</span>' +
         '<div class="ht-ov-habit">' +
           '<span class="ht-ov-icon">' + lucideIconHtml(def.icon || 'circle', 14) + '</span>' +
           '<span class="ht-ov-name">' + escHtml(def.name) + '</span>' +
@@ -488,6 +491,25 @@
 
     el.innerHTML = html;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    if (window.Sortable && !_overviewSortable) {
+      _overviewSortable = Sortable.create(el, {
+        handle: '.ht-ov-drag',
+        animation: 150,
+        ghostClass: 'ht-ov-drag-ghost',
+        onEnd: function() {
+          var allDefs = getDefinitions();
+          var rows = el.querySelectorAll('.ht-ov-row[data-habit-id]');
+          var reordered = [];
+          rows.forEach(function(r) {
+            var d = allDefs.find(function(x) { return x.id === r.dataset.habitId; });
+            if (d) reordered.push(d);
+          });
+          setDefinitions(reordered);
+          renderHabitsView();
+        }
+      });
+    }
   }
 
   // ============================================================
@@ -829,6 +851,7 @@
       row.appendChild(delBtn);
       listEl.appendChild(row);
     });
+
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
