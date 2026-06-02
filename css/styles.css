@@ -5810,18 +5810,19 @@ margin-top: 15px;
   display: grid;
   grid-template-columns: 16px 1fr 140px 80px 130px;
   gap: 12px;
-  padding: 14px 0 8px;
+  padding: 10px 0 6px;
   border-bottom: 1px solid var(--line);
   font-size: 10px; font-weight: 700; color: var(--muted-2);
   letter-spacing: 0.06em; text-transform: uppercase;
   flex-shrink: 0;
 }
-.ht-ov-body { flex: 1; min-height: 0; overflow-y: auto; }
+.ht-ov-body { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 .ht-ov-row {
+  flex: 1;
   display: grid;
   grid-template-columns: 16px 1fr 140px 80px 130px;
   gap: 12px; align-items: center;
-  padding: 8px 0;
+  padding: 0;
   border-bottom: 1px solid var(--line);
 }
 .ht-ov-row:last-child { border-bottom: none; }
@@ -5853,19 +5854,23 @@ margin-top: 15px;
 
 /* Weekly heatmap card */
 .ht-week-card { overflow: hidden; }
+#htWeekHeatmapBody { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .ht-week-badge {
   font-size: 11px; font-weight: 600; color: var(--muted);
   padding: 3px 10px; border-radius: 99px;
   background: var(--surface-2); border: 1px solid var(--line);
 }
-.ht-wk-body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-.ht-wk-grid { display: flex; flex-direction: column; gap: 3px; }
+.ht-wk-body { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+.ht-wk-grid { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 3px; }
 .ht-wk-row {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 28px repeat(7, 1fr);
-  gap: 4px; align-items: center;
+  gap: 4px; align-items: stretch;
 }
 .ht-wk-header {
+  flex: none;
   padding-bottom: 4px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 2px;
@@ -5880,8 +5885,8 @@ margin-top: 15px;
 }
 .ht-wk-day-label.is-today { color: var(--accent); }
 .ht-wk-cell {
-  aspect-ratio: 1; width: 100%; max-width: 35px; max-height: 35px;
-  border-radius: 6px; justify-self: center;
+  aspect-ratio: 1; height: 100%; max-width: 44px; max-height: 44px;
+  border-radius: 6px; justify-self: center; align-self: center;
   background: var(--surface-2); border: 1px solid var(--line);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: transparent;
