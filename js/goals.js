@@ -882,30 +882,30 @@
         barsEl.innerHTML = weekFocusMins.map(function(min, i) {
           var px = min > 0 ? Math.max(10, Math.round((min / maxFocus) * barMaxH)) : 3;
           var cls = 'po-week-bar' + (min > 0 ? ' has-data' : '') + (i === todayWeekIdx ? ' is-today' : '');
-          return '<div class="' + cls + '" style="height:' + px + 'px" data-day="' + i + '"></div>';
+          return '<div class="' + cls + '" style="height:' + px + 'px" data-mins="' + min + '"></div>';
         }).join('');
-        barsEl._weekMins = weekFocusMins;
-        if (!barsEl._perfTip) {
-          barsEl._perfTip = $('perfWeekTooltip');
-          barsEl.addEventListener('mouseover', function(e) {
-            var bar = e.target.closest('.po-week-bar');
-            var tip = barsEl._perfTip;
-            if (!bar) { tip.classList.remove('is-visible'); return; }
-            var idx = parseInt(bar.getAttribute('data-day'));
-            var mins = barsEl._weekMins[idx];
-            tip.textContent = mins + 'm Deep Work';
+        var tip = document.getElementById('perfWeekTooltipBody');
+        if (!tip) {
+          tip = document.createElement('div');
+          tip.id = 'perfWeekTooltipBody';
+          tip.className = 'po-week-tooltip';
+          document.body.appendChild(tip);
+        }
+        barsEl.querySelectorAll('.po-week-bar').forEach(function(bar) {
+          bar.addEventListener('mouseenter', function(e) {
+            tip.textContent = this.getAttribute('data-mins') + 'm Deep Work';
+            tip.style.left = (e.clientX + 10) + 'px';
+            tip.style.top = (e.clientY - 28) + 'px';
             tip.classList.add('is-visible');
           });
-          barsEl.addEventListener('mousemove', function(e) {
-            var tip = barsEl._perfTip;
-            if (!tip.classList.contains('is-visible')) return;
+          bar.addEventListener('mousemove', function(e) {
             tip.style.left = (e.clientX + 10) + 'px';
             tip.style.top = (e.clientY - 28) + 'px';
           });
-          barsEl.addEventListener('mouseout', function(e) {
-            if (e.target.closest('.po-week-bar')) barsEl._perfTip.classList.remove('is-visible');
+          bar.addEventListener('mouseleave', function() {
+            tip.classList.remove('is-visible');
           });
-        }
+        });
       };
       requestAnimationFrame(renderBars);
     }
