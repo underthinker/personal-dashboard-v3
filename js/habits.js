@@ -60,6 +60,12 @@
     { id: 'reading', name: 'Reading', icon: 'book', active: true },
   ];
 
+  const ESTIMATED_EFFORT = {
+    journal: 2, reading: 5, hygiene: 3, healthy_meals: 5,
+    productive: 15, no_alcohol: 1, go_outside: 5, creativity: 15, no_fap: 1,
+  };
+  const WEEKLY_TARGET_PCT = 0.8;
+
   function generateId(name) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
   }
@@ -804,6 +810,240 @@
   }
 
   // ============================================================
+  // FOCUS AREAS — COMPUTE
+  // ============================================================
+
+  function computeFocusAreas() {
+    var defs = getDefinitions().filter(function(d) { return d.active; });
+    if (!defs.length) return null;
+
+    var today = todayYMD();
+
+    function lastDoneDays(habitId) {
+      for (var i = 0; i < 90; i++) {
+        var d = new Date(); d.setDate(d.getDate() - i);
+        var data = getDayData(dateToYMD(d));
+        if (data && data.entries && data.entries[habitId]) return i;
+      }
+      return 90;
+    }
+
+    function consecMissesSinceLastDone(habitId) {
+      var misses = 0;
+      for (var i = 0; i < 90; i++) {
+        var d = new Date(); d.setDate(d.getDate() - i);
+        var data = getDayData(dateToYMD(d));
+        if (data && data.entries && data.entries[habitId]) return misses;
+        misses++;
+      }
+      return misses;
+    }
+
+    function recentMisses(habitId, days) {
+      var count = 0;
+      for (var i = 0; i < days; i++) {
+        var d = new Date(); d.setDate(d.getDate() - i);
+        var data = getDayData(dateToYMD(d));
+        if (!(data && data.entries && data.entries[habitId])) count++;
+      }
+      return count;
+    }
+
+    var habitStats = defs.map(function(def) {
+      var pct30 = completionPct(def.id, 30);
+      var pct14 = completionPct(def.id, 14);
+      var pctPrev = 0;
+      for (var k = 14; k < 28; k++) {
+        var d = new Date(); d.setDate(d.getDate() - k);
+        var data = getDayData(dateToYMD(d));
+        if (data && data.entries && data.entries[def.id]) pctPrev++;
+      }
+      pctPrev = Math.round((pctPrev / 14) * 100);
+      var trend = pct14 - pctPrev;
+      var negativeTrend = trend < 0 ? Math.abs(trend) : 0;
+      var rMisses = recentMisses(def.id, 7);
+      var impactScore = (100 - pct30) + (negativeTrend * 1.5) + (rMisses * 2);
+      var lastDone = lastDoneDays(def.id);
+
+      return {
+        def: def,
+        pct30: pct30,
+        trend: trend,
+        negativeTrend: negativeTrend,
+        impactScore: impactScore,
+        lastDoneDays: lastDone,
+        consecMisses: consecMissesSinceLastDone(def.id),
+        recentMisses: rMisses,
+      };
+    });
+
+    habitStats.sort(function(a, b) { return b.impactScore - a.impactScore; });
+    var highestImpact = habitStats[0];
+
+    var recoveryPool = habitStats.filter(function(h) { return h.lastDoneDays > 2; });
+    recoveryPool.sort(function(a, b) {
+      if (a.lastDoneDays !== b.lastDoneDays) return b.lastDoneDays - a.lastDoneDays;
+      return b.consecMisses - a.consecMisses;
+    });
+    var recovery = recoveryPool.slice(0, 3);
+
+    var winPool = habitStats.filter(function(h) { return h.pct30 > 30; });
+    winPool.sort(function(a, b) {
+      var ea = ESTIMATED_EFFORT[a.def.id] || 5;
+      var eb = ESTIMATED_EFFORT[b.def.id] || 5;
+      if (ea !== eb) return ea - eb;
+      return b.pct30 - a.pct30;
+    });
+    if (winPool.length < 3) {
+      habitStats.forEach(function(h) {
+        if (winPool.length >= 3) return;
+        if (winPool.indexOf(h) === -1) winPool.push(h);
+      });
+    }
+    var quickWins = winPool.slice(0, 3);
+
+    var monday = getMonday();
+    var weeklyCompletions = 0, totalPossible = 0;
+    for (var d = 0; d < 7; d++) {
+      var day = new Date(monday); day.setDate(day.getDate() + d);
+      var ymd = dateToYMD(day);
+      if (ymd > today) continue;
+      var data = getDayData(ymd);
+      defs.forEach(function(def) {
+        totalPossible++;
+        if (data && data.entries && data.entries[def.id]) weeklyCompletions++;
+      });
+    }
+    var currentPct = totalPossible > 0 ? Math.round((weeklyCompletions / totalPossible) * 100) : 0;
+    var targetCompletions = Math.ceil(totalPossible * WEEKLY_TARGET_PCT);
+    var completionsNeeded = Math.max(0, targetCompletions - weeklyCompletions);
+    var targetPct = Math.round(WEEKLY_TARGET_PCT * 100);
+
+    return {
+      highestImpact: highestImpact,
+      recovery: recovery,
+      quickWins: quickWins,
+      weeklyGoal: {
+        currentPct: currentPct,
+        targetPct: targetPct,
+        completionsNeeded: completionsNeeded,
+        weeklyCompletions: weeklyCompletions,
+        totalPossible: totalPossible,
+      },
+    };
+  }
+
+  // ============================================================
+  // RENDER: FOCUS AREAS
+  // ============================================================
+
+  function impactExplanation(h) {
+    if (h.negativeTrend > 20) return 'Largest declining habit — major opportunity';
+    if (h.recentMisses >= 5) return 'Most frequently missed — start small';
+    if (h.pct30 < 25) return 'Lowest consistency — biggest gap to close';
+    if (h.negativeTrend > 10) return 'Declining fast — intervene now';
+    return 'Highest potential impact habit';
+  }
+
+  function recoveryExplanation(h) {
+    var parts = [];
+    if (h.lastDoneDays > 1) parts.push('Last ' + h.lastDoneDays + ' days ago');
+    if (h.consecMisses > 0) parts.push('Missed ' + h.consecMisses + ' straight');
+    return parts.join(' \u00B7 ');
+  }
+
+  function effortLabel(id) {
+    var e = ESTIMATED_EFFORT[id];
+    return e ? '~' + e + ' min' : '';
+  }
+
+  function renderFocusAreas() {
+    var el = $('htFocusBody');
+    if (!el) return;
+    var data = computeFocusAreas();
+    if (!data) { el.innerHTML = ''; return; }
+
+    var trendArrow = data.highestImpact.trend < 0 ? '↓' : '↑';
+    var trendColor = data.highestImpact.trend < 0 ? 'var(--danger)' : 'var(--green)';
+
+    var html = '';
+
+    // Section 1: Highest Impact
+    html += '<div class="ht-focus-impact">' +
+      '<div class="ht-focus-impact-row">' +
+        '<span class="ht-focus-impact-icon">' + lucideIconHtml(data.highestImpact.def.icon || 'circle', 14) + '</span>' +
+        '<div class="ht-focus-impact-info">' +
+          '<div class="ht-focus-impact-name">' + escHtml(data.highestImpact.def.name) + '</div>' +
+          '<div class="ht-focus-impact-pct"><span class="ht-focus-impact-num">' + data.highestImpact.pct30 + '%</span> consistency</div>' +
+        '</div>' +
+        '<div class="ht-focus-impact-trend" style="color:' + trendColor + '">' + trendArrow + ' ' + Math.abs(data.highestImpact.trend) + '%</div>' +
+      '</div>' +
+      '<div class="ht-focus-impact-exp">' + impactExplanation(data.highestImpact) + '</div>' +
+    '</div>';
+
+    // Section 2: Recovery Candidates
+    html += '<div class="ht-focus-divider"></div>' +
+      '<div class="ht-focus-section">' +
+      '<div class="ht-focus-section-label">NEEDS ATTENTION</div>';
+
+    if (data.recovery.length === 0) {
+      html += '<div class="ht-focus-empty">No habits at risk right now</div>';
+    } else {
+      data.recovery.forEach(function(h) {
+        html += '<div class="ht-focus-rec-item">' +
+          '<span class="ht-focus-rec-icon">' + lucideIconHtml(h.def.icon || 'circle', 12) + '</span>' +
+          '<div class="ht-focus-rec-info">' +
+            '<div class="ht-focus-rec-name">' + escHtml(h.def.name) + '</div>' +
+            '<div class="ht-focus-rec-meta">' + recoveryExplanation(h) + '</div>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '</div>';
+
+    // Section 3: Quick Wins
+    html += '<div class="ht-focus-divider"></div>' +
+      '<div class="ht-focus-section">' +
+      '<div class="ht-focus-section-label">QUICK WINS</div>' +
+      '<div class="ht-focus-wins-row">';
+
+    data.quickWins.forEach(function(h) {
+      var effort = effortLabel(h.def.id);
+      html += '<div class="ht-focus-win-item">' +
+        '<span class="ht-focus-win-check">' +
+          '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</span>' +
+        '<span class="ht-focus-win-name">' + escHtml(h.def.name) + '</span>' +
+        (effort ? '<span class="ht-focus-win-effort">(' + effort + ')</span>' : '') +
+      '</div>';
+    });
+
+    html += '</div></div>';
+
+    // Section 4: Weekly Goal
+    var wg = data.weeklyGoal;
+    var goalPct = Math.min(100, wg.totalPossible > 0 ? Math.round((wg.weeklyCompletions / wg.totalPossible) * 100) : 0);
+    html += '<div class="ht-focus-divider"></div>' +
+      '<div class="ht-focus-goal">' +
+      '<div class="ht-focus-goal-row">' +
+        '<span class="ht-focus-goal-lbl">Weekly Consistency</span>' +
+        '<span class="ht-focus-goal-pcts">' + wg.currentPct + '% → ' + wg.targetPct + '%</span>' +
+      '</div>' +
+      '<div class="ht-focus-goal-track">' +
+        '<div class="ht-focus-goal-fill" style="width:' + goalPct + '%"></div>' +
+      '</div>' +
+      '<div class="ht-focus-goal-sub">' +
+        (wg.completionsNeeded > 0
+          ? wg.completionsNeeded + ' more completion' + (wg.completionsNeeded !== 1 ? 's' : '') + ' needed to reach target'
+          : 'Target reached — great week!') +
+      '</div>' +
+    '</div>';
+
+    el.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  // ============================================================
   // RENDER: MAIN VIEW
   // ============================================================
 
@@ -812,6 +1052,7 @@
     renderOverviewTable();
     renderWeeklyHeatmap();
     renderInsightsCard();
+    renderFocusAreas();
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }

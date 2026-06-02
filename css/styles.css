@@ -5976,6 +5976,219 @@ margin-top: 15px;
 }
 
 
+/* ─── Focus Areas Card ─── */
+.ht-focus-card { gap: 0; }
+.ht-focus-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+}
+
+/* Section dividers */
+.ht-focus-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 6px 0 8px;
+  flex-shrink: 0;
+}
+
+/* Section label */
+.ht-focus-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--muted-2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* Section 1: Highest Impact */
+.ht-focus-impact {
+  background: var(--surface-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.08);
+  transition: box-shadow var(--dur-fast) var(--ease-smooth);
+}
+.ht-focus-impact:hover {
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.16);
+}
+.ht-focus-impact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ht-focus-impact-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ht-focus-impact-info {
+  flex: 1;
+  min-width: 0;
+}
+.ht-focus-impact-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.ht-focus-impact-pct {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+.ht-focus-impact-num {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text);
+}
+.ht-focus-impact-trend {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.ht-focus-impact-exp {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* Section 2: Recovery Candidates */
+.ht-focus-section {
+  flex-shrink: 0;
+}
+.ht-focus-rec-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.ht-focus-rec-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(232, 163, 69, 0.14);
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ht-focus-rec-info {
+  flex: 1;
+  min-width: 0;
+}
+.ht-focus-rec-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.ht-focus-rec-meta {
+  font-size: 10.5px;
+  color: var(--muted-2);
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
+/* Section 3: Quick Wins */
+.ht-focus-wins-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.ht-focus-win-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  line-height: 1.3;
+  transition: background var(--dur-fast) var(--ease-smooth), border-color var(--dur-fast) var(--ease-smooth);
+}
+.ht-focus-win-item:hover {
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+.ht-focus-win-check {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ht-focus-win-name {
+  font-weight: 500;
+  color: var(--text);
+}
+.ht-focus-win-effort {
+  color: var(--muted-2);
+  font-size: 10px;
+}
+
+/* Section 4: Weekly Goal */
+.ht-focus-goal {
+  flex-shrink: 0;
+}
+.ht-focus-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.ht-focus-goal-lbl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.ht-focus-goal-pcts {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+.ht-focus-goal-track {
+  height: 5px;
+  background: var(--line-2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.ht-focus-goal-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ht-focus-goal-sub {
+  font-size: 10.5px;
+  color: var(--muted-2);
+  margin-top: 4px;
+}
+
+/* Focus Areas empty state */
+.ht-focus-empty {
+  font-size: 11px;
+  color: var(--muted-2);
+  padding: 4px 0;
+}
+
 /* Responsive: collapse to single column on narrow screens */
 @media (max-width: 1100px) {
   .ht-top-row { grid-template-columns: repeat(3, 1fr); }
