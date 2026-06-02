@@ -5977,7 +5977,7 @@ margin-top: 15px;
 
 
 /* ─── Focus Areas Card ─── */
-.ht-focus-card { gap: 0; }
+.ht-focus-card { gap: 20px; }
 .ht-focus-inner {
   flex: 1;
   display: flex;
