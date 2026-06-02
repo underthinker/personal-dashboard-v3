@@ -5920,7 +5920,7 @@ margin-top: 15px;
   gap: 14px;
   flex: 1;
 }
-.ht-insights-left { display: flex; flex-direction: column; justify-content: space-evenly; flex: 1; min-height: 0; }
+.ht-insights-left { display: flex; flex-direction: column; justify-content: space-evenly; flex: 1; min-height: 0; transition: opacity 0.2s ease; }
 .ht-insights-right {
   border-left: 1px solid var(--line);
   padding-left: 14px;
@@ -5938,6 +5938,11 @@ margin-top: 15px;
 .ht-ins2-text { min-width: 0; }
 .ht-ins2-title { font-size: 12px; font-weight: 600; line-height: 1.35; }
 .ht-ins2-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* Insight rotation dots */
+.ht-ins-dots { display: flex; gap: 4px; justify-content: center; margin-top: 6px; }
+.ht-ins-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--line); transition: background 0.3s; }
+.ht-ins-dot.active { background: var(--accent); }
 
 /* Day stats block (inside insights right) */
 .ht-days-block { }

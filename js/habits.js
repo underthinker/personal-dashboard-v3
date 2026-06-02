@@ -578,11 +578,27 @@
   // RENDER: INSIGHTS CARD
   // ============================================================
 
+  var _COLOR_MAP = {
+    green: { icon: 'rgba(95,214,135,0.18)', text: 'var(--green)' },
+    amber: { icon: 'rgba(232,163,69,0.18)', text: 'var(--amber)' },
+    accent: { icon: 'rgba(209,128,155,0.18)', text: 'var(--accent)' },
+    blue: { icon: 'rgba(91,168,247,0.18)', text: 'var(--blue)' },
+    danger: { icon: 'rgba(255,107,107,0.18)', text: 'var(--danger)' }
+  };
+  var _insTimer = null;
+  var _insOffset = 0;
+  var _allInsights = [];
+
+  function _stopInsTimer() {
+    if (_insTimer) { clearInterval(_insTimer); _insTimer = null; }
+  }
+
   function renderInsightsCard() {
+    _stopInsTimer();
     var el = $('htInsightsBody');
     if (!el) return;
     var defs = getDefinitions().filter(function(d) { return d.active; });
-    if (!defs.length) { el.innerHTML = ''; return; }
+    if (!defs.length) { el.innerHTML = ''; _allInsights = []; return; }
 
     var DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     var DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -623,23 +639,15 @@
       if (p >= 95 && s > perfectStreak) { perfectStreak = s; perfectHabit = def; }
     });
 
-    var COLOR_MAP = {
-      green: { icon: 'rgba(95,214,135,0.18)', text: 'var(--green)' },
-      amber: { icon: 'rgba(232,163,69,0.18)', text: 'var(--amber)' },
-      accent: { icon: 'rgba(209,128,155,0.18)', text: 'var(--accent)' },
-      blue: { icon: 'rgba(91,168,247,0.18)', text: 'var(--blue)' },
-      danger: { icon: 'rgba(255,107,107,0.18)', text: 'var(--danger)' }
-    };
-
-    var insights = [];
+    var allInsights = [];
 
     if (perfectHabit) {
-      insights.push({ color: 'green', lucide: 'check-circle',
+      allInsights.push({ color: 'green', lucide: 'check-circle',
         title: escHtml(perfectHabit.name) + ' has been perfect for ' + perfectStreak + ' days',
         sub: 'Amazing consistency!' });
     }
 
-    insights.push({ color: 'amber', lucide: 'alert-triangle',
+    allInsights.push({ color: 'amber', lucide: 'alert-triangle',
       title: escHtml(DAY_FULL[worstDow]) + ' tends to be your hardest day',
       sub: 'Consider adjusting your schedule' });
 
@@ -649,7 +657,7 @@
       var prodOlder = completionPct(productiveDef.id, 14);
       var prodChange = prodRecent - prodOlder;
       if (Math.abs(prodChange) >= 3) {
-        insights.push({ color: prodChange > 0 ? 'green' : 'danger',
+        allInsights.push({ color: prodChange > 0 ? 'green' : 'danger',
           lucide: prodChange > 0 ? 'trending-up' : 'trending-down',
           title: 'Productive tasks are ' + (prodChange > 0 ? 'up' : 'down') + ' ' + Math.abs(Math.round(prodChange)) + '% from last week',
           sub: prodChange > 0 ? 'Great momentum' : 'Try blocking time for tasks' });
@@ -657,7 +665,7 @@
     }
 
     if (bestStreakDef && bestStreakVal > 0) {
-      insights.push({ color: 'accent', lucide: 'flame',
+      allInsights.push({ color: 'accent', lucide: 'flame',
         title: escHtml(bestStreakDef.name) + ' streak is your longest this month',
         sub: 'Keep nurturing this habit' });
     }
@@ -666,22 +674,29 @@
     if (outsideDef) {
       var outsideRecent = completionPct(outsideDef.id, 14);
       if (outsideRecent < 60) {
-        insights.push({ color: 'danger', lucide: 'sun',
+        allInsights.push({ color: 'danger', lucide: 'sun',
           title: 'Going outside is down ' + (100 - outsideRecent) + '%',
           sub: 'Try pairing it with a habit you already do' });
       }
     }
 
-    if (insights.length < 3) {
-      insights.push({ color: 'blue', lucide: 'calendar',
-        title: top3Names.join(', ') + ' are your most consistent days',
-        sub: 'Schedule key habits on these days' });
+    // Always add consistent days as a rotatable option
+    allInsights.push({ color: 'blue', lucide: 'calendar',
+      title: top3Names.join(', ') + ' are your most consistent days',
+      sub: 'Schedule key habits on these days' });
+
+    _insOffset = 0;
+    _allInsights = allInsights;
+
+    // Render initial window (first 4)
+    var total = allInsights.length;
+    var show = 4;
+    var items = [];
+    for (var i = 0; i < show && i < total; i++) {
+      items.push(allInsights[i]);
     }
-
-    insights = insights.slice(0, 5);
-
-    var insHtml = insights.map(function(ins) {
-      var c = COLOR_MAP[ins.color] || COLOR_MAP.blue;
+    var insHtml = items.map(function(ins) {
+      var c = _COLOR_MAP[ins.color] || _COLOR_MAP.blue;
       return '<div class="ht-ins2-item">' +
         '<div class="ht-ins2-icon" style="background:' + c.icon + ';color:' + c.text + '">' + lucideIconHtml(ins.lucide, 14) + '</div>' +
         '<div class="ht-ins2-text">' +
@@ -690,6 +705,15 @@
         '</div>' +
       '</div>';
     }).join('');
+
+    var dotsHtml = '';
+    if (total > show) {
+      dotsHtml = '<div class="ht-ins-dots">';
+      for (var i = 0; i < total; i++) {
+        dotsHtml += '<span class="ht-ins-dot' + (i < show ? ' active' : '') + '"></span>';
+      }
+      dotsHtml += '</div>';
+    }
 
     var maxRate = Math.max.apply(null, dowRates) || 1;
     function buildBarChart(highlightDow, highlightColor) {
@@ -722,10 +746,61 @@
         buildBarChart(worstDow, 'var(--amber)') +
       '</div>';
 
-    el.innerHTML = '<div class="ht-insights-left">' + insHtml + '</div>' +
+    el.innerHTML = '<div class="ht-insights-left">' + insHtml + dotsHtml + '</div>' +
       '<div class="ht-insights-right">' + rightHtml + '</div>';
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Start rotation timer when there are more insights than slots
+    if (total > show) {
+      _insTimer = setInterval(function() {
+        _insOffset = (_insOffset + 1) % _allInsights.length;
+        _renderInsightWindow();
+      }, 720000);
+    }
+  }
+
+  function _renderInsightWindow() {
+    var el = $('htInsightsBody');
+    if (!el || !_allInsights.length) return;
+    var leftEl = el.querySelector('.ht-insights-left');
+    if (!leftEl || leftEl._fading) return;
+
+    var total = _allInsights.length;
+    var show = 4;
+    var start = _insOffset % total;
+    var items = [];
+    for (var i = 0; i < show; i++) {
+      items.push(_allInsights[(start + i) % total]);
+    }
+    var insHtml = items.map(function(ins) {
+      var c = _COLOR_MAP[ins.color] || _COLOR_MAP.blue;
+      return '<div class="ht-ins2-item">' +
+        '<div class="ht-ins2-icon" style="background:' + c.icon + ';color:' + c.text + '">' + lucideIconHtml(ins.lucide, 14) + '</div>' +
+        '<div class="ht-ins2-text">' +
+          '<div class="ht-ins2-title" style="color:' + c.text + '">' + ins.title + '</div>' +
+          '<div class="ht-ins2-sub">' + ins.sub + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    var dotsHtml = '';
+    if (total > show) {
+      dotsHtml = '<div class="ht-ins-dots">';
+      for (var i = 0; i < total; i++) {
+        var pos = (i - start + total) % total;
+        dotsHtml += '<span class="ht-ins-dot' + (pos < show ? ' active' : '') + '"></span>';
+      }
+      dotsHtml += '</div>';
+    }
+
+    leftEl._fading = true;
+    leftEl.style.opacity = '0';
+    setTimeout(function() {
+      leftEl.innerHTML = insHtml + dotsHtml;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      leftEl.style.opacity = '';
+      leftEl._fading = false;
+    }, 200);
   }
 
   // ============================================================
