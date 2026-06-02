@@ -5799,12 +5799,12 @@ margin-top: 15px;
 }
 
 /* Overview card */
-.ht-overview-card { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+.ht-overview-card { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; gap: 0; }
 .ht-ov-hdr {
   display: grid;
   grid-template-columns: 1fr 140px 80px 130px;
   gap: 12px;
-  padding-bottom: 8px;
+  padding: 14px 0 8px;
   border-bottom: 1px solid var(--line);
   font-size: 10px; font-weight: 700; color: var(--muted-2);
   letter-spacing: 0.06em; text-transform: uppercase;
