@@ -285,9 +285,7 @@
     const sleepBed = day.sleep_bedtime || '';
     const sleepWake = day.sleep_waketime || '';
     const waterOz = day.water_oz || 0;
-    const waterMax = settings.water_goal_oz * 1.3;
-    const waterPct = Math.min(waterOz / waterMax * 100, 100);
-    const waterGoalPct = (settings.water_goal_oz / waterMax * 100).toFixed(1);
+    const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
     const rec = day.recovery || {};
 
     const slidersHtml = RECOVERY_SLIDERS.map(s => {
@@ -327,7 +325,6 @@
             <div class="ql-water-top">
               <div class="ql-water-bar">
                 <div class="ql-water-fill" style="width:${waterPct.toFixed(1)}%"></div>
-                <div class="ql-water-goal-tick" style="left:${waterGoalPct}%"></div>
               </div>
               <span class="ql-water-val"><span id="qlWaterNum">${waterOz}</span> / ${settings.water_goal_oz} oz</span>
             </div>
@@ -785,14 +782,10 @@
     const groupW = plotW / n;
     const barW = Math.max(4, Math.floor(groupW * 0.5));
     const pointX = history.map((_, i) => padL + groupW * i + groupW / 2);
-    const maxWater = settings.water_goal_oz * 1.3;
+    const maxWater = settings.water_goal_oz;
     function yWater(v) { return padT + plotH - Math.min(v / maxWater, 1) * plotH; }
 
     let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg" aria-hidden="true">`;
-
-    // Goal line
-    const goalY = yWater(settings.water_goal_oz);
-    html += `<line x1="${padL}" y1="${goalY.toFixed(1)}" x2="${W-padR}" y2="${goalY.toFixed(1)}" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3,2"/>`;
 
     // Water bars
     history.forEach((h, i) => {
