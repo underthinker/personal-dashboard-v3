@@ -956,10 +956,10 @@
   // ============================================================
 
   function impactExplanation(h) {
-    if (h.negativeTrend > 20) return 'Largest declining habit — major opportunity';
-    if (h.recentMisses >= 5) return 'Most frequently missed — start small';
-    if (h.pct30 < 25) return 'Lowest consistency — biggest gap to close';
-    if (h.negativeTrend > 10) return 'Declining fast — intervene now';
+    if (h.negativeTrend > 20) return 'Largest declining habit, major opportunity';
+    if (h.recentMisses >= 5) return 'Most frequently missed, start small';
+    if (h.pct30 < 25) return 'Lowest consistency, biggest gap to close';
+    if (h.negativeTrend > 10) return 'Declining fast, intervene now';
     return 'Highest potential impact habit';
   }
 
@@ -1053,7 +1053,7 @@
       '<div class="ht-focus-goal-sub">' +
         (wg.completionsNeeded > 0
           ? wg.completionsNeeded + ' more completion' + (wg.completionsNeeded !== 1 ? 's' : '') + ' needed to reach target'
-          : 'Target reached — great week!') +
+          : 'Target reached, great week!') +
       '</div>' +
     '</div>';
 
