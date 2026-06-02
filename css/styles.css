@@ -5908,24 +5908,6 @@ margin-top: 15px;
 }
 .ht-wk-cell.future { opacity: 0.22; cursor: default; pointer-events: none; }
 
-/* Heatmap legend */
-.ht-hm-legend {
-  display: flex; align-items: center; gap: 16px;
-  padding-top: 10px; border-top: 1px solid var(--line); flex-shrink: 0;
-}
-.ht-hm-leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.ht-hm-leg-done-cell {
-  width: 16px; height: 16px; border-radius: 4px;
-  background: rgba(var(--accent-rgb), 0.30); border: 1px solid rgba(var(--accent-rgb), 0.50);
-  color: var(--accent); display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700; flex-shrink: 0;
-}
-.ht-hm-leg-miss-cell {
-  width: 16px; height: 16px; border-radius: 4px;
-  background: var(--surface-2); border: 1px solid var(--line); flex-shrink: 0;
-}
-.ht-hm-leg-dash { color: var(--muted-2); font-size: 12px; }
-
 /* Bottom row */
 .ht-bot-row {
   display: grid;
