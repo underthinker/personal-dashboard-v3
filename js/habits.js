@@ -117,6 +117,17 @@
     storeSet('habits:' + ymd, { date: ymd, entries: data.entries || {}, notes: data.notes || '' });
   }
 
+  function flashRefresh(el) {
+    if (!el) return;
+    el.classList.remove('ht-flash');
+    void el.offsetWidth;
+    el.classList.add('ht-flash');
+    el.addEventListener('animationend', function handler() {
+      el.classList.remove('ht-flash');
+      el.removeEventListener('animationend', handler);
+    });
+  }
+
   // ----------- Mood definitions -----------
   const MOOD_DEFS = [
     { key: 'happy',      label: 'Happy',      emoji: '🌻', color: '#FFD166' },
@@ -433,6 +444,7 @@
     '</div>';
 
     el.innerHTML = html;
+    flashRefresh(el);
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
@@ -449,6 +461,7 @@
 
     if (!defs.length) {
       el.innerHTML = '<div class="hm-empty" style="padding:20px 0;text-align:center">No habits. Open settings to add some.</div>';
+      flashRefresh(el);
       return;
     }
 
@@ -489,6 +502,7 @@
     });
 
     el.innerHTML = html;
+    flashRefresh(el);
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
     if (window.Sortable && !_overviewSortable) {
@@ -521,7 +535,7 @@
     var defs = getDefinitions().filter(function(d) { return d.active; });
     var today = todayYMD();
 
-    if (!defs.length) { el.innerHTML = '<div class="hm-empty" style="padding:16px 0">No active habits.</div>'; return; }
+    if (!defs.length) { el.innerHTML = '<div class="hm-empty" style="padding:16px 0">No active habits.</div>'; flashRefresh(el); return; }
 
     var monday = getMonday();
     var weekDays = [];
@@ -563,6 +577,7 @@
 
     html += '</div></div>';
     el.innerHTML = html;
+    flashRefresh(el);
 
     el.querySelectorAll('.ht-wk-cell:not(.future)').forEach(function(cell) {
       cell.addEventListener('click', function() {
@@ -574,6 +589,8 @@
         renderWeeklyHeatmap();
         renderTopMetrics();
         renderOverviewTable();
+        renderInsightsCard();
+        renderFocusAreas();
       });
     });
 
@@ -604,7 +621,7 @@
     var el = $('htInsightsBody');
     if (!el) return;
     var defs = getDefinitions().filter(function(d) { return d.active; });
-    if (!defs.length) { el.innerHTML = ''; _allInsights = []; return; }
+    if (!defs.length) { el.innerHTML = ''; _allInsights = []; flashRefresh(el); return; }
 
     var DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     var DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -754,6 +771,7 @@
 
     el.innerHTML = '<div class="ht-insights-left">' + insHtml + dotsHtml + '</div>' +
       '<div class="ht-insights-right">' + rightHtml + '</div>';
+    flashRefresh(el);
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
@@ -1040,6 +1058,7 @@
     '</div>';
 
     el.innerHTML = html;
+    flashRefresh(el);
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 

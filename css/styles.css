@@ -3544,6 +3544,14 @@ margin-top: 15px;
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes ht-flash {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+.ht-flash {
+  animation: ht-flash 0.25s ease-out;
+}
+
 @media (min-width: 1401px) {
   #tab-main.is-visible {
     overflow: hidden;
