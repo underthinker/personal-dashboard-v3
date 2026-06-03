@@ -288,7 +288,6 @@
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">DAILY LOG: INTAKE</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -374,7 +373,6 @@
     }).join('');
 
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">DAILY STATUS: RECOVERY</span></div>
       <div class="rc-list" data-rc-list>${rowsHtml}</div>
       <button type="button" class="rc-log-btn" id="rcLogBtn" data-rc-open>+ LOG RECOVERY DATA</button>`;
 
@@ -395,7 +393,7 @@
   // ---- Recovery editor modal ----
   let _rcEscHandler = null;
 
-  function openRecoveryModal(date, day, settings, focusIndex) {
+  function openRecoveryModal(date, day, settings) {
     const bg = $('recModalBg');
     if (!bg) return;
     if (!day.recovery) day.recovery = {};
@@ -417,7 +415,7 @@
     bg.innerHTML = `<div class="setup-modal rcm-modal">
       <div class="setup-header">
         <span class="setup-wordmark">Log Recovery</span>
-        <p class="setup-sub">j / k to move &middot; 1&ndash;${RECOVERY_MAX} to set the focused metric.</p>
+        <p class="setup-sub">Rate each metric from 1 to 7</p>
       </div>
       <div class="rcm-list" data-rcm-list>${rowsHtml}</div>
       <div class="setup-actions" style="justify-content:flex-end">
@@ -443,33 +441,12 @@
       slider.addEventListener('input', () => setVal(slider.dataset.recovery, parseInt(slider.value, 10)));
     });
 
-    const rows = Array.from(bg.querySelectorAll('[data-rcm-row]'));
-    function focusRow(i) {
-      const r = rows[(i + rows.length) % rows.length];
-      if (r) r.focus();
-    }
-
-    // Vim-style navigation + number-key value mapping on the focused metric.
-    function onKey(e) {
-      if (e.key === 'Escape') { closeRecoveryModal(); return; }
-      const active = document.activeElement && document.activeElement.closest('[data-rcm-row]');
-      const idx = active ? parseInt(active.dataset.rcmIndex, 10) : 0;
-      if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); focusRow(idx + 1); }
-      else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); focusRow(idx - 1); }
-      else if (active && /^[1-9]$/.test(e.key)) {
-        const n = parseInt(e.key, 10);
-        if (n <= RECOVERY_MAX) { e.preventDefault(); setVal(active.dataset.recovery, n); }
-      }
-    }
-
     $('rcmDone').addEventListener('click', closeRecoveryModal);
     bg.addEventListener('click', e => { if (e.target === bg) closeRecoveryModal(); });
 
     if (_rcEscHandler) document.removeEventListener('keydown', _rcEscHandler);
-    _rcEscHandler = onKey;
+    _rcEscHandler = e => { if (e.key === 'Escape') closeRecoveryModal(); };
     document.addEventListener('keydown', _rcEscHandler);
-
-    setTimeout(() => focusRow(focusIndex || 0), 50);
   }
 
   function closeRecoveryModal() {
@@ -733,12 +710,12 @@
 
     const insights = generateInsights(date, settings);
     if (insights.length === 0) {
-      el.innerHTML = '<div class="card-head"><span class="card-label">INSIGHTS</span></div><div class="hi-empty">Keep logging, personalized insights appear after a few days of data.</div>';
+      el.innerHTML = '<div class="hi-empty">Keep logging, personalized insights appear after a few days of data.</div>';
       return;
     }
 
     const iconMap = { positive: '↑', warn: '▲', info: '◆' };
-    el.innerHTML = `<div class="card-head"><span class="card-label">INSIGHTS</span></div><div class="hi-list">${
+    el.innerHTML = `<div class="hi-list">${
       insights.map(ins => `<div class="hi-item hi-${ins.type}">
         <span class="hi-icon">${iconMap[ins.type]}</span>
         <span class="hi-text">${ins.text}</span>

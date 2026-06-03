@@ -1372,6 +1372,19 @@
   }
   window.renderHabitFullRings = renderHabitFullRings;
 
+  // Swappable macro slot (3rd home health ring). All accent-colored so they
+  // follow the user's accent preference. Icon strokes use var(--accent).
+  // Lucide icon names matching the Health tab macro bars (flame/wheat/droplet/beef).
+  var MACRO_SLOTS = [
+    { key: 'protein',  label: 'Protein',  totalKey: 'protein_g', goalKey: 'protein_goal_g', unit: 'g', icon: 'beef'    },
+    { key: 'calories', label: 'Calories', totalKey: 'calories',  goalKey: 'calorie_goal',   unit: '',  icon: 'flame'   },
+    { key: 'carbs',    label: 'Carbs',    totalKey: 'carbs_g',   goalKey: 'carbs_goal_g',   unit: 'g', icon: 'wheat'   },
+    { key: 'fat',      label: 'Fat',      totalKey: 'fat_g',     goalKey: 'fat_goal_g',     unit: 'g', icon: 'droplet' }
+  ];
+  var _homeMacroIdx = 0;
+  try { _homeMacroIdx = parseInt(localStorage.getItem('home_macro_slot_v1'), 10) || 0; } catch(e) {}
+  if (_homeMacroIdx < 0 || _homeMacroIdx >= MACRO_SLOTS.length) _homeMacroIdx = 0;
+
   function renderHomeHealthRings(containerId) {
     containerId = containerId || 'habitFullWidget';
     var el = document.getElementById(containerId);
@@ -1381,21 +1394,31 @@
     var day;
     try { day = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) { day = {}; }
 
-    var settings = { water_goal_oz: 64, sleep_goal_hours: 8, protein_goal_g: 118 };
+    var settings = {
+      water_goal_oz: 64, sleep_goal_hours: 8,
+      protein_goal_g: 118, calorie_goal: 2200, carbs_goal_g: 250, fat_goal_g: 75
+    };
     try {
       var s = JSON.parse(localStorage.getItem('health_settings') || '{}');
       if (s.water_goal_oz) settings.water_goal_oz = s.water_goal_oz;
       if (s.sleep_goal_hours) settings.sleep_goal_hours = s.sleep_goal_hours;
       if (s.protein_goal_g) settings.protein_goal_g = s.protein_goal_g;
+      if (s.calorie_goal) settings.calorie_goal = s.calorie_goal;
+      if (s.carbs_goal_g) settings.carbs_goal_g = s.carbs_goal_g;
+      if (s.fat_goal_g) settings.fat_goal_g = s.fat_goal_g;
     } catch(e) {}
 
     var sleepH = day.sleep_hours || 0;
     var waterOz = day.water_oz || 0;
-    var proteinG = (day.nutrition_totals && day.nutrition_totals.protein_g) || 0;
+    var totals = day.nutrition_totals || {};
+
+    var slot = MACRO_SLOTS[_homeMacroIdx];
+    var macroVal = totals[slot.totalKey] || 0;
+    var macroGoal = settings[slot.goalKey];
 
     var metrics = [
       {
-        label: 'Sleep', color: 'var(--green)',
+        label: 'Sleep', color: 'var(--green)', icon: HEALTH_RING_ICONS[0],
         pct: Math.min(100, Math.round(sleepH / settings.sleep_goal_hours * 100)),
         sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm / ' + settings.sleep_goal_hours + 'h') : '—',
         tip: function(p) {
@@ -1403,7 +1426,7 @@
         }
       },
       {
-        label: 'Water', color: '#60a5fa',
+        label: 'Water', color: '#60a5fa', icon: HEALTH_RING_ICONS[1],
         pct: Math.min(100, Math.round(waterOz / settings.water_goal_oz * 100)),
         sub: waterOz > 0 ? (Math.round(waterOz) + 'oz / ' + settings.water_goal_oz + 'oz') : '—',
         tip: function(p) {
@@ -1412,21 +1435,21 @@
         }
       },
       {
-        label: 'Protein', color: 'var(--accent)',
-        pct: Math.min(100, Math.round(proteinG / settings.protein_goal_g * 100)),
-        sub: proteinG > 0 ? (Math.round(proteinG) + 'g / ' + settings.protein_goal_g + 'g') : '—',
+        label: slot.label, color: 'var(--accent)', icon: lucideIconHtml(slot.icon), macro: true,
+        pct: Math.min(100, Math.round(macroVal / macroGoal * 100)),
+        sub: macroVal > 0 ? (Math.round(macroVal) + slot.unit + ' / ' + macroGoal + slot.unit) : '—',
         tip: function(p) {
-          if (p < 50) return 'Protein is below target. Aim for ' + Math.round(settings.protein_goal_g - proteinG) + 'g more.';
-          return 'Protein intake is on track.';
+          if (p < 50) return slot.label + ' is below target. Aim for ' + Math.round(macroGoal - macroVal) + slot.unit + ' more.';
+          return slot.label + ' intake is on track.';
         }
       }
     ];
 
     var html = '';
     metrics.forEach(function(m, i) {
-      html += '<div class="rm-h-item">';
+      html += '<div class="rm-h-item' + (m.macro ? ' rm-h-macro' : '') + '"' + (m.macro ? ' title="Click to swap macro"' : '') + '>';
       html += '<div class="rm-h-header">';
-      html += '<span class="rm-h-icon">' + HEALTH_RING_ICONS[i] + '</span>';
+      html += '<span class="rm-h-icon"' + (m.macro ? ' style="color:var(--accent)"' : '') + '>' + m.icon + '</span>';
       html += '<span class="rm-h-label">' + m.label + '</span>';
       html += '<span class="rm-h-pct">' + m.pct + '%</span>';
       html += '</div>';
@@ -1436,6 +1459,16 @@
       html += '</div>';
     });
     el.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    var macroEl = el.querySelector('.rm-h-macro');
+    if (macroEl) {
+      macroEl.addEventListener('click', function() {
+        _homeMacroIdx = (_homeMacroIdx + 1) % MACRO_SLOTS.length;
+        try { localStorage.setItem('home_macro_slot_v1', String(_homeMacroIdx)); } catch(e) {}
+        renderHomeHealthRings(containerId);
+      });
+    }
   }
   window.renderHomeHealthRings = renderHomeHealthRings;
 

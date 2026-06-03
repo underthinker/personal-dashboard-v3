@@ -419,6 +419,8 @@ body {
 .home-grid .view-habits { display: none; }
 .home-grid .a-goals { gap: 10px; }
 .rm-h-item { display: flex; flex-direction: column; gap: 4px; padding: 4px 0; }
+.rm-h-macro { cursor: pointer; }
+.rm-h-macro:hover .rm-h-label { color: var(--accent); }
 .rm-h-header { display: flex; align-items: center; gap: 8px; }
 .rm-h-icon { display: flex; align-items: center; }
 .rm-h-label { font-size: 13px; font-weight: 600; flex: 1; }
@@ -5214,8 +5216,8 @@ margin-top: 15px;
               border-color var(--dur-fast) var(--ease-smooth);
 }
 .nt-recent-btn:hover {
-  background: rgba(107,227,164,0.08);
-  border-color: rgba(107,227,164,0.22);
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: rgba(var(--accent-rgb), 0.22);
 }
 
 .nt-recent-name {
