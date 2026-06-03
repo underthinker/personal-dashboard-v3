@@ -604,7 +604,7 @@
   var _COLOR_MAP = {
     green: { icon: 'rgba(95,214,135,0.18)', text: 'var(--green)' },
     amber: { icon: 'rgba(232,163,69,0.18)', text: 'var(--amber)' },
-    accent: { icon: 'rgba(209,128,155,0.18)', text: 'var(--accent)' },
+    accent: { icon: 'rgba(var(--accent-rgb),0.18)', text: 'var(--accent)' },
     blue: { icon: 'rgba(91,168,247,0.18)', text: 'var(--blue)' },
     danger: { icon: 'rgba(255,107,107,0.18)', text: 'var(--danger)' }
   };
