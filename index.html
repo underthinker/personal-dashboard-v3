@@ -625,6 +625,11 @@
       </div>
     </div>
 
+    <div class="tweaks-section">
+      <div class="tweaks-section-label">Health Goals</div>
+      <div class="hl-settings-modal-grid" id="tweaksHealthGoals"></div>
+    </div>
+
   </div>
 </div>
 
@@ -692,7 +697,7 @@
   const toggleBtn = document.getElementById('tweaksToggleBtn');
   const closeBtn = document.getElementById('tweaksCloseBtn');
 
-  toggleBtn.addEventListener('click', function() { overlay.classList.add('open'); });
+  toggleBtn.addEventListener('click', function() { overlay.classList.add('open'); renderHealthGoals(); });
   closeBtn.addEventListener('click', function() { overlay.classList.remove('open'); });
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) overlay.classList.remove('open');
@@ -730,6 +735,47 @@
     });
   });
 
+  /* Health Goals */
+  function loadHealthSettings() {
+    try { var v = localStorage.getItem('health_settings'); return v ? JSON.parse(v) : {}; } catch(e) { return {}; }
+  }
+
+  function saveHealthSetting(key, val) {
+    var s = loadHealthSettings();
+    s[key] = val;
+    localStorage.setItem('health_settings', JSON.stringify(s));
+    if (typeof window.renderHealth === 'function') window.renderHealth();
+  }
+
+  function renderHealthGoals() {
+    var container = document.getElementById('tweaksHealthGoals');
+    if (!container) return;
+    var settings = loadHealthSettings();
+    var fields = [
+      { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
+      { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
+      { key: 'calorie_goal',     label: 'Calories',      min: 0 },
+      { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
+      { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
+      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
+      { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
+    ];
+    container.innerHTML = fields.map(function(f) {
+      return '<div class="setup-field">' +
+        '<label class="setup-label">' + f.label + '</label>' +
+        '<input type="number" class="setup-input hl-settings-mono-input" data-key="' + f.key + '"' +
+          ' value="' + (settings[f.key] !== undefined ? settings[f.key] : '') + '" min="' + f.min + '"' +
+          (f.step ? ' step="' + f.step + '"' : '') + '>' +
+        '</div>';
+    }).join('');
+    container.querySelectorAll('.hl-settings-mono-input').forEach(function(input) {
+      input.addEventListener('change', function() {
+        saveHealthSetting(this.dataset.key, parseFloat(this.value) || 0);
+      });
+    });
+  }
+
+  renderHealthGoals();
 })();
 </script>
 

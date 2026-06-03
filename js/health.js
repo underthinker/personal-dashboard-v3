@@ -288,7 +288,6 @@
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
     el.innerHTML = `
-      <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
       <div class="card-head"><span class="card-label">DAILY LOG: INTAKE</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
@@ -323,10 +322,6 @@
           </div>
         </div>
       </div>`;
-
-    const settingsBtn = $('hlSettingsToggle');
-    if (settingsBtn) settingsBtn.addEventListener('click', openSettingsModal);
-
     el.querySelectorAll('.ql-sleep-time-disp').forEach(btn => {
       btn.addEventListener('click', () => openSleepModal(btn.dataset.sleepField, date, day, settings));
     });
@@ -1133,76 +1128,6 @@
     if (_escHandler) { document.removeEventListener('keydown', _escHandler); _escHandler = null; }
   }
 
-  // ---- Settings modal ----
-  let _hsEscHandler = null;
-
-  function openSettingsModal() {
-    const bg = $('hlSettingsModalBg');
-    if (!bg) return;
-
-    const settings = getSettings();
-    const fields = [
-      { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
-      { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
-      { key: 'calorie_goal',     label: 'Calories',      min: 0 },
-      { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
-      { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
-      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
-      { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
-    ];
-
-    bg.innerHTML = `<div class="setup-modal">
-      <div class="setup-header">
-        <span class="setup-wordmark">Health Goals</span>
-        <p class="setup-sub">Adjust your daily health targets.</p>
-      </div>
-      <div class="hl-settings-modal-grid">
-        ${fields.map(f => `
-          <div class="setup-field">
-            <label class="setup-label">${f.label}</label>
-            <input type="number" class="setup-input hl-settings-mono-input" data-key="${f.key}"
-              value="${settings[f.key]}" min="${f.min}"${f.step ? ` step="${f.step}"` : ''}>
-          </div>`).join('')}
-      </div>
-      <div class="setup-actions" style="justify-content:flex-end">
-        <button type="button" class="setup-skip" id="hlSettingsCancel">Cancel</button>
-        <button type="button" class="setup-save" id="hlSettingsSave">Done</button>
-      </div>
-    </div>`;
-
-    bg.hidden = false;
-
-    bg.querySelectorAll('.hl-settings-mono-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const s = getSettings();
-        s[input.dataset.key] = parseFloat(input.value) || 0;
-        localStorage.setItem('health_settings', JSON.stringify(s));
-        renderHealth();
-      });
-    });
-
-    $('hlSettingsCancel').addEventListener('click', closeSettingsModal);
-    $('hlSettingsSave').addEventListener('click', closeSettingsModal);
-
-    bg.addEventListener('click', e => { if (e.target === bg) closeSettingsModal(); });
-
-    if (_hsEscHandler) document.removeEventListener('keydown', _hsEscHandler);
-    _hsEscHandler = e => { if (e.key === 'Escape') closeSettingsModal(); };
-    document.addEventListener('keydown', _hsEscHandler);
-  }
-
-  function closeSettingsModal() {
-    const bg = $('hlSettingsModalBg');
-    if (bg) { bg.hidden = true; bg.innerHTML = ''; }
-    if (_hsEscHandler) { document.removeEventListener('keydown', _hsEscHandler); _hsEscHandler = null; }
-  }
-
-  function initSettings() {
-    const toggle = $('hlSettingsToggle');
-    if (!toggle) return;
-    toggle.addEventListener('click', openSettingsModal);
-  }
-
   // ---- Date nav ----
   function renderDateNav() {
     const viewDate = _resolveViewDate();
@@ -1274,5 +1199,5 @@
   window.getSettings = getSettings;
   window.renderStatsPanel && window.renderStatsPanel();
 
-  document.addEventListener('DOMContentLoaded', () => { initDateNav(); initSettings(); });
+  document.addEventListener('DOMContentLoaded', () => { initDateNav(); });
 })();
