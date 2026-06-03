@@ -47,7 +47,7 @@
     return pad2(h) + ':' + pad2(m);
   }
   function _fmtDisplay(timeStr, use12h) {
-    if (!timeStr) return '—';
+    if (!timeStr) return '-';
     if (!use12h) return timeStr;
     const [h, m] = timeStr.split(':').map(Number);
     const t = _to12h(h, m);
@@ -239,7 +239,7 @@
         stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})"/>
     </svg>
     <div class="hl-ring-label">
-      <div class="hl-ring-pct">${readiness != null ? readiness + '%' : '—'}</div>
+      <div class="hl-ring-pct">${readiness != null ? readiness + '%' : '-'}</div>
       <div class="hl-ring-word">Readiness</div>
     </div>`;
 
@@ -565,7 +565,7 @@
     // Consistency streak
     const streak = getConsistencyStreak(date);
     if (streak >= 5) {
-      insights.push({ type: 'positive', text: `${streak}-day logging streak — great consistency.` });
+      insights.push({ type: 'positive', text: `${streak}-day logging streak. Great consistency.` });
     }
 
     // Readiness trend (last 7 days)
@@ -575,7 +575,7 @@
       const earlyAvg = readinessVals.slice(0, half).reduce((a, b) => a + b, 0) / half;
       const lateAvg  = readinessVals.slice(-half).reduce((a, b) => a + b, 0) / half;
       if (lateAvg - earlyAvg >= 8) {
-        insights.push({ type: 'positive', text: 'Readiness is trending up this week — keep it going.' });
+        insights.push({ type: 'positive', text: 'Readiness is trending up this week. Keep it going.' });
       } else if (earlyAvg - lateAvg >= 8) {
         insights.push({ type: 'warn', text: 'Readiness is trending down. Check sleep and recovery.' });
       }
@@ -614,7 +614,7 @@
         if (gymAvg - noGymAvg >= 0.15) {
           insights.push({ type: 'info', text: 'Mood is consistently better on gym days.' });
         } else if (noGymAvg - gymAvg >= 0.15) {
-          insights.push({ type: 'info', text: 'Mood tends to be higher on rest days — possible overtraining.' });
+          insights.push({ type: 'info', text: 'Mood tends to be higher on rest days. Possible overtraining.' });
         }
       }
     }
@@ -794,7 +794,7 @@
       if (v === 0) return;
       const top = yWater(v);
       const barH = Math.max(2, (padT + plotH) - top);
-      const color = v >= settings.water_goal_oz ? 'rgba(162,210,255,0.80)' : 'rgba(162,210,255,0.38)';
+      const color = v >= settings.water_goal_oz ? 'rgba(var(--accent-rgb),0.80)' : 'rgba(var(--accent-rgb),0.38)';
       html += `<rect x="${(pointX[i] - barW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${barW}" height="${barH.toFixed(1)}" rx="2" fill="${color}"/>`;
     });
 
@@ -891,10 +891,10 @@
     el.innerHTML = `
       <div class="card-head"><span class="card-label">NUTRITION</span></div>
       <div class="nt-macros">
-        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber)')}
-        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', '#A2D2FF')}
-        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', '#FFB5C2')}
-        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--success, #6BE3A4)')}
+        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'rgba(var(--accent-rgb),0.78)')}
+        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', 'rgba(var(--accent-rgb),0.52)')}
+        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', 'rgba(var(--accent-rgb),0.40)')}
+        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--accent)')}
       </div>
       <div class="nt-meal-list">${mealListHtml}</div>
       ${recentHtml}

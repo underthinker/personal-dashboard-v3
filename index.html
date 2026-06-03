@@ -510,41 +510,23 @@
 <!-- ═══ TAB: HEALTH ═══ -->
 <div id="tab-health" class="tab-content">
 
-<div class="section-group">
-
-  <div class="section">
-    <div class="card hl-snapshot" id="hlSnapshot">
-      <div class="hl-date-nav">
-        <span class="card-label">READINESS</span>
-        <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
-        <div class="hl-date-display" id="hlDateDisplay">Today</div>
-        <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
-        <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
-        <button type="button" class="hl-date-today" id="hlDateToday">Today</button>
-      </div>
-      <div id="hlSnapshotBody"></div>
+<div class="health-grid">
+  <div class="card hl-snapshot" id="hlSnapshot">
+    <div class="hl-date-nav">
+      <span class="card-label">READINESS</span>
+      <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
+      <div class="hl-date-display" id="hlDateDisplay">Today</div>
+      <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
+      <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
+      <button type="button" class="hl-date-today" id="hlDateToday">Today</button>
     </div>
+    <div id="hlSnapshotBody"></div>
   </div>
-</div>
 
-<div class="section-group">
-  <div class="section-group-row">
-    <div class="section">
-      <div class="card hl-log-card" id="hlLogCard"></div>
-    </div>
-    <div class="section">
-      <div class="card nt-card" id="ntCard"></div>
-    </div>
-  </div>
-</div>
-
-<div class="section-group">
-  <div class="section">
-    <div class="card htrend-card" id="htrendCard"></div>
-  </div>
-  <div class="section">
-    <div class="card hi-card" id="hiCard"></div>
-  </div>
+  <div class="card hl-log-card" id="hlLogCard"></div>
+  <div class="card nt-card" id="ntCard"></div>
+  <div class="card htrend-card" id="htrendCard"></div>
+  <div class="card hi-card" id="hiCard"></div>
 </div>
 
 <div id="ntModalBg" class="nt-modal-bg" hidden></div>
