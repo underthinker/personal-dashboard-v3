@@ -1335,7 +1335,7 @@ body {
    HEALTH TAB
    ═══════════════════════════════════════════════════════════════ */
 
-.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card, .hl-log-card, .hl-snapshot {
+.gl-card, .hl-card, .ql-card, .rc-card, .nt-card, .htrend-card, .hi-card, .hl-log-card, .hl-recovery-card, .hl-snapshot {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -1362,6 +1362,7 @@ body {
 
 /* Recovery card */
 .rc-card { display: flex; flex-direction: column; gap: 12px; }
+.hl-recovery-card { display: flex; flex-direction: column; gap: 12px; }
 
 /* Nutrition card */
 .nt-card { display: flex; flex-direction: column; gap: 12px; }
@@ -4601,8 +4602,8 @@ margin-top: 15px;
   grid-template-columns: minmax(250px, 1.05fr) minmax(360px, 1.35fr) minmax(300px, 1.1fr);
   grid-template-rows: minmax(0, 0.92fr) minmax(0, 1.08fr);
   grid-template-areas:
-    "snapshot log nutrition"
-    "trends   log insights";
+    "snapshot log      nutrition"
+    "trends   recovery insights";
   gap: 16px;
   height: 100%;
   min-height: 0;
@@ -4615,6 +4616,7 @@ margin-top: 15px;
 
 .hl-snapshot { grid-area: snapshot; }
 .hl-log-card { grid-area: log; }
+.hl-recovery-card { grid-area: recovery; }
 .nt-card { grid-area: nutrition; }
 .htrend-card { grid-area: trends; }
 .hi-card { grid-area: insights; }
@@ -4633,7 +4635,7 @@ margin-top: 15px;
     grid-template-rows: auto;
     grid-template-areas:
       "snapshot log"
-      "nutrition log"
+      "nutrition recovery"
       "trends   insights";
     height: auto;
   }
@@ -4645,6 +4647,7 @@ margin-top: 15px;
     grid-template-areas:
       "snapshot"
       "log"
+      "recovery"
       "nutrition"
       "trends"
       "insights";
@@ -5069,9 +5072,13 @@ margin-top: 15px;
   font-size: 11px;
   font-weight: 700;
   color: var(--muted-2);
-  min-width: 60px;
+  min-width: 78px;
   letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+.nt-macro-icon { color: var(--accent); opacity: 0.85; flex-shrink: 0; }
 
 .nt-macro-bar {
   flex: 1;
@@ -5366,6 +5373,127 @@ margin-top: 15px;
 /* ---------- Recovery metrics card  (rc-*) ---------- */
 .rc-card { padding: 18px; }
 
+/* Recovery read-only dashboard (DAILY STATUS: RECOVERY) */
+.hl-recovery-card { min-height: 0; }
+.rc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+  justify-content: space-between;
+}
+.rc-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--dur-fast);
+}
+.rc-row:hover { background: rgba(255,255,255,0.04); }
+.rc-row:focus-visible {
+  outline: none;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.5);
+}
+.rc-row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+  width: 16px;
+}
+.rc-row-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 92px;
+  flex-shrink: 0;
+}
+.rc-row-bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.rc-row-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: rgba(var(--accent-rgb), 0.55);
+  transition: width var(--dur-normal) var(--ease-smooth);
+}
+.rc-row-badge {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 42px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.rc-row-badge-max { color: var(--muted-2); font-weight: 600; }
+.rc-log-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.03);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+}
+.rc-log-btn:hover {
+  background: var(--accent-soft);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  color: var(--accent);
+}
+
+/* Recovery editor modal (rcm-*) */
+.rcm-modal { max-width: 460px; }
+.rcm-list { display: flex; flex-direction: column; gap: 14px; margin: 4px 0 18px; }
+.rcm-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  transition: background var(--dur-fast);
+}
+.rcm-row:focus-visible {
+  outline: none;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.5);
+}
+.rcm-row-meta { display: flex; align-items: center; gap: 8px; }
+.rcm-row-icon { display: inline-flex; color: var(--muted); flex-shrink: 0; }
+.rcm-row-label { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.rcm-row-bounds {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  font-size: 10px;
+  color: var(--muted-2);
+  padding: 0 8px;
+  gap: 8px;
+}
+.rcm-row-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  min-width: 18px;
+  text-align: right;
+}
+
 /* ---- Trends (Phase 4) ---- */
 .htrend-card {
   gap: 14px;
@@ -5399,6 +5527,40 @@ margin-top: 15px;
   height: auto;
   display: block;
   overflow: visible;
+}
+/* HTML bar charts — match Home tab Deep Work bars */
+.htbar-chart { display: flex; flex-direction: column; gap: 5px; }
+.htbar-bars {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  height: 90px;
+  align-items: flex-end;
+}
+.htbar {
+  border-radius: 4px 4px 3px 3px;
+  background: var(--line-2);
+  position: relative;
+  overflow: hidden;
+  min-height: 3px;
+}
+.htbar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(255,255,255,0.06), transparent 60%);
+}
+.htbar.no-data { background: var(--line-2); opacity: 0.5; }
+.htbar-labels {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.htbar-labels span {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--muted-2);
 }
 .htrend-line-readiness {
   fill: none;

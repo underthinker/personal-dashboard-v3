@@ -268,14 +268,15 @@
 
   // ---- Quick Log ----
   const RECOVERY_SLIDERS = [
-    { key: 'soreness',       label: 'Soreness',       lo: 'Fresh',     hi: 'Wrecked'     },
-    { key: 'stress',         label: 'Stress',         lo: 'Calm',      hi: 'Overwhelmed' },
-    { key: 'burnout',        label: 'Burnout',        lo: 'Energized', hi: 'Empty'       },
-    { key: 'energy',         label: 'Energy',         lo: 'Drained',   hi: 'Charged'     },
-    { key: 'mental_fatigue', label: 'Mental Fatigue', lo: 'Sharp',     hi: 'Foggy'       },
-    { key: 'social_battery', label: 'Social Battery', lo: 'Drained',   hi: 'Full'        },
-    { key: 'motivation',     label: 'Motivation',     lo: 'Zero',      hi: 'Fire'        },
+    { key: 'soreness',       label: 'Soreness',       lo: 'Fresh',     hi: 'Wrecked',     icon: 'activity'        },
+    { key: 'stress',         label: 'Stress',         lo: 'Calm',      hi: 'Overwhelmed', icon: 'cloud-lightning' },
+    { key: 'burnout',        label: 'Burnout',        lo: 'Energized', hi: 'Empty',       icon: 'flame'           },
+    { key: 'energy',         label: 'Energy',         lo: 'Drained',   hi: 'Charged',     icon: 'zap'             },
+    { key: 'mental_fatigue', label: 'Mental Fatigue', lo: 'Sharp',     hi: 'Foggy',       icon: 'brain'           },
+    { key: 'social_battery', label: 'Social Battery', lo: 'Drained',   hi: 'Full',        icon: 'users'           },
+    { key: 'motivation',     label: 'Motivation',     lo: 'Zero',      hi: 'Fire',        icon: 'trending-up'     },
   ];
+  const RECOVERY_MAX = 7;
 
   // ---- Log (merged: sleep + water + recovery) ----
   function renderLog(date, day, settings) {
@@ -286,26 +287,9 @@
     const sleepWake = day.sleep_waketime || '';
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
-    const rec = day.recovery || {};
-
-    const slidersHtml = RECOVERY_SLIDERS.map(s => {
-      const val = rec[s.key] != null ? rec[s.key] : 4;
-      return `<div class="rc-slider-row">
-        <div class="rc-slider-meta">
-          <span class="rc-slider-label">${s.label}</span>
-          <span class="rc-slider-val" id="rcSv-${s.key}">${val}</span>
-        </div>
-        <div class="rc-slider-range-row">
-          <span class="rc-slider-bound">${s.lo}</span>
-          <input type="range" class="rc-slider" min="1" max="7" value="${val}" data-recovery="${s.key}" id="rcSl-${s.key}">
-          <span class="rc-slider-bound rc-slider-bound-hi">${s.hi}</span>
-        </div>
-      </div>`;
-    }).join('');
-
     el.innerHTML = `
       <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
-      <div class="card-head"><span class="card-label">DAILY LOG</span></div>
+      <div class="card-head"><span class="card-label">DAILY LOG: INTAKE</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -338,11 +322,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="hl-log-divider"></div>
-      <div class="hl-log-section">
-        <div class="hl-log-section-label">Recovery</div>
-        <div class="rc-sliders">${slidersHtml}</div>
       </div>`;
 
     const settingsBtn = $('hlSettingsToggle');
@@ -373,19 +352,136 @@
       customInput.addEventListener('blur', _addCustomWater);
       customInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); _addCustomWater(); } });
     }
+  }
 
-    el.querySelectorAll('.rc-slider').forEach(slider => {
-      slider.addEventListener('input', () => {
-        const key = slider.dataset.recovery;
-        const val = parseInt(slider.value, 10);
-        if (!day.recovery) day.recovery = {};
-        day.recovery[key] = val;
-        const valEl = $('rcSv-' + key);
-        if (valEl) valEl.textContent = val;
-        saveDay(date, day);
-        renderSnapshot(date, day, getSettings());
+  // ---- Recovery (read-only dashboard) ----
+  function recoveryIcon(name, size) {
+    return `<i data-lucide="${name}" width="${size}" height="${size}"></i>`;
+  }
+
+  function renderRecovery(date, day, settings) {
+    const el = $('hlRecoveryCard');
+    if (!el) return;
+
+    const rec = day.recovery || {};
+
+    const rowsHtml = RECOVERY_SLIDERS.map((s, i) => {
+      const val = rec[s.key] != null ? rec[s.key] : 4;
+      const pct = (val / RECOVERY_MAX) * 100;
+      return `<div class="rc-row" tabindex="0" role="button"
+          data-rc-row data-rc-index="${i}" data-rc-key="${s.key}" data-rc-value="${val}"
+          aria-label="${s.label}: ${val} of ${RECOVERY_MAX}">
+        <span class="rc-row-icon">${recoveryIcon(s.icon, 15)}</span>
+        <span class="rc-row-label">${s.label}</span>
+        <div class="rc-row-bar"><div class="rc-row-fill" style="width:${pct.toFixed(1)}%"></div></div>
+        <span class="rc-row-badge">${val} <span class="rc-row-badge-max">/ ${RECOVERY_MAX}</span></span>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="card-head"><span class="card-label">DAILY STATUS: RECOVERY</span></div>
+      <div class="rc-list" data-rc-list>${rowsHtml}</div>
+      <button type="button" class="rc-log-btn" id="rcLogBtn" data-rc-open>+ LOG RECOVERY DATA</button>`;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    // Clicking a row (or the button) opens the editor modal.
+    el.querySelectorAll('[data-rc-row]').forEach(row => {
+      row.addEventListener('click', () => openRecoveryModal(date, day, settings, parseInt(row.dataset.rcIndex, 10)));
+      row.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openRecoveryModal(date, day, settings, parseInt(row.dataset.rcIndex, 10)); }
       });
     });
+
+    const logBtn = $('rcLogBtn');
+    if (logBtn) logBtn.addEventListener('click', () => openRecoveryModal(date, day, settings, 0));
+  }
+
+  // ---- Recovery editor modal ----
+  let _rcEscHandler = null;
+
+  function openRecoveryModal(date, day, settings, focusIndex) {
+    const bg = $('recModalBg');
+    if (!bg) return;
+    if (!day.recovery) day.recovery = {};
+
+    const rowsHtml = RECOVERY_SLIDERS.map((s, i) => {
+      const val = day.recovery[s.key] != null ? day.recovery[s.key] : 4;
+      return `<div class="rcm-row" tabindex="0" data-rcm-row data-rcm-index="${i}" data-recovery="${s.key}">
+        <div class="rcm-row-meta">
+          <span class="rcm-row-icon">${recoveryIcon(s.icon, 14)}</span>
+          <span class="rcm-row-label">${s.label}</span>
+          <span class="rcm-row-bounds"><span>${s.lo}</span><span>${s.hi}</span></span>
+          <span class="rcm-row-val" id="rcmVal-${s.key}">${val}</span>
+        </div>
+        <input type="range" class="rc-slider" min="1" max="${RECOVERY_MAX}" value="${val}"
+          data-recovery="${s.key}" id="rcmSl-${s.key}" aria-label="${s.label}">
+      </div>`;
+    }).join('');
+
+    bg.innerHTML = `<div class="setup-modal rcm-modal">
+      <div class="setup-header">
+        <span class="setup-wordmark">Log Recovery</span>
+        <p class="setup-sub">j / k to move &middot; 1&ndash;${RECOVERY_MAX} to set the focused metric.</p>
+      </div>
+      <div class="rcm-list" data-rcm-list>${rowsHtml}</div>
+      <div class="setup-actions" style="justify-content:flex-end">
+        <button type="button" class="setup-save" id="rcmDone">Done</button>
+      </div>
+    </div>`;
+
+    bg.hidden = false;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    function setVal(key, val) {
+      val = Math.max(1, Math.min(RECOVERY_MAX, val));
+      day.recovery[key] = val;
+      const slider = $('rcmSl-' + key);
+      const valEl = $('rcmVal-' + key);
+      if (slider) slider.value = val;
+      if (valEl) valEl.textContent = val;
+      saveDay(date, day);
+      renderSnapshot(date, day, getSettings());
+    }
+
+    bg.querySelectorAll('.rc-slider').forEach(slider => {
+      slider.addEventListener('input', () => setVal(slider.dataset.recovery, parseInt(slider.value, 10)));
+    });
+
+    const rows = Array.from(bg.querySelectorAll('[data-rcm-row]'));
+    function focusRow(i) {
+      const r = rows[(i + rows.length) % rows.length];
+      if (r) r.focus();
+    }
+
+    // Vim-style navigation + number-key value mapping on the focused metric.
+    function onKey(e) {
+      if (e.key === 'Escape') { closeRecoveryModal(); return; }
+      const active = document.activeElement && document.activeElement.closest('[data-rcm-row]');
+      const idx = active ? parseInt(active.dataset.rcmIndex, 10) : 0;
+      if (e.key === 'j' || e.key === 'ArrowDown') { e.preventDefault(); focusRow(idx + 1); }
+      else if (e.key === 'k' || e.key === 'ArrowUp') { e.preventDefault(); focusRow(idx - 1); }
+      else if (active && /^[1-9]$/.test(e.key)) {
+        const n = parseInt(e.key, 10);
+        if (n <= RECOVERY_MAX) { e.preventDefault(); setVal(active.dataset.recovery, n); }
+      }
+    }
+
+    $('rcmDone').addEventListener('click', closeRecoveryModal);
+    bg.addEventListener('click', e => { if (e.target === bg) closeRecoveryModal(); });
+
+    if (_rcEscHandler) document.removeEventListener('keydown', _rcEscHandler);
+    _rcEscHandler = onKey;
+    document.addEventListener('keydown', _rcEscHandler);
+
+    setTimeout(() => focusRow(focusIndex || 0), 50);
+  }
+
+  function closeRecoveryModal() {
+    const bg = $('recModalBg');
+    if (bg) { bg.hidden = true; bg.innerHTML = ''; }
+    if (_rcEscHandler) { document.removeEventListener('keydown', _rcEscHandler); _rcEscHandler = null; }
+    renderHealth();
   }
 
   // ---- Sleep modal ----
@@ -739,72 +835,41 @@
     return html;
   }
 
+  // Build an HTML bar chart matching the Home tab's Deep Work bars: thick
+  // uniform blocks, rounded top corners, theme fills, labels tucked underneath.
+  function buildHtmlBars(history, valFn, colorFn) {
+    const bars = history.map(h => {
+      const r = valFn(h.day);
+      const pct = r == null ? 0 : Math.max(0, Math.min(r.pct, 100));
+      const cls = r == null ? 'htbar no-data' : 'htbar';
+      const style = r == null
+        ? 'height:3px'
+        : `height:${Math.max(8, pct).toFixed(1)}%;background:${colorFn(r)}`;
+      return `<div class="${cls}" style="${style}"></div>`;
+    }).join('');
+    const labels = history.map(h => `<span>${htDayLabel(h.date)}</span>`).join('');
+    return `<div class="htbar-chart">
+      <div class="htbar-bars">${bars}</div>
+      <div class="htbar-labels">${labels}</div>
+    </div>`;
+  }
+
   function buildSleepEnergyChart(history, settings) {
-    const W = 240, H = 120;
-    const padL = 8, padR = 8, padT = 12, padB = 22;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
-    const n = history.length;
-    const groupW = plotW / n;
-    const barW = Math.max(4, Math.floor(groupW * 0.5));
-    const pointX = history.map((_, i) => padL + groupW * i + groupW / 2);
     const maxSleep = Math.max(12, settings.sleep_goal_hours * 1.25);
-    function ySleep(v) { return padT + plotH - Math.min(v / maxSleep, 1) * plotH; }
-
-    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg" aria-hidden="true">`;
-
-    // Sleep goal dashed line
-    const goalY = ySleep(settings.sleep_goal_hours);
-    html += `<line x1="${padL}" y1="${goalY.toFixed(1)}" x2="${W-padR}" y2="${goalY.toFixed(1)}" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3,2"/>`;
-
-    // Sleep bars
-    history.forEach((h, i) => {
-      const v = h.day.sleep_hours;
-      if (v == null) return;
-      const top = ySleep(v);
-      const barH = Math.max(2, (padT + plotH) - top);
-      const color = v >= settings.sleep_goal_hours * 0.875 ? 'rgba(107,227,164,0.65)' : 'rgba(255,107,107,0.55)';
-      html += `<rect x="${(pointX[i] - barW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${barW}" height="${barH.toFixed(1)}" rx="2" fill="${color}"/>`;
-    });
-
-    // Day labels
-    history.forEach((h, i) => {
-      html += `<text x="${pointX[i]}" y="${H - 4}" class="htrend-axis-label">${htDayLabel(h.date)}</text>`;
-    });
-
-    html += '</svg>';
-    return html;
+    return buildHtmlBars(
+      history,
+      day => day.sleep_hours == null ? null : { v: day.sleep_hours, pct: Math.min(day.sleep_hours / maxSleep, 1) * 100 },
+      r => r.v >= settings.sleep_goal_hours * 0.875 ? 'rgba(107,227,164,0.65)' : 'rgba(255,107,107,0.55)'
+    );
   }
 
   function buildHydrationChart(history, settings) {
-    const W = 240, H = 120;
-    const padL = 8, padR = 8, padT = 12, padB = 22;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
-    const n = history.length;
-    const groupW = plotW / n;
-    const barW = Math.max(4, Math.floor(groupW * 0.5));
-    const pointX = history.map((_, i) => padL + groupW * i + groupW / 2);
     const maxWater = settings.water_goal_oz;
-    function yWater(v) { return padT + plotH - Math.min(v / maxWater, 1) * plotH; }
-
-    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg" aria-hidden="true">`;
-
-    // Water bars
-    history.forEach((h, i) => {
-      const v = h.day.water_oz || 0;
-      if (v === 0) return;
-      const top = yWater(v);
-      const barH = Math.max(2, (padT + plotH) - top);
-      const color = v >= settings.water_goal_oz ? 'rgba(var(--accent-rgb),0.80)' : 'rgba(var(--accent-rgb),0.38)';
-      html += `<rect x="${(pointX[i] - barW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${barW}" height="${barH.toFixed(1)}" rx="2" fill="${color}"/>`;
-    });
-
-    // Day labels
-    history.forEach((h, i) => {
-      html += `<text x="${pointX[i]}" y="${H - 4}" class="htrend-axis-label">${htDayLabel(h.date)}</text>`;
-    });
-
-    html += '</svg>';
-    return html;
+    return buildHtmlBars(
+      history,
+      day => (day.water_oz || 0) === 0 ? null : { v: day.water_oz, pct: Math.min(day.water_oz / maxWater, 1) * 100 },
+      r => r.v >= settings.water_goal_oz ? 'rgba(var(--accent-rgb),0.80)' : 'rgba(var(--accent-rgb),0.38)'
+    );
   }
 
   function renderTrends(date, settings) {
@@ -846,11 +911,11 @@
     const totals = day.nutrition_totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
     const recentMeals = getRecentMeals(date);
 
-    function macroBar(label, val, goal, unit, color) {
+    function macroBar(label, val, goal, unit, color, icon) {
       const pct = goal > 0 ? Math.min(val / goal * 100, 100) : 0;
       const display = unit === '' ? Math.round(val) : Math.round(val * 10) / 10;
       return `<div class="nt-macro-row">
-        <span class="nt-macro-label">${label}</span>
+        <span class="nt-macro-label"><i data-lucide="${icon}" class="nt-macro-icon" width="13" height="13"></i>${label}</span>
         <div class="nt-macro-bar"><div class="nt-macro-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
         <span class="nt-macro-val">${display}<span class="nt-macro-goal">/${goal}${unit}</span></span>
       </div>`;
@@ -889,16 +954,18 @@
       : '';
 
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">NUTRITION</span></div>
+      <div class="card-head"><span class="card-label">NUTRITION BREAKDOWN</span></div>
       <div class="nt-macros">
-        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'rgba(var(--accent-rgb),0.78)')}
-        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', 'rgba(var(--accent-rgb),0.52)')}
-        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', 'rgba(var(--accent-rgb),0.40)')}
-        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--accent)')}
+        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'rgba(var(--accent-rgb),0.78)', 'flame')}
+        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', 'rgba(var(--accent-rgb),0.52)', 'wheat')}
+        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', 'rgba(var(--accent-rgb),0.40)', 'droplet')}
+        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--accent)', 'beef')}
       </div>
       <div class="nt-meal-list">${mealListHtml}</div>
       ${recentHtml}
       <button type="button" class="nt-add-btn" id="ntAddBtn">+ Log Meal</button>`;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
     const addBtn = $('ntAddBtn');
     if (addBtn) addBtn.addEventListener('click', () => openMealModal(date, day, settings));
@@ -1193,6 +1260,7 @@
     renderDateNav();
     renderSnapshot(date, day, settings);
     renderLog(date, day, settings);
+    renderRecovery(date, day, settings);
     renderNutrition(date, day, settings);
     renderTrends(date, settings);
     renderInsights(date, settings);
