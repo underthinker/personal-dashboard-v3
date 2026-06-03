@@ -245,7 +245,7 @@
 
     const factors = calcFactors(date, day, settings);
     const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
-      const color = pct >= 80 ? 'var(--success, #5fd687)' : pct >= 60 ? 'var(--amber, #F2C063)' : 'var(--danger, #ff6b6b)';
+      const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--danger)';
       return `<div class="hl-factor-row">
         <span class="hl-factor-label">${name}</span>
         <div class="hl-factor-bar"><div class="hl-factor-fill" style="width:${pct}%;background:${color}"></div></div>
@@ -305,6 +305,7 @@
 
     el.innerHTML = `
       <button type="button" class="hl-settings-toggle" id="hlSettingsToggle" aria-label="Health settings">⚙</button>
+      <div class="card-head"><span class="card-label">DAILY LOG</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -641,12 +642,12 @@
 
     const insights = generateInsights(date, settings);
     if (insights.length === 0) {
-      el.innerHTML = '<div class="hi-empty">Keep logging — personalized insights appear after a few days of data.</div>';
+      el.innerHTML = '<div class="card-head"><span class="card-label">INSIGHTS</span></div><div class="hi-empty">Keep logging, personalized insights appear after a few days of data.</div>';
       return;
     }
 
     const iconMap = { positive: '↑', warn: '▲', info: '◆' };
-    el.innerHTML = `<div class="hi-list">${
+    el.innerHTML = `<div class="card-head"><span class="card-label">INSIGHTS</span></div><div class="hi-list">${
       insights.map(ins => `<div class="hi-item hi-${ins.type}">
         <span class="hi-icon">${iconMap[ins.type]}</span>
         <span class="hi-text">${ins.text}</span>
@@ -723,7 +724,7 @@
     // Dots + value labels
     readinessVals.forEach((v, i) => {
       if (v == null) return;
-      const color = v >= 80 ? 'var(--success, #5fd687)' : v >= 60 ? 'var(--amber, #F2C063)' : 'var(--danger, #ff6b6b)';
+      const color = v >= 80 ? 'var(--green)' : v >= 60 ? 'var(--amber)' : 'var(--danger)';
       const cy = yScale(v);
       html += `<circle cx="${pointX[i]}" cy="${cy}" r="4" fill="${color}" stroke="rgba(0,0,0,0.6)" stroke-width="1.5"/>`;
       html += `<text x="${pointX[i]}" y="${cy - 8}" class="htrend-dot-val">${v}</text>`;
@@ -814,11 +815,12 @@
     const hasAnyData = history.some(h => Object.keys(h.day).length > 0);
 
     if (!hasAnyData) {
-      el.innerHTML = '<div class="htrend-empty">Log a few days of health data to see trends.</div>';
+      el.innerHTML = '<div class="card-head"><span class="card-label">TRENDS</span></div><div class="htrend-empty">Log a few days of health data to see trends.</div>';
       return;
     }
 
     el.innerHTML = `
+      <div class="card-head"><span class="card-label">TRENDS</span></div>
       <div class="htrend-section">
         <div class="htrend-chart-label">Readiness (7 days)</div>
         ${buildReadinessChart(history, settings)}
@@ -887,8 +889,9 @@
       : '';
 
     el.innerHTML = `
+      <div class="card-head"><span class="card-label">NUTRITION</span></div>
       <div class="nt-macros">
-        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber, #F2C063)')}
+        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'var(--amber)')}
         ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', '#A2D2FF')}
         ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', '#FFB5C2')}
         ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--success, #6BE3A4)')}

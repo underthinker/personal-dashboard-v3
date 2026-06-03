@@ -4596,7 +4596,7 @@ margin-top: 15px;
    ============================================================ */
 
 /* ---------- Snapshot hero ---------- */
-.hl-snapshot { padding: 20px; margin-bottom: 0; }
+.hl-snapshot { margin-bottom: 0; }
 
 .hl-snap-inner {
   display: flex;
@@ -4653,9 +4653,6 @@ margin-top: 15px;
 
 /* ---------- Log card (merged: sleep + water + recovery) ---------- */
 .hl-log-card {
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
   gap: 0;
   justify-content: space-between;
   position: relative;
@@ -4929,7 +4926,7 @@ margin-top: 15px;
 }
 
 /* ---------- Nutrition ---------- */
-.nt-card { padding: 18px; display: flex; flex-direction: column; gap: 18px; position: relative; }
+.nt-card { gap: 18px; position: relative; }
 
 .nt-macros { display: flex; flex-direction: column; gap: 10px; padding-right: 28px; }
 
@@ -5227,7 +5224,7 @@ margin-top: 15px;
 .rc-card { padding: 18px; }
 
 /* ---- Trends (Phase 4) ---- */
-.htrend-card { padding: 16px 20px; }
+.htrend-card { gap: 0; }
 .htrend-section { margin-bottom: 16px; }
 .htrend-section:last-child { margin-bottom: 0; }
 .htrend-chart-label {
@@ -5278,7 +5275,7 @@ margin-top: 15px;
 }
 
 /* ---- Insights (Phase 5) ---- */
-.hi-card { padding: 16px 20px; }
+.hi-card { gap: 0; }
 .hi-list { display: flex; flex-direction: column; gap: 10px; }
 .hi-item {
   display: flex;
@@ -5288,12 +5285,12 @@ margin-top: 15px;
   border-radius: 8px;
   border-left: 3px solid transparent;
 }
-.hi-positive { background: rgba(107,227,164,0.07); border-left-color: #6BE3A4; }
-.hi-warn     { background: rgba(242,192,99,0.07);  border-left-color: #F2C063; }
+.hi-positive { background: var(--green-soft); border-left-color: var(--green); }
+.hi-warn     { background: var(--amber-soft); border-left-color: var(--amber); }
 .hi-info     { background: rgba(162,210,255,0.06); border-left-color: rgba(162,210,255,0.55); }
 .hi-icon { font-size: 11px; font-weight: 700; min-width: 14px; margin-top: 2px; }
-.hi-positive .hi-icon { color: #6BE3A4; }
-.hi-warn     .hi-icon { color: #F2C063; }
+.hi-positive .hi-icon { color: var(--green); }
+.hi-warn     .hi-icon { color: var(--amber); }
 .hi-info     .hi-icon { color: rgba(162,210,255,0.80); }
 .hi-text { font-size: 13px; line-height: 1.5; color: var(--muted); }
 .hi-empty {
@@ -5547,6 +5544,11 @@ margin-top: 15px;
 .hl-snapshot > .hl-date-nav {
   padding: 0;
 }
+.hl-date-nav > .card-label { margin-right: auto; }
+
+/* Header spacing for Health cards that collapse their own gap */
+.htrend-card > .card-head,
+.hi-card > .card-head { margin-bottom: 14px; }
 
 .hl-date-prev, .hl-date-next, .hl-date-today {
   background: rgba(255,255,255,0.05);
