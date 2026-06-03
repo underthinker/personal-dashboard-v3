@@ -1135,16 +1135,15 @@ body {
 .weather-icon-mid { height: 0; display: flex; justify-content: center; overflow: visible; position: relative; z-index: 1; }
 .weather-icon-mid .weather-icon { transform: translateY(-50%); }
 .weather-icon {
-  font-size: 30px;
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--accent-rgb), 0.08);
   border-radius: 10px;
   flex-shrink: 0;
 }
+.weather-icon svg { display: block; width: 48px; height: 48px; }
 .weather-temp { font-family: var(--font-mono); font-size: 30px; font-weight: 700; color: var(--text); }
 .weather-cond { font-size: 14px; font-weight: 600; color: var(--text); }
 .weather-hl { display: flex; justify-content: space-between; font-size: 13px; font-family: var(--font-mono); }
