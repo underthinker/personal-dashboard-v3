@@ -791,15 +791,15 @@
   }
 
   function buildReadinessChart(history, settings) {
-    const W = 480, H = 130;
-    const padL = 8, padR = 8, padT = 16, padB = 22;
+    const W = 480, H = 230;
+    const padL = 8, padR = 8, padT = 28, padB = 34;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const n = history.length;
     const pointX = history.map((_, i) => padL + (n > 1 ? i / (n - 1) : 0.5) * plotW);
     function yScale(v) { return padT + plotH - (v / 100) * plotH; }
 
     const readinessVals = history.map(h => calcReadiness(h.date, h.day, settings));
-    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg" aria-hidden="true">`;
+    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg htrend-svg-readiness" aria-hidden="true">`;
 
     // Zone bands
     const y80 = yScale(80), y60 = yScale(60);
@@ -874,22 +874,25 @@
 
   function renderTrends(date, settings) {
     const el = $('htrendCard');
-    if (!el) return;
+    const el2 = $('htrend2Card');
+    if (!el || !el2) return;
 
     const history = getHistory(date, 7);
     const hasAnyData = history.some(h => Object.keys(h.day).length > 0);
 
     if (!hasAnyData) {
-      el.innerHTML = '<div class="card-head"><span class="card-label">TRENDS</span></div><div class="htrend-empty">Log a few days of health data to see trends.</div>';
+      el.innerHTML = '<div class="card-head"><span class="card-label">READINESS (7 DAYS)</span></div><div class="htrend-empty">Log a few days of health data to see trends.</div>';
+      el2.innerHTML = '<div class="htrend-empty">Log a few days of health data to see trends.</div>';
       return;
     }
 
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">TRENDS</span></div>
+      <div class="card-head"><span class="card-label">READINESS (7 DAYS)</span></div>
       <div class="htrend-section">
-        <div class="htrend-chart-label">Readiness (7 days)</div>
         ${buildReadinessChart(history, settings)}
-      </div>
+      </div>`;
+
+    el2.innerHTML = `
       <div class="htrend-row2">
         <div class="htrend-section">
           <div class="htrend-chart-label">Sleep &amp; Energy</div>
@@ -956,14 +959,14 @@
     el.innerHTML = `
       <div class="card-head"><span class="card-label">NUTRITION BREAKDOWN</span></div>
       <div class="nt-macros">
-        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'rgba(var(--accent-rgb),0.78)', 'flame')}
-        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', 'rgba(var(--accent-rgb),0.52)', 'wheat')}
-        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', 'rgba(var(--accent-rgb),0.40)', 'droplet')}
-        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'var(--accent)', 'beef')}
+        ${macroBar('Calories', totals.calories  || 0, settings.calorie_goal,   '',  'rgba(var(--accent-rgb),0.55)', 'flame')}
+        ${macroBar('Carbs',    totals.carbs_g   || 0, settings.carbs_goal_g,   'g', 'rgba(var(--accent-rgb),0.55)', 'wheat')}
+        ${macroBar('Fat',      totals.fat_g     || 0, settings.fat_goal_g,     'g', 'rgba(var(--accent-rgb),0.55)', 'droplet')}
+        ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'rgba(var(--accent-rgb),0.55)', 'beef')}
       </div>
       <div class="nt-meal-list">${mealListHtml}</div>
       ${recentHtml}
-      <button type="button" class="nt-add-btn" id="ntAddBtn">+ Log Meal</button>`;
+      <button type="button" class="nt-add-btn rc-log-btn" id="ntAddBtn">+ LOG MEAL</button>`;
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 

@@ -821,11 +821,7 @@
     // ── Focus time (today + live session) ──
     var health = {};
     try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
-    var focusMin = Math.round(health.focus_min || 0);
-    try {
-      var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
-      if (fs.running && fs.startedAt) focusMin += Math.floor((Date.now() - fs.startedAt) / 60000);
-    } catch(e) {}
+    var focusMin = Math.round(health.focus_min || 0) + liveFocusMinToday();
     var focusStr = focusMin >= 60 ? Math.floor(focusMin/60) + 'h ' + (focusMin%60) + 'm' : focusMin + 'm';
 
     var focusEl = $('perfFocusTime');
@@ -864,12 +860,7 @@
       weekFocusMins.push(Math.round(wh.focus_min || 0));
     }
     // Include live session in today's bar so it matches the hero value
-    try {
-      var liveFs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
-      if (liveFs.running && liveFs.startedAt) {
-        weekFocusMins[todayWeekIdx] += Math.floor((Date.now() - liveFs.startedAt) / 60000);
-      }
-    } catch(e) {}
+    weekFocusMins[todayWeekIdx] += liveFocusMinToday();
     var weekDeepFlags = weekFocusMins.map(function(m) { return m >= 120; });
 
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
@@ -972,11 +963,7 @@
 
     var health = {};
     try { health = JSON.parse(localStorage.getItem('health:' + todayYmd) || '{}'); } catch(e) {}
-    var focusMin = Math.round(health.focus_min || 0);
-    try {
-      var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
-      if (fs.running && fs.startedAt) focusMin += Math.floor((Date.now() - fs.startedAt) / 60000);
-    } catch(e) {}
+    var focusMin = Math.round(health.focus_min || 0) + liveFocusMinToday();
     var focusStr = focusMin >= 60 ? Math.floor(focusMin/60) + 'h ' + (focusMin%60) + 'm' : focusMin + 'm';
 
     var todayGoals = storeGet('goals:' + todayYmd) || [];
@@ -1368,6 +1355,40 @@
 
   function saveFocusSession(s) { localStorage.setItem(FOCUS_SESSION_KEY, JSON.stringify(s)); }
 
+  // Credit a focus span to health:* keys, splitting at midnight so each day
+  // only gets the minutes that actually elapsed within it.
+  function creditFocusSpan(startMs, endMs) {
+    var cursor = startMs;
+    while (cursor < endMs) {
+      var d = new Date(cursor);
+      var ymd = dateToYMD(d);
+      var nextMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1).getTime();
+      var segEnd = Math.min(endMs, nextMidnight);
+      var mins = Math.round((segEnd - cursor) / 60000);
+      if (mins > 0) {
+        try {
+          var h = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
+          h.focus_min = (h.focus_min || 0) + mins;
+          localStorage.setItem('health:' + ymd, JSON.stringify(h));
+        } catch(e) {}
+      }
+      cursor = nextMidnight;
+    }
+  }
+
+  // Live (unsaved) minutes of the running session that fall within today only.
+  function liveFocusMinToday() {
+    try {
+      var fs = JSON.parse(localStorage.getItem(FOCUS_SESSION_KEY) || '{}');
+      if (fs.running && fs.startedAt) {
+        var now = new Date();
+        var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        return Math.floor((Date.now() - Math.max(fs.startedAt, todayStart)) / 60000);
+      }
+    } catch(e) {}
+    return 0;
+  }
+
   function _updateFocusStatUI() {
     var toggle = $('focusStatToggle');
     var dot = $('focusRunningDot');
@@ -1385,17 +1406,11 @@
   function _stopFocusSession() {
     clearInterval(_focusTimerInterval);
     var s = getFocusSession();
-    var sessionMin = (Date.now() - s.startedAt) / 60000;
+    var startedAt = s.startedAt;
     s.running = false;
     s.startedAt = null;
     saveFocusSession(s);
-    var td = new Date();
-    var ymd = dateToYMD(td);
-    try {
-      var health = JSON.parse(localStorage.getItem('health:' + ymd) || '{}');
-      health.focus_min = (health.focus_min || 0) + Math.round(sessionMin);
-      localStorage.setItem('health:' + ymd, JSON.stringify(health));
-    } catch(e) {}
+    if (startedAt) creditFocusSpan(startedAt, Date.now());
     window.dispatchEvent(new CustomEvent('focus-updated'));
     renderStatsPanel();
     _updateFocusStatUI();

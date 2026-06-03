@@ -4600,10 +4600,11 @@ margin-top: 15px;
 .health-grid {
   display: grid;
   grid-template-columns: minmax(250px, 1.05fr) minmax(360px, 1.35fr) minmax(300px, 1.1fr);
-  grid-template-rows: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-rows: minmax(0, 0.92fr) minmax(0, 0.54fr) minmax(0, 0.54fr);
   grid-template-areas:
-    "snapshot log      nutrition"
-    "trends   recovery insights";
+    "snapshot trends   nutrition"
+    "log      recovery nutrition"
+    "trends2  recovery insights";
   gap: 16px;
   height: 100%;
   min-height: 0;
@@ -4612,6 +4613,7 @@ margin-top: 15px;
 #tab-health .card {
   min-height: 0;
   overflow: hidden;
+  margin-bottom: 0;
 }
 
 .hl-snapshot { grid-area: snapshot; }
@@ -4619,6 +4621,7 @@ margin-top: 15px;
 .hl-recovery-card { grid-area: recovery; }
 .nt-card { grid-area: nutrition; }
 .htrend-card { grid-area: trends; }
+.htrend2-card { grid-area: trends2; }
 .hi-card { grid-area: insights; }
 
 @media (min-width: 1401px) {
@@ -4634,9 +4637,10 @@ margin-top: 15px;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto;
     grid-template-areas:
-      "snapshot log"
+      "snapshot trends"
       "nutrition recovery"
-      "trends   insights";
+      "log      ."
+      "trends2  insights";
     height: auto;
   }
 }
@@ -4646,10 +4650,11 @@ margin-top: 15px;
     grid-template-columns: 1fr;
     grid-template-areas:
       "snapshot"
-      "log"
+      "trends"
       "recovery"
       "nutrition"
-      "trends"
+      "log"
+      "trends2"
       "insights";
     gap: 12px;
   }
@@ -4676,21 +4681,23 @@ margin-top: 15px;
   flex: 1;
   min-height: 0;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .hl-snap-inner {
   display: flex;
-  align-items: center;
-  gap: 18px;
+  align-items: stretch;
+  gap: clamp(26px, 2.6vw, 38px);
   width: 100%;
+  min-height: 0;
 }
 
 .hl-ring-wrap {
   position: relative;
-  width: clamp(104px, 9vw, 128px);
-  height: clamp(104px, 9vw, 128px);
+  width: clamp(150px, 13vw, 196px);
+  height: clamp(150px, 13vw, 196px);
   flex-shrink: 0;
+  align-self: center;
 }
 
 .hl-ring-svg { width: 100%; height: 100%; }
@@ -4706,7 +4713,7 @@ margin-top: 15px;
 
 .hl-ring-pct {
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 24px;
+  font-size: clamp(30px, 2.5vw, 40px);
   font-weight: 800;
   color: var(--text);
   line-height: 1;
@@ -4714,7 +4721,7 @@ margin-top: 15px;
 }
 
 .hl-ring-word {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -4727,8 +4734,9 @@ margin-top: 15px;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  justify-content: center;
+  gap: clamp(12px, 1.2vw, 18px);
+  justify-content: space-between;
+  padding-block: 8px;
 }
 
 @media (max-width: 520px) {
@@ -5179,7 +5187,7 @@ margin-top: 15px;
 }
 .nt-meal-del:hover { opacity: 1; color: var(--danger); }
 
-.nt-empty { font-size: 13px; color: var(--muted-2); font-style: italic; padding: 4px 0; }
+.nt-empty { font-size: 13px; color: var(--muted-2); font-style: italic; padding: 4px 0; text-align: center; margin-top: 125px; }
 
 .nt-recent-head {
   font-size: 10.5px;
@@ -5262,6 +5270,26 @@ margin-top: 15px;
   padding: 20px;
 }
 .nt-modal-bg[hidden] { display: none !important; }
+
+@keyframes health-modal-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes health-modal-window-in {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.nt-modal-bg:not([hidden]) {
+  animation: health-modal-backdrop-in 0.22s ease both;
+}
+
+.nt-modal-bg:not([hidden]) .nt-modal,
+.nt-modal-bg:not([hidden]) .rcm-modal {
+  transform-origin: center;
+  animation: health-modal-window-in 0.26s cubic-bezier(0.4,0,0.2,1) both;
+}
 
 .nt-modal {
   background: rgba(20,20,24,0.97);
@@ -5452,12 +5480,28 @@ margin-top: 15px;
   font-weight: 700;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: background var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast);
+  transform: scale(1);
+  transform-origin: center;
+  transition: background var(--dur-fast),
+              border-color var(--dur-fast),
+              color var(--dur-fast),
+              transform 0.26s cubic-bezier(0.4,0,0.2,1),
+              box-shadow var(--dur-fast);
 }
 .rc-log-btn:hover {
   background: var(--accent-soft);
   border-color: rgba(var(--accent-rgb), 0.45);
   color: var(--accent);
+  transform: scale(0.96);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.rc-log-btn:active {
+  transform: scale(0.94);
+}
+.rc-log-btn:focus-visible {
+  outline: none;
+  border-color: rgba(var(--accent-rgb), 0.55);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.16);
 }
 
 /* Recovery editor modal (rcm-*) */
@@ -5510,7 +5554,13 @@ margin-top: 15px;
   background: rgba(255,255,255,0.10);
   border-radius: 2px;
 }
-.htrend-section { margin-bottom: 12px; }
+.htrend-section {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-bottom: 12px;
+}
 .htrend-section:last-child { margin-bottom: 0; }
 .htrend-chart-label {
   font-size: 11px;
@@ -5524,20 +5574,40 @@ margin-top: 15px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+.htrend-row2 .htrend-section {
+  margin-bottom: 0;
+}
+.htrend-row2 .htrend-chart-label {
+  line-height: 1;
+  min-height: 11px;
 }
 .htrend-svg {
   width: 100%;
-  height: auto;
+  height: 100%;
+  min-height: 0;
   display: block;
   overflow: visible;
 }
+.htrend-svg-readiness {
+  height: clamp(210px, 22vw, 300px);
+}
 /* HTML bar charts — match Home tab Deep Work bars */
-.htbar-chart { display: flex; flex-direction: column; gap: 5px; }
+.htbar-chart {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+}
 .htbar-bars {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 6px;
-  height: 90px;
+  flex: 1;
+  min-height: 90px;
   align-items: flex-end;
 }
 .htbar {
@@ -5985,16 +6055,16 @@ margin-top: 15px;
 }
 
 .hl-factor-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--muted);
-  min-width: 82px;
+  min-width: 92px;
   flex-shrink: 0;
 }
 
 .hl-factor-bar {
   flex: 1;
-  height: 5px;
+  height: 7px;
   background: rgba(255,255,255,0.06);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -6008,10 +6078,10 @@ margin-top: 15px;
 
 .hl-factor-pct {
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--muted-2);
-  min-width: 30px;
+  min-width: 34px;
   text-align: right;
   flex-shrink: 0;
 }
