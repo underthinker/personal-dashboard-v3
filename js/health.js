@@ -384,7 +384,6 @@
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">SLEEP &amp; HYDRATION</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -470,7 +469,6 @@
     }).join('');
 
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">RECOVERY</span></div>
       <div class="rc-list" data-rc-list>${rowsHtml}</div>
       <button type="button" class="rc-log-btn" id="rcLogBtn" data-rc-open>+ LOG RECOVERY DATA</button>`;
 
