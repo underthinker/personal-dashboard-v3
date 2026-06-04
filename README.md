@@ -65,7 +65,8 @@ vendor/
   tesseract/            ← Tesseract.js (OCR)
   pdfjs/                ← PDF.js
   sortable.min.js       ← SortableJS
-9 Hashiras/             ← Avatar images per accent
+assets/
+  avatars/              ← Avatar images per accent
 ```
 
 ## FAQ
