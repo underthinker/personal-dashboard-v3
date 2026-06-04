@@ -634,8 +634,10 @@
     if (_insFadeTimer) { clearTimeout(_insFadeTimer); _insFadeTimer = null; }
     leftEl._fading = false;
     leftEl.style.opacity = '';
+    var newOff = idx % _allInsights.length;
+    storeSet('habit_ins_offset', newOff);
     _stopInsTimer();
-    _insOffset = idx % _allInsights.length;
+    _insOffset = newOff;
     _renderInsightWindow();
     var total = _allInsights.length;
     var show = 4;
@@ -739,15 +741,17 @@
       title: top3Names.join(', ') + ' are your most consistent days',
       sub: 'Schedule key habits on these days' });
 
-    _insOffset = 0;
+    const savedOff = storeGet('habit_ins_offset');
+    _insOffset = (savedOff && savedOff >= 0 && savedOff < allInsights.length) ? savedOff : 0;
     _allInsights = allInsights;
 
-    // Render initial window (first 4)
+    // Render initial window starting from saved offset
     var total = allInsights.length;
     var show = 4;
+    var start = _insOffset % total;
     var items = [];
     for (var i = 0; i < show && i < total; i++) {
-      items.push(allInsights[i]);
+      items.push(allInsights[(start + i) % total]);
     }
     var insHtml = items.map(function(ins) {
       var c = _COLOR_MAP[ins.color] || _COLOR_MAP.blue;
@@ -764,7 +768,7 @@
     if (total > show) {
       dotsHtml = '<div class="ht-ins-dots">';
       for (var i = 0; i < total; i++) {
-        dotsHtml += '<span class="ht-ins-dot' + (i === _insOffset ? ' active' : '') + '" data-ins="' + i + '"></span>';
+        dotsHtml += '<span class="ht-ins-dot' + (i === start ? ' active' : '') + '" data-ins="' + i + '"></span>';
       }
       dotsHtml += '</div>';
     }
