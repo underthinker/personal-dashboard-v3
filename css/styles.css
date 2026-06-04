@@ -1142,10 +1142,9 @@ body {
   justify-content: center;
   border-radius: 10px;
   flex-shrink: 0;
+  color: var(--accent);
 }
-.weather-icon svg { display: block; width: 48px; height: 48px; }
-.weather-icon svg .am-weather-sun,
-.weather-icon svg .am-weather-moon { transform-box: fill-box; transform-origin: center; }
+.weather-icon svg { display: block; width: 40px; height: 40px; stroke-width: 1.75; }
 .weather-temp { font-family: var(--font-mono); font-size: 30px; font-weight: 700; color: var(--text); }
 .weather-cond { font-size: 14px; font-weight: 600; color: var(--text); }
 .weather-hl { display: flex; justify-content: space-between; font-size: 13px; font-family: var(--font-mono); }

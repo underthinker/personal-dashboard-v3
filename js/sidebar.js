@@ -3,15 +3,15 @@
   var AVATAR_KEY = 'sidebar_user_avatar_v1';
   var DEFAULT_NAME = 'you';
   var ACCENT_AVATAR_DEFAULTS = {
-    '#d1809b': '9 Hashiras/kanroji.webp',
-    '#a78bfa': '9 Hashiras/Shinobu.jpg',
-    '#5fd687': '9 Hashiras/Sanemi.jpg',
-    '#5ba8f7': '9 Hashiras/Giyu.webp',
-    '#e66a3b': '9 Hashiras/Rengoku.webp',
-    '#2aa198': '9 Hashiras/Iguro.jpg',
-    '#cfa846': '9 Hashiras/Uzui.webp',
-    '#7bc4b2': '9 Hashiras/Tokito.jpg',
-    '#7d8462': '9 Hashiras/Himejima.webp'
+    '#d1809b': 'assets/avatars/kanroji.webp',
+    '#a78bfa': 'assets/avatars/Shinobu.jpg',
+    '#5fd687': 'assets/avatars/Sanemi.jpg',
+    '#5ba8f7': 'assets/avatars/Giyu.webp',
+    '#e66a3b': 'assets/avatars/Rengoku.webp',
+    '#2aa198': 'assets/avatars/Iguro.jpg',
+    '#cfa846': 'assets/avatars/Uzui.webp',
+    '#7bc4b2': 'assets/avatars/Tokito.jpg',
+    '#7d8462': 'assets/avatars/Himejima.webp'
   };
 
   var nameEl = document.querySelector('.su-name');
