@@ -5265,6 +5265,10 @@ margin-top: 15px;
   background: rgba(var(--accent-rgb), 0.08);
   border-color: rgba(var(--accent-rgb), 0.22);
 }
+.nt-recent-btn.active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: var(--accent);
+}
 
 .nt-recent-name {
   font-size: 12px;
@@ -5448,6 +5452,12 @@ margin-top: 15px;
   transition: background var(--dur-fast), border-color var(--dur-fast);
 }
 .nt-modal-save:hover { background: rgba(107,227,164,0.22); border-color: rgba(107,227,164,0.55); }
+
+.nt-modal-recent {
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
 
 /* ---------- Recovery metrics card  (rc-*) ---------- */
 .rc-card { padding: 18px; }

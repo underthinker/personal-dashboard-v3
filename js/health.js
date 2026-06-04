@@ -984,8 +984,6 @@
 
     const meals = day.meals || [];
     const totals = day.nutrition_totals || { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
-    const recentMeals = getRecentMeals(date);
-
     function macroBar(label, val, goal, unit, color, icon) {
       const pct = goal > 0 ? Math.min(val / goal * 100, 100) : 0;
       const display = unit === '' ? Math.round(val) : Math.round(val * 10) / 10;
@@ -1017,17 +1015,6 @@
               </div>`).join('')}
           </div>`).join('');
 
-    const recentHtml = recentMeals.length > 0
-      ? `<div class="nt-recent-head">Quick Add</div>
-         <div class="nt-recent-list">
-           ${recentMeals.map((m, i) =>
-             `<button type="button" class="nt-recent-btn" data-recent="${i}">
-               <span class="nt-recent-name">${escHtml(m.name)}</span>
-               <span class="nt-recent-cal">${m.calories || 0} cal</span>
-             </button>`).join('')}
-         </div>`
-      : '';
-
     el.innerHTML = `
       <div class="card-head"><span class="card-label">NUTRITION BREAKDOWN</span></div>
       <div class="nt-macros">
@@ -1037,7 +1024,6 @@
         ${macroBar('Protein',  totals.protein_g || 0, settings.protein_goal_g, 'g', 'rgba(var(--accent-rgb),0.55)', 'beef')}
       </div>
       <div class="nt-meal-list">${mealListHtml}</div>
-      ${recentHtml}
       <button type="button" class="nt-add-btn rc-log-btn" id="ntAddBtn">+ LOG MEAL</button>`;
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -1059,14 +1045,7 @@
     el.querySelectorAll('.nt-meal-edit').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.edit, 10);
-        openMealModal(date, day, settings, null, idx);
-      });
-    });
-
-    el.querySelectorAll('.nt-recent-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const m = recentMeals[parseInt(btn.dataset.recent, 10)];
-        if (m) openMealModal(date, day, settings, m);
+        openMealModal(date, day, settings, idx);
       });
     });
   }
@@ -1101,12 +1080,12 @@
   // ---- Meal modal ----
   let _escHandler = null;
 
-  function openMealModal(date, day, settings, prefill, editIndex) {
+  function openMealModal(date, day, settings, editIndex) {
     const bg = $('ntModalBg');
     if (!bg) return;
 
     const editing = editIndex != null && day.meals && day.meals[editIndex];
-    const src = editing ? day.meals[editIndex] : prefill;
+    const src = editing ? day.meals[editIndex] : null;
 
     const GROUPS = ['breakfast', 'lunch', 'dinner', 'snacks'];
     const now = new Date();
@@ -1115,9 +1094,24 @@
     const defaultGroup = h < 10 ? 'breakfast' : h < 13 ? 'lunch' : h < 17 ? 'dinner' : 'snacks';
     const selGroup = src ? (src.group || defaultGroup) : defaultGroup;
 
+    const recentMeals = !editing ? getRecentMeals(date) : [];
+    const recentHtml = !editing && recentMeals.length > 0
+      ? `<div class="nt-modal-recent">
+           <div class="nt-recent-head">Quick Add</div>
+           <div class="nt-recent-list">
+             ${recentMeals.map((m, i) =>
+               `<button type="button" class="nt-recent-btn" data-recent-idx="${i}">
+                  <span class="nt-recent-name">${escHtml(m.name)}</span>
+                  <span class="nt-recent-cal">${m.calories || 0} cal</span>
+                </button>`).join('')}
+           </div>
+         </div>`
+      : '';
+
     bg.innerHTML = `<div class="nt-modal glass">
-      <div class="nt-modal-title">${editing ? 'Edit Meal' : prefill ? 'Quick Add' : 'Log Meal'}</div>
+      <div class="nt-modal-title">${editing ? 'Edit Meal' : 'Log Meal'}</div>
       <div class="nt-modal-body">
+        ${recentHtml}
         <div class="nt-form-row">
           <label class="nt-form-label" for="ntfName">Name</label>
           <input type="text" class="nt-form-input" id="ntfName"
@@ -1172,6 +1166,22 @@
 
     $('ntfCancel').addEventListener('click', closeMealModal);
     bg.addEventListener('click', e => { if (e.target === bg) closeMealModal(); });
+
+    bg.querySelectorAll('.nt-recent-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const m = recentMeals[parseInt(btn.dataset.recentIdx, 10)];
+        if (!m) return;
+        bg.querySelectorAll('.nt-recent-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        $('ntfName').value  = m.name || '';
+        $('ntfTime').value  = m.time || defaultTime;
+        $('ntfGroup').value = m.group || defaultGroup;
+        $('ntfCal').value   = m.calories  || '';
+        $('ntfCarbs').value = m.carbs_g   || '';
+        $('ntfFat').value   = m.fat_g     || '';
+        $('ntfProt').value  = m.protein_g || '';
+      });
+    });
 
     $('ntfSave').addEventListener('click', () => {
       const name = ($('ntfName').value || '').trim();
