@@ -190,11 +190,15 @@
 
   function streakFor(habitId) {
     var current = 0, best = 0, run = 0;
-    for (var i = 0; i < 365; i++) {
+    var today = new Date();
+    var todayData = getDayData(dateToYMD(today));
+    var todayDone = todayData && todayData.entries && todayData.entries[habitId];
+    for (var i = 1; i < 365; i++) {
       var d = new Date(); d.setDate(d.getDate() - i);
       var data = getDayData(dateToYMD(d));
       if (data && data.entries && data.entries[habitId]) { current++; } else { break; }
     }
+    if (todayDone) current++;
     for (var i = 0; i < 365; i++) {
       var d = new Date(); d.setDate(d.getDate() - i);
       var data = getDayData(dateToYMD(d));
