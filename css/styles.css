@@ -4599,6 +4599,49 @@ margin-top: 15px;
    ============================================================ */
 
 /* ---------- Dashboard grid ---------- */
+.hl-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+.hl-metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+/* Metric tiles reuse Habits .ht-mc; minor health-specific tuning */
+.hl-mc .ht-mc-sub { font-size: 11px; }
+
+/* surface-2 nesting: lift flat bars onto nested panels (design-language parity) */
+.hl-factors,
+.health-grid .rc-list,
+.health-grid .nt-macros {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 12px;
+}
+.health-grid .nt-macros { padding: 12px; }
+
+/* Factor row icon badge */
+.hl-factor-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.hl-factor-label { min-width: 78px; }
+
 .health-grid {
   display: grid;
   grid-template-columns: minmax(250px, 1.05fr) minmax(360px, 1.35fr) minmax(300px, 1.1fr);
@@ -4608,7 +4651,7 @@ margin-top: 15px;
     "log      recovery nutrition"
     "trends2  recovery insights";
   gap: 16px;
-  height: 100%;
+  flex: 1;
   min-height: 0;
 }
 
@@ -4635,6 +4678,8 @@ margin-top: 15px;
 }
 
 @media (max-width: 1400px) {
+  .hl-section { height: auto; }
+  .hl-metric-row { grid-template-columns: repeat(2, 1fr); }
   .health-grid {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto;
@@ -4648,6 +4693,7 @@ margin-top: 15px;
 }
 
 @media (max-width: 900px) {
+  .hl-metric-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .health-grid {
     grid-template-columns: 1fr;
     grid-template-areas:

@@ -528,10 +528,12 @@
 <!-- ═══ TAB: HEALTH ═══ -->
 <div id="tab-health" class="tab-content">
 
+<div class="hl-section">
+<div class="hl-metric-row" id="hlMetricRow"></div>
 <div class="health-grid">
   <div class="card hl-snapshot" id="hlSnapshot">
     <div class="hl-date-nav">
-      <span class="card-label">READINESS</span>
+      <span class="card-label">READINESS BREAKDOWN</span>
       <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
       <div class="hl-date-display" id="hlDateDisplay">Today</div>
       <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
@@ -548,6 +550,7 @@
   <div class="card htrend-card htrend2-card" id="htrend2Card"></div>
   <div class="card hi-card" id="hiCard"></div>
 </div>
+</div><!-- /hl-section -->
 
 <div id="ntModalBg" class="nt-modal-bg" hidden></div>
 <div id="recModalBg" class="nt-modal-bg" hidden></div>

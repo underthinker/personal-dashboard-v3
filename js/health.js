@@ -221,6 +221,100 @@
     };
   }
 
+  // ---- Metric row (top hero tiles, mirrors Habits ht-top-row) ----
+  function _sparkline(pts, w, h, color) {
+    if (!pts || pts.length < 2) return '';
+    const max = Math.max.apply(null, pts), min = Math.min.apply(null, pts);
+    const range = max - min || 1, pad = 2;
+    const xStep = (w - 2 * pad) / (pts.length - 1);
+    const d = pts.map((v, i) =>
+      (i === 0 ? 'M' : 'L') + (pad + i * xStep).toFixed(1) + ',' +
+      (h - pad - ((v - min) / range) * (h - 2 * pad)).toFixed(1)).join(' ');
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="ht-spark-svg"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  function _mcIcon(name) { return `<i data-lucide="${name}" width="13" height="13"></i>`; }
+
+  function _fmtFocus(min) {
+    if (!min) return '0';
+    const h = Math.floor(min / 60), m = Math.round(min % 60);
+    return h ? (h + 'h ' + (m ? m + 'm' : '')).trim() : m + 'm';
+  }
+
+  function _trendSub(diff, unit) {
+    if (diff === 0) return '<span style="color:var(--muted-2)">No change vs yest.</span>';
+    const up = diff > 0;
+    const col = up ? 'var(--green)' : 'var(--danger)';
+    return `<span style="color:${col}">${up ? '↑' : '↓'} ${Math.abs(diff)}${unit} vs yest.</span>`;
+  }
+
+  function renderMetricRow(date, settings) {
+    const el = $('hlMetricRow');
+    if (!el) return;
+
+    const history = getHistory(date, 7);
+    const day = history[history.length - 1].day;
+    const prevEntry = history.length >= 2 ? history[history.length - 2] : null;
+    const prevDay = prevEntry ? prevEntry.day : {};
+
+    // Series for sparklines (missing → 0)
+    const readinessSeries = history.map(h => calcReadiness(h.date, h.day, settings) || 0);
+    const sleepSeries = history.map(h => h.day.sleep_hours || 0);
+    const waterSeries = history.map(h => h.day.water_oz || 0);
+    const focusSeries = history.map(h => h.day.focus_min || 0);
+
+    // Readiness + trend vs yesterday
+    const readiness = calcReadiness(date, day, settings);
+    const prevReadiness = prevEntry ? calcReadiness(prevEntry.date, prevDay, settings) : null;
+    const rDiff = (readiness != null && prevReadiness != null) ? readiness - prevReadiness : 0;
+
+    // Sleep
+    const sleep = day.sleep_hours != null ? day.sleep_hours : null;
+    const sleepDisp = sleep != null ? (Math.round(sleep * 10) / 10) : '–';
+    const sleepHit = sleep != null && sleep >= settings.sleep_goal_hours * 0.875;
+
+    // Water
+    const water = day.water_oz || 0;
+    const waterHit = water >= settings.water_goal_oz;
+
+    // Focus
+    const focusMin = day.focus_min || 0;
+    const focusHit = focusMin >= settings.focus_goal_min;
+
+    function tile(icon, head, num, unit, sub, spark) {
+      return `<div class="card ht-mc hl-mc">
+        <div class="ht-mc-head">${_mcIcon(icon)}<span>${head}</span></div>
+        <div class="ht-mc-body">
+          <div>
+            <div class="ht-mc-num">${num}${unit ? `<span class="ht-mc-unit">${unit}</span>` : ''}</div>
+            <div class="ht-mc-sub">${sub}</div>
+          </div>
+          ${spark ? `<div class="ht-mc-visual">${spark}</div>` : ''}
+        </div>
+      </div>`;
+    }
+
+    el.innerHTML =
+      tile('heart-pulse', 'READINESS',
+        readiness != null ? readiness : '–', readiness != null ? '%' : '',
+        readiness != null ? _trendSub(rDiff, '') : 'No data yet',
+        _sparkline(readinessSeries, 60, 28, 'var(--accent)')) +
+      tile('moon', 'SLEEP',
+        sleepDisp, sleep != null ? 'h' : '',
+        `Goal ${settings.sleep_goal_hours}h`,
+        _sparkline(sleepSeries, 60, 28, sleepHit ? 'var(--green)' : 'var(--accent)')) +
+      tile('droplet', 'HYDRATION',
+        water, 'oz',
+        `${Math.round(water / settings.water_goal_oz * 100)}% of ${settings.water_goal_oz}oz`,
+        _sparkline(waterSeries, 60, 28, waterHit ? 'var(--green)' : 'var(--accent)')) +
+      tile('timer', 'DEEP WORK',
+        _fmtFocus(focusMin), '',
+        `Goal ${_fmtFocus(settings.focus_goal_min)}`,
+        _sparkline(focusSeries, 60, 28, focusHit ? 'var(--green)' : 'var(--accent)'));
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
   // ---- Snapshot ----
   function renderSnapshot(date, day, settings) {
     const el = $('hlSnapshotBody');
@@ -243,10 +337,12 @@
       <div class="hl-ring-word">Readiness</div>
     </div>`;
 
+    const FACTOR_ICONS = { Sleep: 'moon', Hydration: 'droplet', Mood: 'smile', Nutrition: 'utensils', Recovery: 'heart-pulse', Energy: 'zap' };
     const factors = calcFactors(date, day, settings);
     const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
       const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--danger)';
       return `<div class="hl-factor-row">
+        <span class="hl-factor-icon"><i data-lucide="${FACTOR_ICONS[name] || 'circle'}" width="13" height="13"></i></span>
         <span class="hl-factor-label">${name}</span>
         <div class="hl-factor-bar"><div class="hl-factor-fill" style="width:${pct}%;background:${color}"></div></div>
         <span class="hl-factor-pct">${pct}%</span>
@@ -257,6 +353,8 @@
       <div class="hl-ring-wrap">${ringSvg}</div>
       <div class="hl-factors">${factorBarsHtml}</div>
     </div>`;
+
+    if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
   // ---- Throttled render (water rapid-click guard) ----
@@ -288,6 +386,7 @@
     const waterOz = day.water_oz || 0;
     const waterPct = Math.min(waterOz / settings.water_goal_oz * 100, 100);
     el.innerHTML = `
+      <div class="card-head"><span class="card-label">SLEEP &amp; HYDRATION</span></div>
       <div class="hl-log-section">
         <div class="ql-row">
           <label class="ql-label">Sleep</label>
@@ -373,6 +472,7 @@
     }).join('');
 
     el.innerHTML = `
+      <div class="card-head"><span class="card-label">RECOVERY</span></div>
       <div class="rc-list" data-rc-list>${rowsHtml}</div>
       <button type="button" class="rc-log-btn" id="rcLogBtn" data-rc-open>+ LOG RECOVERY DATA</button>`;
 
@@ -1163,6 +1263,7 @@
     const day = loadDay(date);
     const settings = getSettings();
     renderDateNav();
+    renderMetricRow(date, settings);
     renderSnapshot(date, day, settings);
     renderLog(date, day, settings);
     renderRecovery(date, day, settings);
