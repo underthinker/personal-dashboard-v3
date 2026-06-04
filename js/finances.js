@@ -1452,11 +1452,20 @@
     const avg = months.length ? Math.round((totalIncome - totalExpenses) / months.length) : 0;
     const netColor = net >= 0 ? '#5fd687' : '#FF6B6B';
     const periodLbl = periodShortLabel(activePeriod);
+    const sw = ' fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+    const icoIn = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 17l6-6 4 4 7-7"/><path d="M14 7h7v7"/></svg>';
+    const icoOut = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 7l6 6 4-4 7 7"/><path d="M14 17h7v-7"/></svg>';
+    const icoNet = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0M3 8v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5"/><circle cx="16.5" cy="13" r="1"/></svg>';
+    const icoAvg = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 21h18"/><path d="M6 18v-5M12 18V6M18 18v-8"/></svg>';
+    const mc = function (badge, ico, label, num, sub, numStyle) {
+      return '<div class="card fin-mc"><div class="fin-mc-head"><span class="po-badge po-badge-' + badge + '">' + ico + '</span><span class="card-label">' + label + '</span></div>' +
+        '<div class="fin-mc-body"><div><div class="fin-mc-num"' + (numStyle ? ' style="' + numStyle + '"' : '') + '>' + num + '</div><div class="fin-mc-sub">' + sub + '</div></div></div></div>';
+    };
     el.innerHTML =
-      '<div class="card fin-mc"><div class="fin-mc-head">Total Income</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(totalIncome) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
-      '<div class="card fin-mc"><div class="fin-mc-head">Total Expenses</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(totalExpenses) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
-      '<div class="card fin-mc"><div class="fin-mc-head">Net Savings</div><div class="fin-mc-body"><div><div class="fin-mc-num" style="color:' + netColor + '">' + (net < 0 ? '-' : '') + fmtK(Math.abs(net)) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
-      '<div class="card fin-mc"><div class="fin-mc-head">Monthly Avg</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(avg) + '</div><div class="fin-mc-sub">per month</div></div></div></div>';
+      mc('green', icoIn, 'Total Income', fmtK(totalIncome), periodLbl) +
+      mc('amber', icoOut, 'Total Expenses', fmtK(totalExpenses), periodLbl) +
+      mc('accent', icoNet, 'Net Savings', (net < 0 ? '-' : '') + fmtK(Math.abs(net)), periodLbl, 'color:' + netColor) +
+      mc('blue', icoAvg, 'Monthly Avg', fmtK(avg), 'per month');
   }
 
   function renderFinances() { const data = loadData(); renderDashboard(data); renderIncomeTable(data, activeQuarters.income); renderExpenseTable(data, activeQuarters.expense); bindQuarterBtns(); bindPeriodBtns(); renderGoals(); }

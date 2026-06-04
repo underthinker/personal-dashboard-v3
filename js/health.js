@@ -930,41 +930,86 @@
     return DAY_SHORT[new Date(y, mo - 1, d).getDay()];
   }
 
+  function buildReadinessTrendCaption(history, settings) {
+    const vals = history.map(h => calcReadiness(h.date, h.day, settings)).filter(v => v != null);
+    if (vals.length < 4) return '';
+    const half = Math.floor(vals.length / 2);
+    const earlyAvg = vals.slice(0, half).reduce((a, b) => a + b, 0) / half;
+    const lateAvg = vals.slice(-half).reduce((a, b) => a + b, 0) / half;
+    const delta = Math.round(lateAvg - earlyAvg);
+    const dir = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
+    const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '–';
+    const sign = delta > 0 ? '+' : '';
+    const label = delta === 0 ? 'flat' : `${sign}${delta} vs last week`;
+    return `<span class="htrend-trend htrend-trend-${dir}">${arrow} ${label}</span>`;
+  }
+
   function buildReadinessChart(history, settings) {
     const W = 480, H = 230;
-    const padL = 8, padR = 8, padT = 28, padB = 34;
+    const padL = 12, padR = 12, padT = 30, padB = 34;
     const plotW = W - padL - padR, plotH = H - padT - padB;
+    const baseY = padT + plotH;
     const n = history.length;
     const pointX = history.map((_, i) => padL + (n > 1 ? i / (n - 1) : 0.5) * plotW);
     function yScale(v) { return padT + plotH - (v / 100) * plotH; }
 
     const readinessVals = history.map(h => calcReadiness(h.date, h.day, settings));
-    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg htrend-svg-readiness" aria-hidden="true">`;
+    const uid = 'rd' + Math.random().toString(36).slice(2, 8);
+    let html = `<svg viewBox="0 0 ${W} ${H}" class="htrend-svg htrend-svg-readiness" role="img" aria-label="Readiness over the last 7 days">`;
 
-    // Zone bands
-    const y80 = yScale(80), y60 = yScale(60);
-    html += `<rect x="${padL}" y="${padT}" width="${plotW}" height="${(y60 - padT).toFixed(1)}" fill="rgba(255,107,107,0.06)"/>`;
-    html += `<rect x="${padL}" y="${y60.toFixed(1)}" width="${plotW}" height="${(y80 - y60).toFixed(1)}" fill="rgba(242,192,99,0.06)"/>`;
-    html += `<rect x="${padL}" y="${y80.toFixed(1)}" width="${plotW}" height="${(padT + plotH - y80).toFixed(1)}" fill="rgba(107,227,164,0.06)"/>`;
+    // Gradients: area fill fades down, line uses accent.
+    html += `<defs>
+      <linearGradient id="${uid}-area" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(var(--accent-rgb),0.28)"/>
+        <stop offset="100%" stop-color="rgba(var(--accent-rgb),0)"/>
+      </linearGradient>
+    </defs>`;
 
-    // Zone boundary lines
-    html += `<line x1="${padL}" y1="${y60.toFixed(1)}" x2="${W-padR}" y2="${y60.toFixed(1)}" stroke="rgba(242,192,99,0.25)" stroke-width="1" stroke-dasharray="3,3"/>`;
-    html += `<line x1="${padL}" y1="${y80.toFixed(1)}" x2="${W-padR}" y2="${y80.toFixed(1)}" stroke="rgba(107,227,164,0.25)" stroke-width="1" stroke-dasharray="3,3"/>`;
-
-    // Readiness line
-    const yVals = readinessVals.map(v => v != null ? yScale(v) : null);
-    htSegments(pointX, yVals).forEach(seg => {
-      if (seg.length >= 2) html += `<path d="${htLinePath(seg)}" class="htrend-line-readiness"/>`;
+    // Subtle threshold gridlines (60 / 80) — reference only, no zone bands.
+    [[60, yScale(60)], [80, yScale(80)]].forEach(([val, yy]) => {
+      html += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" class="htrend-gridline"/>`;
+      html += `<text x="${W - padR}" y="${(yy - 3).toFixed(1)}" class="htrend-axis-y">${val}</text>`;
     });
 
-    // Dots + value labels
+    const yVals = readinessVals.map(v => v != null ? yScale(v) : null);
+    const segs = htSegments(pointX, yVals);
+
+    // Area fill under each continuous segment.
+    segs.forEach(seg => {
+      if (seg.length < 2) return;
+      const linePath = htLinePath(seg);
+      const area = `${linePath} L${seg[seg.length-1][0]},${baseY} L${seg[0][0]},${baseY} Z`;
+      html += `<path d="${area}" class="htrend-area" fill="url(#${uid}-area)"/>`;
+    });
+
+    // Accent line — pathLength=1 lets CSS draw it in regardless of real length.
+    segs.forEach(seg => {
+      if (seg.length >= 2) html += `<path d="${htLinePath(seg)}" pathLength="1" class="htrend-line-readiness"/>`;
+    });
+
+    // Decide which points get emphasis: latest + peak + low.
+    const valid = readinessVals.map((v, i) => ({ v, i })).filter(o => o.v != null);
+    const emphasis = new Set();
+    if (valid.length) {
+      emphasis.add(valid[valid.length - 1].i); // latest
+      emphasis.add(valid.reduce((a, b) => b.v > a.v ? b : a).i); // peak
+      emphasis.add(valid.reduce((a, b) => b.v < a.v ? b : a).i); // low
+    }
+
+    // Dots — faint for all, emphasized for endpoints. Native title = hover value.
+    html += `<g class="htrend-points">`;
     readinessVals.forEach((v, i) => {
       if (v == null) return;
-      const color = v >= 80 ? 'var(--green)' : v >= 60 ? 'var(--amber)' : 'var(--danger)';
       const cy = yScale(v);
-      html += `<circle cx="${pointX[i]}" cy="${cy}" r="4" fill="${color}" stroke="rgba(0,0,0,0.6)" stroke-width="1.5"/>`;
-      html += `<text x="${pointX[i]}" y="${cy - 8}" class="htrend-dot-val">${v}</text>`;
+      const title = `<title>${htDayLabel(history[i].date)}: ${v}</title>`;
+      if (emphasis.has(i)) {
+        html += `<circle cx="${pointX[i]}" cy="${cy}" r="5.5" class="htrend-dot htrend-dot-key">${title}</circle>`;
+        html += `<text x="${pointX[i]}" y="${cy - 12}" class="htrend-dot-val">${v}</text>`;
+      } else {
+        html += `<circle cx="${pointX[i]}" cy="${cy}" r="3.5" class="htrend-dot">${title}</circle>`;
+      }
     });
+    html += `</g>`;
 
     // Day labels
     history.forEach((h, i) => {
@@ -1027,7 +1072,10 @@
     }
 
     el.innerHTML = `
-      <div class="card-head"><span class="card-label">READINESS (7 DAYS)</span></div>
+      <div class="card-head">
+        <span class="card-label">READINESS (7 DAYS)</span>
+        ${buildReadinessTrendCaption(history, settings)}
+      </div>
       <div class="htrend-section">
         ${buildReadinessChart(history, settings)}
       </div>`;
