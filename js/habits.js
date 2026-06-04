@@ -613,11 +613,38 @@
     danger: { icon: 'rgba(255,107,107,0.18)', text: 'var(--danger)' }
   };
   var _insTimer = null;
+  var _insFadeTimer = null;
   var _insOffset = 0;
   var _allInsights = [];
 
   function _stopInsTimer() {
     if (_insTimer) { clearInterval(_insTimer); _insTimer = null; }
+  }
+
+  function _onDotClick(e) {
+    var dot = e.target.closest('.ht-ins-dot');
+    if (!dot || !dot.hasAttribute('data-ins')) return;
+    var idx = parseInt(dot.getAttribute('data-ins'));
+    if (isNaN(idx)) return;
+    var el = $('htInsightsBody');
+    if (!el) return;
+    var leftEl = el.querySelector('.ht-insights-left');
+    if (!leftEl) return;
+    // Cancel any pending fade so the jump takes effect immediately
+    if (_insFadeTimer) { clearTimeout(_insFadeTimer); _insFadeTimer = null; }
+    leftEl._fading = false;
+    leftEl.style.opacity = '';
+    _stopInsTimer();
+    _insOffset = idx % _allInsights.length;
+    _renderInsightWindow();
+    var total = _allInsights.length;
+    var show = 4;
+    if (total > show) {
+      _insTimer = setInterval(function() {
+        _insOffset = (_insOffset + 1) % _allInsights.length;
+        _renderInsightWindow();
+      }, 720000);
+    }
   }
 
   function renderInsightsCard() {
@@ -737,7 +764,7 @@
     if (total > show) {
       dotsHtml = '<div class="ht-ins-dots">';
       for (var i = 0; i < total; i++) {
-        dotsHtml += '<span class="ht-ins-dot' + (i < show ? ' active' : '') + '"></span>';
+        dotsHtml += '<span class="ht-ins-dot' + (i === _insOffset ? ' active' : '') + '" data-ins="' + i + '"></span>';
       }
       dotsHtml += '</div>';
     }
@@ -779,6 +806,9 @@
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
 
+    var leftEl = el.querySelector('.ht-insights-left');
+    if (leftEl) leftEl.addEventListener('click', _onDotClick);
+
     // Start rotation timer when there are more insights than slots
     if (total > show) {
       _insTimer = setInterval(function() {
@@ -815,19 +845,19 @@
     if (total > show) {
       dotsHtml = '<div class="ht-ins-dots">';
       for (var i = 0; i < total; i++) {
-        var pos = (i - start + total) % total;
-        dotsHtml += '<span class="ht-ins-dot' + (pos < show ? ' active' : '') + '"></span>';
+        dotsHtml += '<span class="ht-ins-dot' + (i === start ? ' active' : '') + '" data-ins="' + i + '"></span>';
       }
       dotsHtml += '</div>';
     }
 
     leftEl._fading = true;
     leftEl.style.opacity = '0';
-    setTimeout(function() {
+    _insFadeTimer = setTimeout(function() {
       leftEl.innerHTML = insHtml + dotsHtml;
       if (typeof lucide !== 'undefined') lucide.createIcons();
       leftEl.style.opacity = '';
       leftEl._fading = false;
+      _insFadeTimer = null;
     }, 200);
   }
 

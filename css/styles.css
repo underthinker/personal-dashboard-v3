@@ -6511,9 +6511,11 @@ input.sleep-picker-val:focus {
 .ht-ins2-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
 /* Insight rotation dots */
-.ht-ins-dots { display: flex; gap: 4px; justify-content: center; margin-top: 6px; }
-.ht-ins-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--line); transition: background 0.3s; }
+.ht-ins-dots { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+.ht-ins-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--line); transition: background 0.3s; cursor: pointer; }
+.ht-ins-dot:hover { background: var(--muted); }
 .ht-ins-dot.active { background: var(--accent); }
+.ht-ins-dot.active:hover { background: var(--accent); }
 
 /* Day stats block (inside insights right) */
 .ht-days-block { }
