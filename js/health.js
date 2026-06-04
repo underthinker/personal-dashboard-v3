@@ -340,11 +340,9 @@
     const FACTOR_ICONS = { Sleep: 'moon', Hydration: 'droplet', Mood: 'smile', Nutrition: 'utensils', Recovery: 'heart-pulse', Energy: 'zap' };
     const factors = calcFactors(date, day, settings);
     const factorBarsHtml = Object.entries(factors).map(([name, pct]) => {
-      const color = pct >= 80 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--danger)';
       return `<div class="hl-factor-row">
         <span class="hl-factor-icon"><i data-lucide="${FACTOR_ICONS[name] || 'circle'}" width="13" height="13"></i></span>
         <span class="hl-factor-label">${name}</span>
-        <div class="hl-factor-bar"><div class="hl-factor-fill" style="width:${pct}%;background:${color}"></div></div>
         <span class="hl-factor-pct">${pct}%</span>
       </div>`;
     }).join('');
@@ -1237,7 +1235,6 @@
     const prev = $('hlDatePrev');
     const next = $('hlDateNext');
     const picker = $('hlDatePicker');
-    const todayBtn = $('hlDateToday');
     if (!prev) return;
 
     prev.addEventListener('click', () => {
@@ -1259,11 +1256,6 @@
         _setViewDate(picker.value);
         renderHealth();
       }
-    });
-
-    todayBtn.addEventListener('click', () => {
-      _setViewDate(null);
-      renderHealth();
     });
   }
 

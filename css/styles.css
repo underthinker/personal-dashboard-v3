@@ -4640,7 +4640,7 @@ margin-top: 15px;
   color: var(--accent);
   flex-shrink: 0;
 }
-.hl-factor-label { min-width: 78px; }
+.hl-factor-label { min-width: 78px; flex-shrink: 0; }
 
 .health-grid {
   display: grid;
@@ -4780,11 +4780,11 @@ margin-top: 15px;
 .hl-factors {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(12px, 1.2vw, 18px);
-  justify-content: space-between;
-  padding-block: 8px;
+  gap: clamp(6px, 0.6vw, 10px);
+  padding-block: 4px;
 }
 
 @media (max-width: 520px) {
@@ -6004,7 +6004,7 @@ margin-top: 15px;
 .htrend-card > .card-head,
 .hi-card > .card-head { margin-bottom: 0; }
 
-.hl-date-prev, .hl-date-next, .hl-date-today {
+.hl-date-prev, .hl-date-next {
   background: rgba(255,255,255,0.05);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
@@ -6021,7 +6021,7 @@ margin-top: 15px;
   width: 28px;
   padding-inline: 0;
 }
-.hl-date-prev:hover, .hl-date-next:hover, .hl-date-today:hover {
+.hl-date-prev:hover, .hl-date-next:hover {
   background: rgba(var(--accent-rgb), 0.10);
   border-color: rgba(var(--accent-rgb), 0.24);
 }
@@ -6110,30 +6110,8 @@ margin-top: 15px;
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.hl-factor-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  min-width: 92px;
-  flex-shrink: 0;
-}
-
-.hl-factor-bar {
   flex: 1;
-  height: 7px;
-  background: rgba(255,255,255,0.06);
-  border-radius: var(--radius-full);
-  overflow: hidden;
 }
-
-.hl-factor-fill {
-  height: 100%;
-  border-radius: var(--radius-full);
-  transition: width var(--dur-normal) var(--ease-smooth);
-}
-
 .hl-factor-pct {
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
@@ -6142,6 +6120,7 @@ margin-top: 15px;
   min-width: 34px;
   text-align: right;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* ---------- Health: Meal edit button ---------- */
