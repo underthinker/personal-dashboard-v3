@@ -230,7 +230,7 @@
     const d = pts.map((v, i) =>
       (i === 0 ? 'M' : 'L') + (pad + i * xStep).toFixed(1) + ',' +
       (h - pad - ((v - min) / range) * (h - 2 * pad)).toFixed(1)).join(' ');
-    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="ht-spark-svg"><path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="ht-spark-svg"><path d="${d}" pathLength="1" class="ht-spark-path" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   }
 
   function _mcIcon(name) { return `<i data-lucide="${name}" width="13" height="13"></i>`; }
@@ -331,8 +331,9 @@
     const ringColor = readiness == null ? 'rgba(255,255,255,0.06)' : 'var(--accent)';
     const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 124 124" aria-hidden="true">
       <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
-      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="9"
-        stroke-dasharray="${(pct * CIRC).toFixed(2)} ${CIRC.toFixed(2)}"
+      <circle class="hl-ring-fill" cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="9"
+        stroke-dasharray="${CIRC.toFixed(2)}"
+        stroke-dashoffset="${(CIRC * (1 - pct)).toFixed(2)}"
         stroke-linecap="round" transform="rotate(-90 ${CX} ${CY})"/>
     </svg>
     <div class="hl-ring-label">

@@ -9,6 +9,22 @@
 
   var tabs = document.querySelectorAll('.nav-item');
   var contents = document.querySelectorAll('.tab-content');
+
+  // Retrigger card-content entrance animations once per tab visit.
+  // (Data mutations re-render in place without this class, so toggling a
+  // goal/habit doesn't replay every visual.)
+  var _enterTimers = new WeakMap();
+  function playEntrance(el) {
+    if (!el) return;
+    el.classList.remove('is-entering');
+    void el.offsetWidth; // reflow so the animation restarts
+    el.classList.add('is-entering');
+    clearTimeout(_enterTimers.get(el));
+    _enterTimers.set(el, setTimeout(function () {
+      el.classList.remove('is-entering');
+    }, 1800));
+  }
+
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
       tabs.forEach(function (t) { t.classList.remove('active'); });
@@ -41,6 +57,12 @@
       if (contentId === 'tab-health') {
         window.renderHealth && window.renderHealth();
       }
+
+      playEntrance(el);
     });
   });
+
+  // Play entrance on the tab that's already visible at first load.
+  var initial = document.querySelector('.tab-content.is-visible');
+  if (initial) playEntrance(initial);
 })();

@@ -880,6 +880,11 @@ body {
 .hfr-ring svg { width: 100%; height: 100%; }
 .hfr-track { fill: none; stroke: var(--surface-2); stroke-width: 5; }
 .hfr-fill { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 36px 36px; }
+/* Ring draw-in (habits + home readiness widget) — c = 2*PI*31 = 194.78 */
+@media (prefers-reduced-motion: no-preference) {
+  .hfr-fill { animation: hfr-ring-draw 0.8s var(--ease-out) both; }
+}
+@keyframes hfr-ring-draw { from { stroke-dashoffset: 194.78; } }
 .view-habits { color: var(--muted); font-size: 12px; background: transparent; border: 0; padding: 0; cursor: pointer; margin-top: auto; text-align: left; }
 .view-habits:hover { color: var(--text); }
 
@@ -3538,11 +3543,6 @@ margin-top: 15px;
   flex: 1;
 }
 
-@keyframes tab-fade-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 @keyframes ht-flash {
   0% { opacity: 0.5; }
   100% { opacity: 1; }
@@ -4745,6 +4745,11 @@ margin-top: 15px;
 }
 
 .hl-ring-svg { width: 100%; height: 100%; }
+/* Ring draw-in (health readiness) — CIRC = 2*PI*48 = 301.59 */
+@media (prefers-reduced-motion: no-preference) {
+  .hl-ring-fill { animation: hl-ring-draw 0.9s var(--ease-out) both; }
+}
+@keyframes hl-ring-draw { from { stroke-dashoffset: 301.59; } }
 
 .hl-ring-label {
   position: absolute;
@@ -5796,6 +5801,202 @@ input.sleep-picker-val:focus {
 @media (max-width: 520px) {
   .htrend-row2 { grid-template-columns: 1fr; }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   Card-content entrance animations.
+   Gated behind `.is-entering` (added to a tab on visit by tabs.js)
+   so data mutations re-render in place WITHOUT replaying every visual.
+   ════════════════════════════════════════════════════════════════ */
+@keyframes hl-row-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes hl-bar-grow { from { width: 0; } }
+@keyframes htbar-grow { from { transform: scaleY(0); } }
+@keyframes hl-spark-draw { to { stroke-dashoffset: 0; } }
+@keyframes hl-cell-pop { from { opacity: 0; transform: scale(0.6); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* ─── Health tab ─── */
+  /* Readiness factor rows — staggered fade/slide */
+  #tab-health.is-entering .hl-factor-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-health.is-entering .hl-factor-row:nth-child(1) { animation-delay: 0.30s; }
+  #tab-health.is-entering .hl-factor-row:nth-child(2) { animation-delay: 0.37s; }
+  #tab-health.is-entering .hl-factor-row:nth-child(3) { animation-delay: 0.44s; }
+  #tab-health.is-entering .hl-factor-row:nth-child(4) { animation-delay: 0.51s; }
+  #tab-health.is-entering .hl-factor-row:nth-child(5) { animation-delay: 0.58s; }
+  #tab-health.is-entering .hl-factor-row:nth-child(6) { animation-delay: 0.65s; }
+
+  /* Nutrition macro rows — fade in, then bars grow from zero */
+  #tab-health.is-entering .nt-macro-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-health.is-entering .nt-macro-row:nth-child(1) { animation-delay: 0.05s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(2) { animation-delay: 0.12s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(3) { animation-delay: 0.19s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(4) { animation-delay: 0.26s; }
+  #tab-health.is-entering .nt-macro-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
+  #tab-health.is-entering .nt-macro-row:nth-child(1) .nt-macro-fill { animation-delay: 0.15s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(2) .nt-macro-fill { animation-delay: 0.22s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(3) .nt-macro-fill { animation-delay: 0.29s; }
+  #tab-health.is-entering .nt-macro-row:nth-child(4) .nt-macro-fill { animation-delay: 0.36s; }
+
+  /* Trend bar charts (sleep/energy/hydration) — grow up, left to right */
+  #tab-health.is-entering .htbar { animation: htbar-grow 0.6s var(--ease-out) both; transform-origin: bottom; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(1) { animation-delay: 0.10s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(2) { animation-delay: 0.16s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(3) { animation-delay: 0.22s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(4) { animation-delay: 0.28s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(5) { animation-delay: 0.34s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(6) { animation-delay: 0.40s; }
+  #tab-health.is-entering .htbar-bars .htbar:nth-child(7) { animation-delay: 0.46s; }
+
+  /* Insights — staggered fade/slide */
+  #tab-health.is-entering .hi-item { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-health.is-entering .hi-item:nth-child(1) { animation-delay: 0.10s; }
+  #tab-health.is-entering .hi-item:nth-child(2) { animation-delay: 0.18s; }
+  #tab-health.is-entering .hi-item:nth-child(3) { animation-delay: 0.26s; }
+  #tab-health.is-entering .hi-item:nth-child(4) { animation-delay: 0.34s; }
+  #tab-health.is-entering .hi-item:nth-child(5) { animation-delay: 0.42s; }
+
+  /* Top metric tiles — draw the sparkline in, staggered across tiles */
+  #tab-health.is-entering .ht-spark-path {
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: hl-spark-draw 0.9s var(--ease-out) both;
+  }
+  #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(1) .ht-spark-path { animation-delay: 0.15s; }
+  #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(2) .ht-spark-path { animation-delay: 0.25s; }
+  #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(3) .ht-spark-path { animation-delay: 0.35s; }
+  #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(4) .ht-spark-path { animation-delay: 0.45s; }
+
+  /* Recovery rows — fade/slide, then bars grow from zero */
+  #tab-health.is-entering .rc-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-health.is-entering .rc-row:nth-child(1) { animation-delay: 0.05s; }
+  #tab-health.is-entering .rc-row:nth-child(2) { animation-delay: 0.12s; }
+  #tab-health.is-entering .rc-row:nth-child(3) { animation-delay: 0.19s; }
+  #tab-health.is-entering .rc-row:nth-child(4) { animation-delay: 0.26s; }
+  #tab-health.is-entering .rc-row:nth-child(5) { animation-delay: 0.33s; }
+  #tab-health.is-entering .rc-row:nth-child(6) { animation-delay: 0.40s; }
+  #tab-health.is-entering .rc-row-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
+  #tab-health.is-entering .rc-row:nth-child(1) .rc-row-fill { animation-delay: 0.15s; }
+  #tab-health.is-entering .rc-row:nth-child(2) .rc-row-fill { animation-delay: 0.22s; }
+  #tab-health.is-entering .rc-row:nth-child(3) .rc-row-fill { animation-delay: 0.29s; }
+  #tab-health.is-entering .rc-row:nth-child(4) .rc-row-fill { animation-delay: 0.36s; }
+  #tab-health.is-entering .rc-row:nth-child(5) .rc-row-fill { animation-delay: 0.43s; }
+  #tab-health.is-entering .rc-row:nth-child(6) .rc-row-fill { animation-delay: 0.50s; }
+
+  /* ─── Habits tab ─── */
+  /* Top metric tiles + overview trend sparklines — draw in */
+  #tab-habits.is-entering .ht-spark-path {
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    animation: hl-spark-draw 0.9s var(--ease-out) both;
+  }
+  #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(1) .ht-spark-path { animation-delay: 0.15s; }
+  #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(2) .ht-spark-path { animation-delay: 0.25s; }
+  #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(3) .ht-spark-path { animation-delay: 0.35s; }
+  #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(4) .ht-spark-path { animation-delay: 0.45s; }
+  #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(5) .ht-spark-path { animation-delay: 0.55s; }
+
+  /* Overview rows — fade/slide, then 30-day bars grow from zero */
+  #tab-habits.is-entering .ht-ov-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(1) { animation-delay: 0.05s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(2) { animation-delay: 0.11s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(3) { animation-delay: 0.17s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(4) { animation-delay: 0.23s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(5) { animation-delay: 0.29s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(6) { animation-delay: 0.35s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(7) { animation-delay: 0.41s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(8) { animation-delay: 0.47s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(9) { animation-delay: 0.53s; }
+  #tab-habits.is-entering .ht-ov-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) 0.2s both; }
+
+  /* Weekly heatmap cells — pop in, column by column (left → right) */
+  #tab-habits.is-entering .ht-wk-cell:not(.future) { animation: hl-cell-pop 0.4s var(--ease-out) both; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(2) { animation-delay: 0.10s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(3) { animation-delay: 0.16s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(4) { animation-delay: 0.22s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(5) { animation-delay: 0.28s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(6) { animation-delay: 0.34s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(7) { animation-delay: 0.40s; }
+  #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(8) { animation-delay: 0.46s; }
+
+  /* Insights mini bar chart — grow up */
+  #tab-habits.is-entering .ht-mini-bar { animation: htbar-grow 0.5s var(--ease-out) both; transform-origin: bottom; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(1) .ht-mini-bar { animation-delay: 0.10s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(2) .ht-mini-bar { animation-delay: 0.16s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(3) .ht-mini-bar { animation-delay: 0.22s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(4) .ht-mini-bar { animation-delay: 0.28s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(5) .ht-mini-bar { animation-delay: 0.34s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(6) .ht-mini-bar { animation-delay: 0.40s; }
+  #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(7) .ht-mini-bar { animation-delay: 0.46s; }
+
+  /* Focus card content — fade/slide in */
+  #tab-habits.is-entering .ht-focus-inner > * { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-habits.is-entering .ht-focus-inner > *:nth-child(1) { animation-delay: 0.10s; }
+  #tab-habits.is-entering .ht-focus-inner > *:nth-child(2) { animation-delay: 0.20s; }
+  #tab-habits.is-entering .ht-focus-inner > *:nth-child(3) { animation-delay: 0.30s; }
+  #tab-habits.is-entering .ht-focus-inner > *:nth-child(4) { animation-delay: 0.40s; }
+
+  /* ─── Home tab (#tab-main) ─── */
+  /* Performance Overview week bars — grow up, left → right */
+  #tab-main.is-entering .po-week-bar { animation: htbar-grow 0.6s var(--ease-out) both; transform-origin: bottom; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(1) { animation-delay: 0.10s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(2) { animation-delay: 0.16s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(3) { animation-delay: 0.22s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(4) { animation-delay: 0.28s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(5) { animation-delay: 0.34s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(6) { animation-delay: 0.40s; }
+  #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(7) { animation-delay: 0.46s; }
+
+  /* Weekly insight cards — staggered fade/slide */
+  #tab-main.is-entering .ins-card { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-main.is-entering .ins-card:nth-child(1) { animation-delay: 0.10s; }
+  #tab-main.is-entering .ins-card:nth-child(2) { animation-delay: 0.18s; }
+  #tab-main.is-entering .ins-card:nth-child(3) { animation-delay: 0.26s; }
+  #tab-main.is-entering .ins-card:nth-child(4) { animation-delay: 0.34s; }
+
+  /* Mood sparkline — lines fade, dots pop */
+  #tab-main.is-entering .mood-spark line { opacity: 0; animation: hl-row-in 0.5s var(--ease-out) 0.2s both; }
+  #tab-main.is-entering .mood-spark circle {
+    transform-box: fill-box; transform-origin: center;
+    animation: hl-cell-pop 0.4s var(--ease-bounce) 0.35s both;
+  }
+
+  /* Today's Plan + Tomorrow goal lists — staggered fade/slide */
+  #tab-main.is-entering .goal-item { opacity: 0; animation: hl-row-in 0.4s var(--ease-out) both; }
+  #tab-main.is-entering .goal-item:nth-child(1) { animation-delay: 0.06s; }
+  #tab-main.is-entering .goal-item:nth-child(2) { animation-delay: 0.12s; }
+  #tab-main.is-entering .goal-item:nth-child(3) { animation-delay: 0.18s; }
+  #tab-main.is-entering .goal-item:nth-child(4) { animation-delay: 0.24s; }
+  #tab-main.is-entering .goal-item:nth-child(5) { animation-delay: 0.30s; }
+  #tab-main.is-entering .goal-item:nth-child(6) { animation-delay: 0.36s; }
+  #tab-main.is-entering .goal-item:nth-child(7) { animation-delay: 0.42s; }
+  #tab-main.is-entering .goal-item:nth-child(n+8) { animation-delay: 0.48s; }
+
+  /* Timeline blocks — staggered fade/slide */
+  #tab-main.is-entering .tl-row { opacity: 0; animation: hl-row-in 0.4s var(--ease-out) both; }
+  #tab-main.is-entering .tl-row:nth-child(1) { animation-delay: 0.06s; }
+  #tab-main.is-entering .tl-row:nth-child(2) { animation-delay: 0.12s; }
+  #tab-main.is-entering .tl-row:nth-child(3) { animation-delay: 0.18s; }
+  #tab-main.is-entering .tl-row:nth-child(4) { animation-delay: 0.24s; }
+  #tab-main.is-entering .tl-row:nth-child(5) { animation-delay: 0.30s; }
+  #tab-main.is-entering .tl-row:nth-child(6) { animation-delay: 0.36s; }
+  #tab-main.is-entering .tl-row:nth-child(n+7) { animation-delay: 0.42s; }
+
+  /* Weather widget rows — staggered fade/slide */
+  #tab-main.is-entering #weatherWidget > div { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(1) { animation-delay: 0.10s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(2) { animation-delay: 0.16s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(3) { animation-delay: 0.22s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(4) { animation-delay: 0.28s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(5) { animation-delay: 0.34s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(6) { animation-delay: 0.40s; }
+  #tab-main.is-entering #weatherWidget > div:nth-child(n+7) { animation-delay: 0.46s; }
+
+  /* Session card — day ring draws in (JS sets dashoffset; no transition on it),
+     plus status + range text fade in */
+  #tab-main.is-entering #dayRingFill { animation: dayring-draw 0.9s var(--ease-out) both; }
+  #tab-main.is-entering .session-status,
+  #tab-main.is-entering .session-range {
+    opacity: 0; animation: hl-row-in 0.5s var(--ease-out) 0.25s both;
+  }
+}
+@keyframes dayring-draw { from { stroke-dashoffset: 326.73; } }
 
 /* ---- Insights (Phase 5) ---- */
 .hi-card { gap: 14px; }
