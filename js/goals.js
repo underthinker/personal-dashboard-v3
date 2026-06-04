@@ -861,7 +861,9 @@
     }
     // Include live session in today's bar so it matches the hero value
     weekFocusMins[todayWeekIdx] += liveFocusMinToday();
-    var weekDeepFlags = weekFocusMins.map(function(m) { return m >= 120; });
+    var focusGoalMin = 240;
+    try { var _gs = JSON.parse(localStorage.getItem('health_settings') || '{}'); focusGoalMin = _gs.focus_goal_min || 240; } catch(e) {}
+    var weekDeepFlags = weekFocusMins.map(function(m) { return m >= focusGoalMin; });
 
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
     var barsEl = $('perfWeekBars');
@@ -925,7 +927,9 @@
 
     // ── Deep work consistency dots ──
     var consistencyCount = weekDeepFlags.filter(Boolean).length;
-    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days with 2h+';
+    var _gh = Math.floor(focusGoalMin / 60), _gm = focusGoalMin % 60;
+    var goalLabel = _gh > 0 ? (_gh + 'h' + (_gm ? ' ' + _gm + 'm' : '') + '+') : focusGoalMin + 'm+';
+    var countEl = $('perfConsistencyCount'); if (countEl) countEl.textContent = consistencyCount + ' of 7 days with ' + goalLabel;
 
     var DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     var dotsEl = $('perfDots');

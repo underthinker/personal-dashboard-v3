@@ -1216,7 +1216,6 @@
     const viewDate = _resolveViewDate();
     const today = getActiveDate();
     const displayEl = $('hlDateDisplay');
-    const pickerEl = $('hlDatePicker');
     const nextBtn = $('hlDateNext');
     if (!displayEl) return;
     if (viewDate === today) {
@@ -1225,14 +1224,128 @@
       const d = new Date(viewDate + 'T00:00:00');
       displayEl.textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     }
-    if (pickerEl) pickerEl.value = viewDate;
     if (nextBtn) nextBtn.disabled = viewDate >= today;
+  }
+
+  // ---- Calendar modal ----
+  let _calMonth, _calYear;
+  let _calEscHandler = null;
+
+  function closeDatePicker() {
+    const bg = $('hlDateModalBg');
+    if (bg) { bg.hidden = true; bg.innerHTML = ''; }
+    if (_calEscHandler) { document.removeEventListener('keydown', _calEscHandler); _calEscHandler = null; }
+  }
+
+  function openDatePicker() {
+    const bg = $('hlDateModalBg');
+    if (!bg) return;
+    const viewDate = _resolveViewDate();
+    const d = new Date(viewDate + 'T00:00:00');
+    _calMonth = d.getMonth();
+    _calYear = d.getFullYear();
+    renderCalendar();
+    bg.hidden = false;
+
+    if (_calEscHandler) document.removeEventListener('keydown', _calEscHandler);
+    _calEscHandler = e => { if (e.key === 'Escape') closeDatePicker(); };
+    document.addEventListener('keydown', _calEscHandler);
+  }
+
+  function renderCalendar() {
+    const bg = $('hlDateModalBg');
+    if (!bg) return;
+    const today = getActiveDate();
+    const viewDate = _resolveViewDate();
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const weekdays = ['S','M','T','W','T','F','S'];
+
+    const firstDay = new Date(_calYear, _calMonth, 1).getDay();
+    const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
+    const daysInPrev = new Date(_calYear, _calMonth, 0).getDate();
+
+    const prevM = _calMonth === 0 ? 11 : _calMonth - 1;
+    const prevY = _calMonth === 0 ? _calYear - 1 : _calYear;
+    const nextM = _calMonth === 11 ? 0 : _calMonth + 1;
+    const nextY = _calMonth === 11 ? _calYear + 1 : _calYear;
+
+    function hasData(dateStr) {
+      try { const v = localStorage.getItem('health:' + dateStr); return v ? Object.keys(JSON.parse(v)).length > 0 : false; }
+      catch (e) { return false; }
+    }
+
+    function dayCls(dateStr, isOther) {
+      let cls = 'hl-date-calendar-day';
+      if (isOther) cls += ' hl-date-calendar-other';
+      if (dateStr > today) return cls + ' hl-date-calendar-disabled';
+      if (!hasData(dateStr)) cls += ' hl-date-calendar-empty';
+      if (dateStr === today) cls += ' hl-date-calendar-today';
+      if (dateStr === viewDate) cls += ' hl-date-calendar-selected';
+      return cls;
+    }
+
+    let grid = '';
+
+    // Weekday headers
+    grid += '<div class="hl-date-calendar-weekdays">';
+    for (const d of weekdays) {
+      grid += `<div class="hl-date-calendar-weekday">${d}</div>`;
+    }
+    grid += '</div>';
+
+    grid += '<div class="hl-date-calendar-grid">';
+
+    // Previous month fill
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = daysInPrev - i;
+      const dateStr = prevY + '-' + String(prevM + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      grid += `<div class="${dayCls(dateStr, true)}" data-cal-date="${dateStr}">${day}</div>`;
+    }
+
+    // Current month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = _calYear + '-' + String(_calMonth + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      grid += `<div class="${dayCls(dateStr, false)}" data-cal-date="${dateStr}">${day}</div>`;
+    }
+
+    // Fill remaining cells with next month dates (always produces 42 cells = 6 rows)
+    const totalCells = firstDay + daysInMonth;
+    for (let day = 1; day <= 42 - totalCells; day++) {
+      const dateStr = nextY + '-' + String(nextM + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+      grid += `<div class="${dayCls(dateStr, true)}" data-cal-date="${dateStr}">${day}</div>`;
+    }
+
+    grid += '</div>';
+
+    bg.innerHTML = `<div class="hl-date-calendar">
+      <div class="hl-date-calendar-header">
+        <button type="button" class="hl-date-calendar-nav" id="hlCalPrev">←</button>
+        <span class="hl-date-calendar-month">${monthNames[_calMonth]} ${_calYear}</span>
+        <button type="button" class="hl-date-calendar-nav" id="hlCalNext">→</button>
+      </div>
+      ${grid}
+    </div>`;
+
+    // Wire day clicks
+    bg.querySelectorAll('[data-cal-date]').forEach(el => {
+      el.addEventListener('click', () => {
+        if (el.dataset.calDate > today) return;
+        _setViewDate(el.dataset.calDate);
+        closeDatePicker();
+        renderHealth();
+      });
+    });
+
+    // Wire month nav
+    $('hlCalPrev').addEventListener('click', () => { _calMonth--; if (_calMonth < 0) { _calMonth = 11; _calYear--; } renderCalendar(); });
+    $('hlCalNext').addEventListener('click', () => { _calMonth++; if (_calMonth > 11) { _calMonth = 0; _calYear++; } renderCalendar(); });
   }
 
   function initDateNav() {
     const prev = $('hlDatePrev');
     const next = $('hlDateNext');
-    const picker = $('hlDatePicker');
+    const display = $('hlDateDisplay');
     if (!prev) return;
 
     prev.addEventListener('click', () => {
@@ -1249,12 +1362,9 @@
       if (newDate <= getActiveDate()) { _setViewDate(newDate); renderHealth(); }
     });
 
-    picker.addEventListener('input', () => {
-      if (picker.value && picker.value <= getActiveDate()) {
-        _setViewDate(picker.value);
-        renderHealth();
-      }
-    });
+    if (display) {
+      display.addEventListener('click', openDatePicker);
+    }
   }
 
   // ---- Main render ----

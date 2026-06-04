@@ -535,8 +535,7 @@
     <div class="hl-date-nav">
       <span class="card-label">READINESS BREAKDOWN</span>
       <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
-      <div class="hl-date-display" id="hlDateDisplay">Today</div>
-      <input type="date" class="hl-date-picker" id="hlDatePicker" aria-label="Pick date">
+      <div class="hl-date-display" id="hlDateDisplay" tabindex="0" role="button" aria-label="Pick date">Today</div>
       <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
     </div>
     <div id="hlSnapshotBody"></div>
@@ -555,6 +554,7 @@
 <div id="recModalBg" class="nt-modal-bg" hidden></div>
 <div id="sleepModalBg" class="nt-modal-bg" hidden></div>
 <div id="hlSettingsModalBg" class="nt-modal-bg" hidden></div>
+<div id="hlDateModalBg" class="nt-modal-bg" hidden></div>
 </div><!-- /tab-health -->
 
 <!-- ═══ TAB: GYM ═══ -->

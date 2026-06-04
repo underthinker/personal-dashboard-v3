@@ -5996,9 +5996,9 @@ margin-top: 15px;
   align-items: center;
   gap: 6px;
   padding: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
-.hl-date-nav > .card-label { margin-right: auto; }
+.hl-date-nav > .card-label { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Header spacing for Health cards that collapse their own gap */
 .htrend-card > .card-head,
@@ -6038,29 +6038,125 @@ margin-top: 15px;
   border-radius: var(--r-sm);
   background: rgba(var(--accent-rgb), 0.08);
   border: 1px solid rgba(var(--accent-rgb), 0.14);
+  cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
+}
+.hl-date-display:hover {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.30);
 }
 
-.hl-date-picker {
-  background: rgba(0,0,0,0.28);
+/* ---------- Date picker calendar modal ---------- */
+.hl-date-calendar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: var(--shadow-lg);
+}
+
+.hl-date-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.hl-date-calendar-header .hl-date-calendar-month {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.hl-date-calendar-nav {
+  background: rgba(255,255,255,0.05);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   color: var(--text);
   font-family: inherit;
   font-size: 11px;
+  font-weight: 600;
   min-height: 28px;
-  padding: 4px 7px;
-  outline: none;
-  color-scheme: dark;
+  width: 28px;
+  padding-inline: 0;
   cursor: pointer;
+  transition: background var(--dur-fast), border-color var(--dur-fast);
 }
 
-@media (max-width: 520px) {
-  .hl-date-nav > .card-label {
-    width: 100%;
-    margin-right: 0;
-  }
+.hl-date-calendar-nav:hover {
+  background: rgba(var(--accent-rgb), 0.10);
+  border-color: rgba(var(--accent-rgb), 0.24);
 }
 
+.hl-date-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.hl-date-calendar-weekday {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.hl-date-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.hl-date-calendar-day {
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  padding: 6px 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast), color var(--dur-fast);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.hl-date-calendar-day:hover {
+  background: rgba(var(--accent-rgb), 0.10);
+}
+
+.hl-date-calendar-day.hl-date-calendar-today {
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: rgba(var(--accent-rgb), 0.20);
+  font-weight: 700;
+}
+
+.hl-date-calendar-day.hl-date-calendar-selected {
+  background: rgba(var(--accent-rgb), 0.18);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+
+.hl-date-calendar-day.hl-date-calendar-other {
+  opacity: 0.7;
+}
+
+.hl-date-calendar-day.hl-date-calendar-empty {
+  color: var(--muted-2);
+}
+
+.hl-date-calendar-day.hl-date-calendar-disabled {
+  color: var(--muted-3);
+  cursor: default;
+  opacity: 0.35;
+  pointer-events: none;
+}
 
 /* ---------- Health: Settings toggle ---------- */
 .hl-settings-toggle {
@@ -6116,7 +6212,7 @@ margin-top: 15px;
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px;
   font-weight: 700;
-  color: var(--muted-2);
+  color: #fff;
   min-width: 34px;
   text-align: right;
   flex-shrink: 0;
