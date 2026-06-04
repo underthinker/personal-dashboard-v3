@@ -17,10 +17,22 @@
   var nameEl = document.querySelector('.su-name');
   var avatarEl = document.querySelector('.su-avatar');
 
+  function resizeName() {
+    nameEl.style.fontSize = '';
+    var max = parseFloat(getComputedStyle(nameEl).fontSize);
+    var min = 14;
+    var step = 1;
+    while ((nameEl.scrollWidth > nameEl.clientWidth) && (max >= min + step)) {
+      max -= step;
+      nameEl.style.fontSize = max + 'px';
+    }
+  }
+
   /* ─── Name ─────────────────────────────────────── */
 
   function loadName() {
     nameEl.textContent = localStorage.getItem(NAME_KEY) || DEFAULT_NAME;
+    resizeName();
   }
 
   var cancelled = false;
@@ -45,6 +57,7 @@
     if (cancelled) { cancelled = false; loadName(); return; }
     if (!text) { loadName(); return; }
     localStorage.setItem(NAME_KEY, text);
+    resizeName();
   });
 
   /* ─── Avatar ───────────────────────────────────── */
