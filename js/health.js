@@ -599,13 +599,13 @@
         <div class="sleep-picker">
           <div class="sleep-picker-col">
             <button type="button" class="sleep-picker-arrow" data-sp-adj="h+1">▲</button>
-            <div class="sleep-picker-val" id="spHour">${hourVal}</div>
+            <input class="sleep-picker-val" id="spHour" type="text" inputmode="numeric" maxlength="2" value="${hourVal}">
             <button type="button" class="sleep-picker-arrow" data-sp-adj="h-1">▼</button>
           </div>
           <div class="sleep-picker-sep">:</div>
           <div class="sleep-picker-col">
             <button type="button" class="sleep-picker-arrow" data-sp-adj="m+1">▲</button>
-            <div class="sleep-picker-val" id="spMin">${pad2(m)}</div>
+            <input class="sleep-picker-val" id="spMin" type="text" inputmode="numeric" maxlength="2" value="${pad2(m)}">
             <button type="button" class="sleep-picker-arrow" data-sp-adj="m-1">▼</button>
           </div>
           ${ampmHtml}
@@ -620,12 +620,51 @@
     bg.hidden = false;
 
     bg.querySelectorAll('[data-sp-adj]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const adj = btn.dataset.spAdj;
-        const type = adj[0];
-        const delta = parseInt(adj.slice(1), 10);
-        _spAdjust(type, delta);
-      });
+      _spSetupArrow(btn);
+    });
+
+    function _spApplyInput(hEl, mEl, use12h) {
+      const hv = hEl.value.replace(/\D/g, '').slice(0, 2);
+      const mv = mEl.value.replace(/\D/g, '').slice(0, 2);
+      if (hv.length === 2) {
+        const n = parseInt(hv, 10);
+        if (use12h) hEl.value = String(Math.max(1, Math.min(12, n)));
+        else hEl.value = pad2(Math.min(23, n));
+        _spH = use12h ? _to24h(parseInt(hEl.value, 10), _spM, $('spAmpm')?.textContent || 'AM').hour : parseInt(hEl.value, 10);
+      }
+      if (mv.length === 2) {
+        mEl.value = pad2(Math.min(59, parseInt(mv, 10)));
+        _spM = parseInt(mEl.value, 10);
+      }
+    }
+
+    const spHour = $('spHour');
+    const spMin = $('spMin');
+    spHour.addEventListener('input', () => _spApplyInput(spHour, spMin, use12h));
+    spMin.addEventListener('input', () => _spApplyInput(spHour, spMin, use12h));
+    spHour.addEventListener('focus', () => spHour.select());
+    spMin.addEventListener('focus', () => spMin.select());
+    spHour.addEventListener('blur', () => {
+      const v = spHour.value.replace(/\D/g, '');
+      if (v) {
+        const n = parseInt(v, 10);
+        if (use12h) spHour.value = String(Math.max(1, Math.min(12, n)));
+        else spHour.value = pad2(Math.min(23, n));
+        _spH = use12h ? _to24h(parseInt(spHour.value, 10), _spM, $('spAmpm')?.textContent || 'AM').hour : parseInt(spHour.value, 10);
+      } else {
+        spHour.value = use12h ? '12' : '00';
+        _spH = use12h ? 0 : 0;
+      }
+    });
+    spMin.addEventListener('blur', () => {
+      const v = spMin.value.replace(/\D/g, '');
+      if (v) {
+        spMin.value = pad2(Math.min(59, parseInt(v, 10)));
+        _spM = parseInt(spMin.value, 10);
+      } else {
+        spMin.value = '00';
+        _spM = 0;
+      }
     });
 
     $('spCancel').addEventListener('click', closeSleepModal);
@@ -658,6 +697,36 @@
     document.addEventListener('keydown', _spEscHandler);
   }
 
+  function _spSetupArrow(btn) {
+    let holdTimer = null;
+    function fire() {
+      const adj = btn.dataset.spAdj;
+      const type = adj[0];
+      const delta = parseInt(adj.slice(1), 10);
+      _spAdjust(type, delta);
+    }
+    function startHold() {
+      const start = Date.now();
+      let interval = 400;
+      fire();
+      holdTimer = setTimeout(function tick() {
+        fire();
+        const elapsed = Date.now() - start;
+        interval = Math.max(50, 400 - elapsed * 0.35);
+        holdTimer = setTimeout(tick, interval);
+      }, 300);
+    }
+    function stopHold() {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    }
+    btn.addEventListener('mousedown', startHold);
+    btn.addEventListener('mouseup', stopHold);
+    btn.addEventListener('mouseleave', stopHold);
+    btn.addEventListener('touchstart', e => { e.preventDefault(); startHold(); });
+    btn.addEventListener('touchend', stopHold);
+    btn.addEventListener('touchcancel', stopHold);
+  }
+
   function _spAdjust(type, delta) {
     if (type === 'h') {
       if (_spSettings.time_format_12h) {
@@ -683,12 +752,12 @@
     const apEl = $('spAmpm');
     if (_spSettings.time_format_12h) {
       const t = _to12h(_spH, _spM);
-      if (hEl) hEl.textContent = t.hour;
+      if (hEl) hEl.value = String(t.hour);
       if (apEl) apEl.textContent = t.ampm;
     } else {
-      if (hEl) hEl.textContent = pad2(_spH);
+      if (hEl) hEl.value = pad2(_spH);
     }
-    if (mEl) mEl.textContent = pad2(_spM);
+    if (mEl) mEl.value = pad2(_spM);
   }
 
   function closeSleepModal() {
@@ -1233,11 +1302,13 @@
   // ---- Calendar modal ----
   let _calMonth, _calYear;
   let _calEscHandler = null;
+  let _calBgHandler = null;
 
   function closeDatePicker() {
     const bg = $('hlDateModalBg');
     if (bg) { bg.hidden = true; bg.innerHTML = ''; }
     if (_calEscHandler) { document.removeEventListener('keydown', _calEscHandler); _calEscHandler = null; }
+    if (_calBgHandler) { document.removeEventListener('click', _calBgHandler); _calBgHandler = null; }
   }
 
   function openDatePicker() {
@@ -1253,6 +1324,10 @@
     if (_calEscHandler) document.removeEventListener('keydown', _calEscHandler);
     _calEscHandler = e => { if (e.key === 'Escape') closeDatePicker(); };
     document.addEventListener('keydown', _calEscHandler);
+
+    if (_calBgHandler) document.removeEventListener('click', _calBgHandler);
+    _calBgHandler = e => { if (e.target === bg) closeDatePicker(); };
+    document.addEventListener('click', _calBgHandler);
   }
 
   function renderCalendar() {

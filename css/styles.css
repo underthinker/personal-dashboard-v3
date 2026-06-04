@@ -4905,12 +4905,35 @@ margin-top: 15px;
   line-height: 1.2;
   user-select: none;
 }
+input.sleep-picker-val {
+  background: transparent;
+  border: none;
+  outline: none;
+  caret-color: var(--text);
+  padding: 0;
+  user-select: auto;
+}
+input.sleep-picker-val:focus {
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+}
 .sleep-picker-sep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   font-size: 36px;
   font-weight: 700;
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color: var(--muted-2);
-  margin-bottom: 28px;
+  line-height: 1.2;
+}
+.sleep-picker-sep::before,
+.sleep-picker-sep::after {
+  content: '';
+  display: block;
+  height: 26px;
+  pointer-events: none;
 }
 .sleep-picker-arrow {
   background: none;
