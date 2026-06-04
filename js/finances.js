@@ -1395,13 +1395,7 @@
     setTimeout(() => {
       renderDashboard(loadData());
       overview.style.transition = 'opacity 0.35s ease';
-      requestAnimationFrame(() => {
-        overview.style.opacity = '1';
-        const newCards = overview.querySelectorAll('.fin-card');
-        newCards.forEach((c, i) => { c.style.setProperty('--i', i); c.classList.add('is-entering'); });
-        const maxDelay = newCards.length * 100;
-        setTimeout(() => { newCards.forEach((c) => c.classList.remove('is-entering')); }, maxDelay + 600);
-      });
+      requestAnimationFrame(() => { overview.style.opacity = '1'; });
     }, 150);
   }
 
@@ -1444,8 +1438,29 @@
   function addIncomeRow(m) { const data = loadData(); const now = new Date(); data.income.push({id: uid(), source: '', amount: 0, tags: [], date: now.getFullYear() + '-' + pad2(m+1) + '-' + pad2(now.getDate())}); saveData(data); renderFinances(); }
   function addExpenseRow(m) { const data = loadData(); const now = new Date(); data.expenses.push({id: uid(), source: '', amount: 0, tags: [], date: now.getFullYear() + '-' + pad2(m+1) + '-' + pad2(now.getDate())}); saveData(data); renderFinances(); }
 
+  function renderMetrics(data) {
+    const el = $('finMetrics');
+    if (!el) return;
+    const months = periodMonths(activePeriod);
+    let totalIncome = 0, totalExpenses = 0;
+    for (let mi = 0; mi < months.length; mi++) {
+      const m = months[mi];
+      totalIncome += monthSum(data.income, m);
+      totalExpenses += monthSum(data.expenses, m);
+    }
+    const net = totalIncome - totalExpenses;
+    const avg = months.length ? Math.round((totalIncome - totalExpenses) / months.length) : 0;
+    const netColor = net >= 0 ? '#5fd687' : '#FF6B6B';
+    const periodLbl = periodShortLabel(activePeriod);
+    el.innerHTML =
+      '<div class="card fin-mc"><div class="fin-mc-head">Total Income</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(totalIncome) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
+      '<div class="card fin-mc"><div class="fin-mc-head">Total Expenses</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(totalExpenses) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
+      '<div class="card fin-mc"><div class="fin-mc-head">Net Savings</div><div class="fin-mc-body"><div><div class="fin-mc-num" style="color:' + netColor + '">' + (net < 0 ? '-' : '') + fmtK(Math.abs(net)) + '</div><div class="fin-mc-sub">' + periodLbl + '</div></div></div></div>' +
+      '<div class="card fin-mc"><div class="fin-mc-head">Monthly Avg</div><div class="fin-mc-body"><div><div class="fin-mc-num">' + fmtK(avg) + '</div><div class="fin-mc-sub">per month</div></div></div></div>';
+  }
+
   function renderFinances() { const data = loadData(); renderDashboard(data); renderIncomeTable(data, activeQuarters.income); renderExpenseTable(data, activeQuarters.expense); bindQuarterBtns(); bindPeriodBtns(); renderGoals(); }
-  function renderDashboard(data) { renderYearlySavings(data); renderIncomeDonut(data); renderExpenseDonut(data); }
+  function renderDashboard(data) { renderMetrics(data); renderYearlySavings(data); renderIncomeDonut(data); renderExpenseDonut(data); }
 
   const GOALS_KEY = 'finance_goals_v1';
 
