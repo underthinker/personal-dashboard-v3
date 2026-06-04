@@ -1392,6 +1392,7 @@
     } catch(e) {}
     return 0;
   }
+  window.liveFocusMinToday = liveFocusMinToday;
 
   function _updateFocusStatUI() {
     var toggle = $('focusStatToggle');

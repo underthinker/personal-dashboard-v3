@@ -277,8 +277,11 @@
     const water = day.water_oz || 0;
     const waterHit = water >= settings.water_goal_oz;
 
-    // Focus
-    const focusMin = day.focus_min || 0;
+    // Focus (include live running session if viewing today)
+    let focusMin = day.focus_min || 0;
+    if (date === getActiveDate() && typeof window.liveFocusMinToday === 'function') {
+      focusMin += window.liveFocusMinToday();
+    }
     const focusHit = focusMin >= settings.focus_goal_min;
 
     function tile(icon, head, num, unit, sub, spark) {
@@ -1386,6 +1389,7 @@
   window.calcReadiness = calcReadiness;
   window.getSettings = getSettings;
   window.renderStatsPanel && window.renderStatsPanel();
+  window.addEventListener('focus-updated', renderHealth);
 
   document.addEventListener('DOMContentLoaded', () => { initDateNav(); });
 })();
