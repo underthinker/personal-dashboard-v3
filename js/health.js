@@ -17,7 +17,7 @@
     } catch (e) { return defaultSettings(); }
   }
   function defaultSettings() {
-    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, carbs_goal_g: 250, fat_goal_g: 75, protein_goal_g: 118, time_format_12h: false, focus_goal_min: 240 };
+    return { water_goal_oz: 64, sleep_goal_hours: 8, calorie_goal: 2200, carbs_goal_g: 250, fat_goal_g: 75, protein_goal_g: 118, time_format_12h: false, focus_goal_min: 120 };
   }
 
   window.getFocusMinToday = function() {

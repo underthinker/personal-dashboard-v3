@@ -861,8 +861,8 @@
     }
     // Include live session in today's bar so it matches the hero value
     weekFocusMins[todayWeekIdx] += liveFocusMinToday();
-    var focusGoalMin = 240;
-    try { var _gs = JSON.parse(localStorage.getItem('health_settings') || '{}'); focusGoalMin = _gs.focus_goal_min || 240; } catch(e) {}
+    var focusGoalMin = 120;
+    try { var _gs = JSON.parse(localStorage.getItem('health_settings') || '{}'); focusGoalMin = _gs.focus_goal_min || 120; } catch(e) {}
     var weekDeepFlags = weekFocusMins.map(function(m) { return m >= focusGoalMin; });
 
     var maxFocus = Math.max.apply(null, weekFocusMins) || 1;
