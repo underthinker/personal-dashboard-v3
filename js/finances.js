@@ -43,20 +43,7 @@
   }
 
   function seedData() {
-    const y = new Date().getFullYear();
     const d = { income: [], expenses: [] };
-    d.income.push({id:1, source:'Acme Inc.', amount:5000, tags:['Salary'], date: y + '-01-09'});
-    d.income.push({id:2, source:'Design Agency', amount:1000, tags:['Freelance'], date: y + '-01-09'});
-    d.income.push({id:3, source:'Brokerage Account', amount:500, tags:['Salary'], date: y + '-01-09'});
-    d.income.push({id:4, source:'Acme Inc.', amount:5000, tags:['Salary'], date: y + '-02-02'});
-    d.income.push({id:5, source:'Digital Store', amount:1000, tags:['Freelance'], date: y + '-02-02'});
-    d.income.push({id:6, source:'Acme Inc.', amount:5000, tags:['Salary'], date: y + '-03-09'});
-    d.income.push({id:7, source:'Design Agency', amount:2500, tags:['Freelance'], date: y + '-03-09'});
-    d.expenses.push({id:1, source:"Joe's Pizza", amount:25, tags:['Dining Out'], date: y + '-01-09'});
-    d.expenses.push({id:2, source:'Mortgage', amount:2500, tags:['Rent/Mortgage'], date: y + '-01-09'});
-    d.expenses.push({id:3, source:'Hydro Inc.', amount:120, tags:['Utilities'], date: y + '-01-09'});
-    d.expenses.push({id:4, source:'Gym Clothes', amount:200, tags:['Retail'], date: y + '-01-09'});
-    d.expenses.push({id:5, source:'Mortgage', amount:2500, tags:['Rent/Mortgage'], date: y + '-02-09'});
     saveData(d);
     return d;
   }
