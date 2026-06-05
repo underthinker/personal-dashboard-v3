@@ -2230,7 +2230,7 @@ margin-top: 15px;
 
 @keyframes row-entrance {
   from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
+  to { opacity: 1; transform: translate3d(0,0,0); }
 }
 
 .fin-cell-inner {
@@ -3667,6 +3667,7 @@ margin-top: 15px;
   min-height: 0;
   overflow-y: auto;
   background: var(--bg-home-deep);
+  scrollbar-gutter: stable;
 }
 
 /* ---------- Section groups (generic tab layout) ---------- */
@@ -5969,7 +5970,7 @@ input.sleep-picker-val:focus {
    Gated behind `.is-entering` (added to a tab on visit by tabs.js)
    so data mutations re-render in place WITHOUT replaying every visual.
    ════════════════════════════════════════════════════════════════ */
-@keyframes hl-row-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes hl-row-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateZ(0); } }
 @keyframes hl-bar-grow { from { width: 0; } }
 @keyframes htbar-grow { from { transform: scaleY(0); } }
 @keyframes hl-spark-draw { to { stroke-dashoffset: 0; } }
@@ -5982,6 +5983,17 @@ input.sleep-picker-val:focus {
 @keyframes hm-check-draw { to { stroke-dashoffset: 0; } }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Entrance-animated text rows stay on their compositing layer after
+     `is-entering` is stripped (tabs.js, 1800ms) so layer demotion doesn't
+     snap subpixel text. Finance rows are exempt — their inline `both`
+     animation is never cleared, so they never demote. */
+  .hl-factor-row, .nt-macro-row, .hi-item, .rc-row,
+  .ht-ov-row, .ht-focus-inner > *,
+  .ins-card, .goal-item, .tl-row,
+  #weatherWidget > div, .session-status, .session-range {
+    transform: translateZ(0);
+  }
+
   /* ─── Health tab ─── */
   /* Readiness factor rows — staggered fade/slide */
   #tab-health.is-entering .hl-factor-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
@@ -6287,7 +6299,7 @@ input.sleep-picker-val:focus {
 /* ─── Card Entry Animation ─── */
 @keyframes card-enter {
   from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateZ(0); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
