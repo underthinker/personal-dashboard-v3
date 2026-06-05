@@ -16,6 +16,8 @@
 <link rel="stylesheet" href="css/styles.css">
 <script>
   (function() {
+    var theme = localStorage.getItem('tweak_theme');
+    if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
     var c = localStorage.getItem('tweak_accent');
     if (c) {
       var r = document.documentElement;
@@ -106,6 +108,10 @@
   </div>
   <div class="topbar-right">
     <span id="topbarDate"></span>
+    <button class="icon-btn" id="themeToggleBtn" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+    </button>
     <button class="icon-btn" id="tweaksToggleBtn" type="button" aria-label="Settings">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 1 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -646,6 +652,14 @@
     </div>
 
     <div class="tweaks-section">
+      <div class="tweaks-section-label">Appearance</div>
+      <div class="tweaks-theme-seg" id="tweaksThemeSeg">
+        <button class="tweaks-theme-btn" data-theme="dark">Dark</button>
+        <button class="tweaks-theme-btn" data-theme="light">Light</button>
+      </div>
+    </div>
+
+    <div class="tweaks-section">
       <div class="tweaks-section-label">Accent Color</div>
       <div class="tweaks-colors" id="tweaksColors">
         <button class="tweaks-color active" style="background:#d1809b" data-color="#d1809b" title="Kanroji"></button>
@@ -738,8 +752,25 @@
     if (e.target === overlay) overlay.classList.remove('open');
   });
 
-  /* Accent colors */
+  /* Theme (light/dark) */
   const root = document.documentElement;
+  const themeSeg = document.getElementById('tweaksThemeSeg');
+  const themeBtns = themeSeg.querySelectorAll('.tweaks-theme-btn');
+  function applyTheme(theme) {
+    if (theme === 'light') root.setAttribute('data-theme', 'light');
+    else root.removeAttribute('data-theme');
+    localStorage.setItem('tweak_theme', theme);
+    themeBtns.forEach(function(b) { b.classList.toggle('active', b.dataset.theme === theme); });
+  }
+  applyTheme(localStorage.getItem('tweak_theme') === 'light' ? 'light' : 'dark');
+  themeBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() { applyTheme(btn.dataset.theme); });
+  });
+  document.getElementById('themeToggleBtn').addEventListener('click', function() {
+    applyTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+
+  /* Accent colors */
   const savedColor = localStorage.getItem('tweak_accent');
   function setAccentRGB(color) {
     const r = parseInt(color.slice(1,3), 16);
