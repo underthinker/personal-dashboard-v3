@@ -30,6 +30,7 @@ UI Aesthetic Polish Progress.md
 .agents/
 .claude/
 .opencode/
+skills-lock.json
 
 # Project notes
 health-tab-plan.md
