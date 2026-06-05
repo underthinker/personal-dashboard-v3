@@ -677,23 +677,44 @@
     var container = document.getElementById('tweaksHealthGoals');
     if (!container) return;
     var settings = loadHealthSettings();
-    var fields = [
-      { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
-      { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
-      { key: 'calorie_goal',     label: 'Calories',      min: 0 },
-      { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
-      { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
-      { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
-      { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
+    var groups = [
+      {
+        label: 'Hydration & Sleep',
+        fields: [
+          { key: 'water_goal_oz',    label: 'Water (oz)',    min: 0 },
+          { key: 'sleep_goal_hours', label: 'Sleep (hrs)',   min: 0, step: 0.5 },
+        ]
+      },
+      {
+        label: 'Nutrition',
+        fields: [
+          { key: 'calorie_goal',     label: 'Calories',      min: 0 },
+          { key: 'carbs_goal_g',     label: 'Carbs (g)',     min: 0 },
+          { key: 'fat_goal_g',       label: 'Fat (g)',       min: 0 },
+          { key: 'protein_goal_g',   label: 'Protein (g)',   min: 0 },
+        ]
+      },
+      {
+        label: 'Wellness',
+        fields: [
+          { key: 'focus_goal_min',   label: 'Focus (min)',   min: 0 },
+        ]
+      },
     ];
-    container.innerHTML = fields.map(function(f) {
+    function renderField(f) {
       return '<div class="setup-field">' +
         '<label class="setup-label">' + f.label + '</label>' +
         '<input type="number" class="setup-input hl-settings-mono-input" data-key="' + f.key + '"' +
           ' value="' + (settings[f.key] !== undefined ? settings[f.key] : '') + '" min="' + f.min + '"' +
           (f.step ? ' step="' + f.step + '"' : '') + '>' +
         '</div>';
-    }).join('');
+    }
+    var html = '';
+    groups.forEach(function(g) {
+      html += '<div class="tweaks-sub-label">' + g.label + '</div>';
+      html += '<div class="hl-settings-subgrid">' + g.fields.map(renderField).join('') + '</div>';
+    });
+    container.innerHTML = html;
     container.querySelectorAll('.hl-settings-mono-input').forEach(function(input) {
       input.addEventListener('change', function() {
         saveHealthSetting(this.dataset.key, parseFloat(this.value) || 0);
