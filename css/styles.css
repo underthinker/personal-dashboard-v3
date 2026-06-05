@@ -5907,6 +5907,12 @@ input.sleep-picker-val:focus {
 @keyframes hl-spark-draw { to { stroke-dashoffset: 0; } }
 @keyframes hl-cell-pop { from { opacity: 0; transform: scale(0.6); } }
 
+/* Consistency bar — grow from 0 on every render */
+@keyframes ht-bar-grow { from { width: 0%; } }
+
+/* Checkmark SVG draw — stroke draws in left→right on tab entry */
+@keyframes hm-check-draw { to { stroke-dashoffset: 0; } }
+
 @media (prefers-reduced-motion: no-preference) {
   /* ─── Health tab ─── */
   /* Readiness factor rows — staggered fade/slide */
@@ -6009,6 +6015,12 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(7) { animation-delay: 0.40s; }
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(8) { animation-delay: 0.46s; }
 
+  /* Checked cell checkmarks — stroke draws in after cell appears */
+  #tab-habits.is-entering .ht-wk-cell.done svg path {
+    stroke-dashoffset: 15;
+    animation: hm-check-draw 0.25s var(--ease-out) 0.15s both;
+  }
+
   /* Insights mini bar chart — grow up */
   #tab-habits.is-entering .ht-mini-bar { animation: htbar-grow 0.5s var(--ease-out) both; transform-origin: bottom; }
   #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(1) .ht-mini-bar { animation-delay: 0.10s; }
@@ -6089,6 +6101,27 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .session-range {
     opacity: 0; animation: hl-row-in 0.5s var(--ease-out) 0.25s both;
   }
+
+  /* Performance bars — Task Completion + Readiness — grow from 0 */
+  #tab-main.is-entering .po-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
+  #tab-main.is-entering .po-metric:nth-child(1) .po-bar-fill { animation-delay: 0.15s; }
+  #tab-main.is-entering .po-metric:nth-child(3) .po-bar-fill { animation-delay: 0.25s; }
+
+  /* Consistency dots — pop in left to right */
+  #tab-main.is-entering .po-dot-wrap { animation: hl-cell-pop 0.4s var(--ease-bounce) both; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(1) { animation-delay: 0.10s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(2) { animation-delay: 0.16s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(3) { animation-delay: 0.22s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(4) { animation-delay: 0.28s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(5) { animation-delay: 0.34s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(6) { animation-delay: 0.40s; }
+  #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(7) { animation-delay: 0.46s; }
+
+  /* Sleep/Water/Protein bars in Habits Mini card — grow from 0 */
+  #tab-main.is-entering .rm-h-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
+  #tab-main.is-entering .rm-h-item:nth-child(1) .rm-h-bar-fill { animation-delay: 0.10s; }
+  #tab-main.is-entering .rm-h-item:nth-child(2) .rm-h-bar-fill { animation-delay: 0.18s; }
+  #tab-main.is-entering .rm-h-item:nth-child(3) .rm-h-bar-fill { animation-delay: 0.26s; }
 }
 @keyframes dayring-draw { from { stroke-dashoffset: 326.73; } }
 
@@ -6194,15 +6227,15 @@ input.sleep-picker-val:focus {
     animation: card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .home-grid .card:nth-child(1)  { animation-delay:   0ms; }
-  .home-grid .card:nth-child(2)  { animation-delay:  50ms; }
-  .home-grid .card:nth-child(3)  { animation-delay: 100ms; }
-  .home-grid .card:nth-child(4)  { animation-delay: 150ms; }
-  .home-grid .card:nth-child(5)  { animation-delay: 200ms; }
-  .home-grid .card:nth-child(6)  { animation-delay: 250ms; }
-  .home-grid .card:nth-child(7)  { animation-delay: 300ms; }
-  .home-grid .card:nth-child(8)  { animation-delay: 350ms; }
-  .home-grid .card:nth-child(9)  { animation-delay: 400ms; }
-  .home-grid .card:nth-child(10) { animation-delay: 450ms; }
+  .home-grid .card:nth-child(2)  { animation-delay:  25ms; }
+  .home-grid .card:nth-child(3)  { animation-delay:  50ms; }
+  .home-grid .card:nth-child(4)  { animation-delay:  75ms; }
+  .home-grid .card:nth-child(5)  { animation-delay: 100ms; }
+  .home-grid .card:nth-child(6)  { animation-delay: 125ms; }
+  .home-grid .card:nth-child(7)  { animation-delay: 150ms; }
+  .home-grid .card:nth-child(8)  { animation-delay: 175ms; }
+  .home-grid .card:nth-child(9)  { animation-delay: 200ms; }
+  .home-grid .card:nth-child(10) { animation-delay: 225ms; }
 }
 
 /* ─── Mobile Tab Bar ─── */
@@ -6824,6 +6857,11 @@ input.sleep-picker-val:focus {
 }
 .ht-wk-cell.future { opacity: 0.22; cursor: default; pointer-events: none; }
 
+/* Base state for checkmark SVG — enables stroke-draw animation on entry */
+.ht-wk-cell.done svg path {
+  stroke-dasharray: 15;
+}
+
 /* Bottom row */
 .ht-bot-row {
   display: grid;
@@ -7095,6 +7133,7 @@ input.sleep-picker-val:focus {
   border-radius: 99px;
   background: var(--accent);
   box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.3);
+  animation: ht-bar-grow 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ht-focus-goal-sub {
