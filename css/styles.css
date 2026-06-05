@@ -7176,11 +7176,6 @@ input.sleep-picker-val:focus {
   font-weight: 500;
   color: var(--text);
 }
-.ht-focus-win-effort {
-  color: var(--muted-2);
-  font-size: 10px;
-}
-
 /* Section 4: Weekly Goal */
 .ht-focus-goal {
   flex-shrink: 0;

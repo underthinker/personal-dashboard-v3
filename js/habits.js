@@ -943,7 +943,9 @@
     });
     var recovery = recoveryPool.slice(0, 3);
 
-    var winPool = habitStats.filter(function(h) { return h.pct30 > 30; });
+    var todayData = getDayData(today);
+    function doneToday(id) { return !!(todayData && todayData.entries && todayData.entries[id]); }
+    var winPool = habitStats.filter(function(h) { return h.pct30 > 30 && !doneToday(h.def.id); });
     winPool.sort(function(a, b) {
       var ea = ESTIMATED_EFFORT[a.def.id] || 5;
       var eb = ESTIMATED_EFFORT[b.def.id] || 5;
@@ -953,7 +955,7 @@
     if (winPool.length < 3) {
       habitStats.forEach(function(h) {
         if (winPool.length >= 3) return;
-        if (winPool.indexOf(h) === -1) winPool.push(h);
+        if (winPool.indexOf(h) === -1 && !doneToday(h.def.id)) winPool.push(h);
       });
     }
     var quickWins = winPool.slice(0, 3);
@@ -1008,11 +1010,6 @@
     return parts.join(' \u00B7 ');
   }
 
-  function effortLabel(id) {
-    var e = ESTIMATED_EFFORT[id];
-    return e ? '~' + e + ' min' : '';
-  }
-
   function renderFocusAreas() {
     var el = $('htFocusBody');
     if (!el) return;
@@ -1064,13 +1061,11 @@
       '<div class="ht-focus-wins-row">';
 
     data.quickWins.forEach(function(h) {
-      var effort = effortLabel(h.def.id);
       html += '<div class="ht-focus-win-item">' +
         '<span class="ht-focus-win-check">' +
           '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         '</span>' +
         '<span class="ht-focus-win-name">' + escHtml(h.def.name) + '</span>' +
-        (effort ? '<span class="ht-focus-win-effort">(' + effort + ')</span>' : '') +
       '</div>';
     });
 
