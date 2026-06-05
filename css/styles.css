@@ -244,11 +244,12 @@ body {
   content: '';
   position: absolute;
   inset: 0;
+  border-radius: 50%;
   background: radial-gradient(circle at 35% 40%, #e6c5b0 0 18%, transparent 19%),
               radial-gradient(circle at 50% 80%, #6b4f5b 0 38%, transparent 39%);
 }
 .su-avatar.has-image::after { display: none; }
-.su-avatar img { border-radius: 50%; }
+.su-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .su-avatar:hover .su-avatar-overlay {
   opacity: 1;
 }
@@ -265,7 +266,7 @@ body {
   transition: opacity 0.15s;
   z-index: 1;
 }
-.su-info { display: flex; flex-direction: column; line-height: 1.4; min-width: 0; overflow: hidden; }
+.su-info { display: flex; flex-direction: column; line-height: 1.4; min-width: 0; }
 .su-name { font-family: var(--font-serif); font-size: 24px; font-weight: 600; font-style: italic; letter-spacing: 0.4px; cursor: text; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .su-name:hover { opacity: 0.75; }
 .su-name[contenteditable="true"] {
