@@ -5869,6 +5869,8 @@ input.sleep-picker-val:focus {
   position: relative;
   overflow: hidden;
   min-height: 3px;
+  transform: translateZ(0);
+  transform-origin: bottom;
 }
 .htbar::after {
   content: '';
@@ -5980,9 +5982,9 @@ input.sleep-picker-val:focus {
    ════════════════════════════════════════════════════════════════ */
 @keyframes hl-row-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateZ(0); } }
 @keyframes hl-bar-grow { from { width: 0; } }
-@keyframes htbar-grow { from { transform: scaleY(0); } }
+@keyframes htbar-grow { from { transform: scaleY(0); } to { transform: scaleY(1) translateZ(0); } }
 @keyframes hl-spark-draw { to { stroke-dashoffset: 0; } }
-@keyframes hl-cell-pop { from { opacity: 0; transform: scale(0.6); } }
+@keyframes hl-cell-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1) translateZ(0); } }
 
 /* Consistency bar — grow from 0 on every render */
 @keyframes ht-bar-grow { from { width: 0%; } }
@@ -6930,6 +6932,7 @@ input.sleep-picker-val:focus {
   background: var(--surface-2); border: 1px solid var(--line);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   color: transparent;
+  transform: translateZ(0);
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .ht-wk-cell:hover:not(.future) { border-color: rgba(var(--accent-rgb), 0.4); }
@@ -7009,7 +7012,7 @@ input.sleep-picker-val:focus {
   align-items: center; justify-content: flex-end;
   height: 100%; gap: 2px;
 }
-.ht-mini-bar { width: 100%; min-height: 2px; border-radius: 2px; }
+.ht-mini-bar { width: 100%; min-height: 2px; border-radius: 2px; transform: translateZ(0); transform-origin: bottom; }
 .ht-mini-bar-lbl { font-size: 8.5px; color: var(--muted-2); flex-shrink: 0; line-height: 1; }
 
 

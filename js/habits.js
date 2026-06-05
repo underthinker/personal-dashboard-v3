@@ -65,6 +65,7 @@
     productive: 15, no_alcohol: 1, go_outside: 5, creativity: 15, no_fap: 1,
   };
   const WEEKLY_TARGET_PCT = 0.8;
+  const TREND_MIN_PCT = 22; // min ~3/14 days to show directional trend
 
   function generateId(name) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -484,9 +485,12 @@
       }
       var prevPct = Math.round((prevDone / 14) * 100);
       var trendDiff = recentPct - prevPct;
+      var trendSuppressed = recentPct < TREND_MIN_PCT && prevPct < TREND_MIN_PCT;
+      if (trendSuppressed) trendDiff = 0;
       var trendColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
       var trendArrow = trendDiff > 0 ? '↑' : trendDiff < 0 ? '↓' : '—';
       var trendStr = trendDiff !== 0 ? (trendDiff > 0 ? '+' : '') + trendDiff + '%' : '0%';
+      var trendTitle = trendSuppressed ? ' title="Insufficient data (min 3 entries in 14 days)"' : '';
       var sparkColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
       var sparkSvg = miniSparklineSvg(pts14, 56, 20, sparkColor);
 
@@ -501,7 +505,7 @@
           '<span class="ht-ov-pct">' + pct30 + '%</span>' +
         '</div>' +
         '<div class="ht-ov-streak">' + streak + ' days</div>' +
-        '<div class="ht-ov-trend">' + sparkSvg + '<span style="color:' + trendColor + '">' + trendArrow + ' ' + trendStr + '</span></div>' +
+        '<div class="ht-ov-trend">' + sparkSvg + '<span style="color:' + trendColor + '"' + trendTitle + '>' + trendArrow + ' ' + trendStr + '</span></div>' +
       '</div>';
     });
 
@@ -916,6 +920,7 @@
       }
       pctPrev = Math.round((pctPrev / 14) * 100);
       var trend = pct14 - pctPrev;
+      if (pct14 < TREND_MIN_PCT && pctPrev < TREND_MIN_PCT) trend = 0;
       var negativeTrend = trend < 0 ? Math.abs(trend) : 0;
       var rMisses = recentMisses(def.id, 7);
       var impactScore = (100 - pct30) + (negativeTrend * 1.5) + (rMisses * 2);
