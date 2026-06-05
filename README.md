@@ -6,7 +6,7 @@ A personal dashboard for goals, finances, habits, health, and daily flow. Zero f
 
 **Home** - Day ring (time-blocked progress), daily goals with drag reorder and streaks, tomorrow planning, performance stats (deep work, completion rate, readiness, weekly chart, 7-day consistency), drag-sortable timeline with recurring blocks and templates, monthly calendar with goal dots, daily insight summaries, mood logging with 30-day sparkline, live weather via OpenWeatherMap.
 
-**Finances** - Income/expense tracking with tags, yearly savings chart, tag-based donut charts, savings goals, tag management, client-side paystub OCR (image or PDF). Views: year, quarterly, month.
+**Finances** - Income/expense tracking with tags, yearly savings chart, tag-based donut charts, savings goals, tag management, client-side paystub OCR (image or PDF). Views: year, quarterly, month. Work in progress.
 
 **Habits** - Default set (journal, exercise, reading, etc.), per-habit consistency and streaks, weekly heatmap, weekly focus suggestions, customizable icons.
 
@@ -55,7 +55,7 @@ js/
   shared.js             ← Utilities (pad2, escHtml, date helpers)
   sidebar.js            ← User name, avatar
   goals.js              ← Home tab
-  finances.js           ← Finances tab
+  finances.js           ← Finances tab (stub)
   habits.js             ← Habits tab
   health.js             ← Health tab
   gym.js                ← Gym tab (stub)
@@ -76,7 +76,7 @@ assets/
 
 **Data sent anywhere?** No. All data stays in `localStorage`. Paystub OCR runs client-side.
 
-**Browser support?** Modern Chrome, Firefox, Safari, Edge.
+**Browser support?** Modern Chrome, Firefox, Safari, Edge, Zen.
 
 ## License
 
