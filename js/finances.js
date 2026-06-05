@@ -35,8 +35,11 @@
     } catch(e) { return seedData(); }
   }
 
-  function saveData(data) {
+  function saveData(data, skipEvent) {
     localStorage.setItem(FINANCES_KEY, JSON.stringify(data));
+    if (!skipEvent) {
+      window.dispatchEvent(new CustomEvent('finances-changed'));
+    }
   }
 
   function seedData() {
@@ -299,7 +302,7 @@
         break;
       }
     }
-    saveData(data);
+    saveData(data, true);
   }
 
   function hideTagPicker() {
@@ -757,6 +760,14 @@
         totalEl.textContent = (periodNet < 0 ? '-' : '') + fmt(Math.abs(periodNet));
       }
     }
+    const hasData = bars.some(function(b) { return b.income > 0 || b.expense > 0; });
+    if (!hasData) {
+      svg.innerHTML = '<text x="240" y="130" text-anchor="middle" fill="var(--muted-2)" font-size="14" font-family="var(--font-mono)">No data for this period</text>';
+      svg.classList.remove('savings-entrance');
+      var ttip = $('savingsTooltip');
+      if (ttip) ttip.classList.remove('is-visible');
+      return;
+    }
     if (months.length === 1) { renderMonthlyWaterfall(data, bars[0]); return; }
     let maxVal = 0, minVal = 0;
     for (let i = 0; i < bars.length; i++) {
@@ -1180,47 +1191,102 @@
 
   // --- Table rendering (income, expense, cell editing) ---
 
+  var finFilterState = { income: { query: '', tag: '' }, expenses: { query: '', tag: '' } };
+
+  function finMatchesFilter(item, filter) {
+    if (filter.query) {
+      var q = filter.query.toLowerCase();
+      if (!(item.source || '').toLowerCase().includes(q)) return false;
+    }
+    if (filter.tag) {
+      if (!(item.tags || []).some(function(t) { return t === filter.tag; })) return false;
+    }
+    return true;
+  }
+
+  function finPopulateTagFilter(scope) {
+    var sel = $(scope === 'income' ? 'finTagFilterIncome' : 'finTagFilterExpense');
+    if (!sel) return;
+    var allTags = getAllTags(scope === 'income' ? 'income' : 'expense');
+    var currentVal = sel.value;
+    sel.innerHTML = '<option value="">All tags</option>';
+    for (var ti = 0; ti < allTags.length; ti++) {
+      var label = allTags[ti].label;
+      var display = getTagDisplayName(label, scope === 'income' ? 'income' : 'expense');
+      sel.innerHTML += '<option value="' + window.escHtml(label) + '">' + window.escHtml(display) + '</option>';
+    }
+    sel.value = currentVal || '';
+  }
+
+  function finBindSearchEvents(scope) {
+    var input = $(scope === 'income' ? 'finSearchIncome' : 'finSearchExpense');
+    var sel = $(scope === 'income' ? 'finTagFilterIncome' : 'finTagFilterExpense');
+    if (input && !input._finBound) {
+      input._finBound = true;
+      input.addEventListener('input', function() {
+        finFilterState[scope].query = input.value;
+        var data = loadData();
+        if (scope === 'income') renderIncomeTable(data, activeQuarters.income);
+        else renderExpenseTable(data, activeQuarters.expense);
+      });
+    }
+    if (sel && !sel._finBound) {
+      sel._finBound = true;
+      sel.addEventListener('change', function() {
+        finFilterState[scope].tag = sel.value;
+        var data = loadData();
+        if (scope === 'income') renderIncomeTable(data, activeQuarters.income);
+        else renderExpenseTable(data, activeQuarters.expense);
+      });
+    }
+    // Restore state
+    if (input) input.value = finFilterState[scope].query;
+    if (sel) sel.value = finFilterState[scope].tag || '';
+  }
+
   function renderTable(data, scope, q) {
-    const isIncome = scope === 'income';
-    const container = $(isIncome ? 'incomeTable' : 'expenseTable');
+    var isIncome = scope === 'income';
+    var container = $(isIncome ? 'incomeTable' : 'expenseTable');
     if (!container) return;
-    const months = periodMonths(q);
-    const items = isIncome ? data.income : data.expenses;
-    const dataKey = isIncome ? 'income' : 'expenses';
-    const tagScope = isIncome ? 'income' : 'expense';
-    const delAttr = isIncome ? 'data-del-income' : 'data-del-expense';
-    const addAttr = isIncome ? 'data-add-income-month' : 'data-add-expense-month';
-    const tableScope = isIncome ? 'income' : 'expenses';
-    const wireScope = isIncome ? 'income' : 'expense';
-    const s = tableSortState[tableScope];
-    const activeCls = (col) => s.col === col ? ' is-sortable is-active' : ' is-sortable';
-    const thSource = '<th style="text-align:left" class="' + activeCls('source') + '" data-sort-col="source" data-sort-scope="' + tableScope + '">Source' + sortIcon(tableScope, 'source') + '</th>';
-    const thAmount = '<th class="' + activeCls('amount') + '" data-sort-col="amount" data-sort-scope="' + tableScope + '">Amount' + sortIcon(tableScope, 'amount') + '</th>';
-    const thTags = '<th class="' + activeCls('tags') + '" data-sort-col="tags" data-sort-scope="' + tableScope + '">Tags' + sortIcon(tableScope, 'tags') + '</th>';
-    const thDate = '<th class="' + activeCls('date') + '" data-sort-col="date" data-sort-scope="' + tableScope + '">Date' + sortIcon(tableScope, 'date') + '</th>';
-    let html = '';
-    for (let mi = 0; mi < months.length; mi++) {
-      const m = months[mi];
-      const filtered = getSortItems(items.filter((item) => monthIdx(item.date) === m), tableScope);
-      let sum = 0;
-      for (let i = 0; i < filtered.length; i++) sum += filtered[i].amount;
+    var months = periodMonths(q);
+    var allItems = isIncome ? data.income : data.expenses;
+    var filter = finFilterState[isIncome ? 'income' : 'expenses'];
+    var items = allItems.filter(function(item) { return finMatchesFilter(item, filter); });
+    var dataKey = isIncome ? 'income' : 'expenses';
+    var tagScope = isIncome ? 'income' : 'expense';
+    var delAttr = isIncome ? 'data-del-income' : 'data-del-expense';
+    var addAttr = isIncome ? 'data-add-income-month' : 'data-add-expense-month';
+    var tableScope = isIncome ? 'income' : 'expenses';
+    var wireScope = isIncome ? 'income' : 'expense';
+    var s = tableSortState[tableScope];
+    var activeCls = function(col) { return s.col === col ? ' is-sortable is-active' : ' is-sortable'; };
+    var thSource = '<th style="text-align:left" class="' + activeCls('source') + '" data-sort-col="source" data-sort-scope="' + tableScope + '">Source' + sortIcon(tableScope, 'source') + '</th>';
+    var thAmount = '<th class="' + activeCls('amount') + '" data-sort-col="amount" data-sort-scope="' + tableScope + '">Amount' + sortIcon(tableScope, 'amount') + '</th>';
+    var thTags = '<th class="' + activeCls('tags') + '" data-sort-col="tags" data-sort-scope="' + tableScope + '">Tags' + sortIcon(tableScope, 'tags') + '</th>';
+    var thDate = '<th class="' + activeCls('date') + '" data-sort-col="date" data-sort-scope="' + tableScope + '">Date' + sortIcon(tableScope, 'date') + '</th>';
+    var html = '';
+    for (var mi = 0; mi < months.length; mi++) {
+      var m = months[mi];
+      var filtered = getSortItems(items.filter(function(item) { return monthIdx(item.date) === m; }), tableScope);
+      var sum = 0;
+      for (var i = 0; i < filtered.length; i++) sum += filtered[i].amount;
       html += '<div class="fin-table-group" data-month="' + m + '">';
       html += '<div class="fin-table-group-header" data-toggle-group="true"><span class="fin-group-arrow">&#9660;</span>' + (m+1) + '. ' + MONTH_NAMES[m] + '<span class="fin-table-group-count">' + filtered.length + '</span></div>';
       html += '<table class="fin-table"><thead><tr>' + thSource + thAmount + thTags + thDate + '<th style="width:30px"></th></tr></thead><tbody>';
-      for (let i = 0; i < filtered.length; i++) {
-        html += '<tr><td style="text-align:left"><div class="fin-cell-inner" data-field="source" data-id="' + filtered[i].id + '">' + escHtml(filtered[i].source) + '</div></td>';
-        html += '<td><div class="fin-cell-inner" data-field="amount" data-id="' + filtered[i].id + '">' + fmt(filtered[i].amount) + '</div></td>';
-        html += '<td><div class="fin-cell-inner" data-field="tags" data-id="' + filtered[i].id + '">' + tagsHtml(filtered[i].tags, tagScope) + '</div></td>';
-        html += '<td><div class="fin-cell-inner" data-field="date" data-id="' + filtered[i].id + '" data-dateval="' + filtered[i].date + '">' + formatDate(filtered[i].date) + '</div></td>';
-        html += '<td style="width:30px"><button class="fin-del-btn" ' + delAttr + '="' + filtered[i].id + '">&times;</button></td></tr>';
+      for (var i2 = 0; i2 < filtered.length; i2++) {
+        html += '<tr><td style="text-align:left"><div class="fin-cell-inner" data-field="source" data-id="' + filtered[i2].id + '">' + escHtml(filtered[i2].source) + '</div></td>';
+        html += '<td><div class="fin-cell-inner" data-field="amount" data-id="' + filtered[i2].id + '">' + fmt(filtered[i2].amount) + '</div></td>';
+        html += '<td><div class="fin-cell-inner" data-field="tags" data-id="' + filtered[i2].id + '">' + tagsHtml(filtered[i2].tags, tagScope) + '</div></td>';
+        html += '<td><div class="fin-cell-inner" data-field="date" data-id="' + filtered[i2].id + '" data-dateval="' + filtered[i2].date + '">' + formatDate(filtered[i2].date) + '</div></td>';
+        html += '<td style="width:30px"><button class="fin-del-btn" ' + delAttr + '="' + filtered[i2].id + '">&times;</button></td></tr>';
       }
       html += '</tbody></table>';
       html += '<div class="fin-table-group-sum">' + fmt(sum) + '</div>';
       html += '<button class="fin-add-row-btn" ' + addAttr + '="' + m + '">&#43; Add</button></div>';
     }
     container.innerHTML = html;
-    const rows = container.querySelectorAll('.fin-table tbody tr');
-    rows.forEach((r, i) => { r.style.animation = 'row-entrance 0.35s var(--ease-out) both'; r.style.animationDelay = (i * 0.025) + 's'; });
+    var rows = container.querySelectorAll('.fin-table tbody tr');
+    rows.forEach(function(r, i) { r.style.animation = 'row-entrance 0.35s var(--ease-out) both'; r.style.animationDelay = (i * 0.025) + 's'; });
     wireTableEdit(container, wireScope);
   }
 
@@ -1438,37 +1504,135 @@
   function addIncomeRow(m) { const data = loadData(); const now = new Date(); data.income.push({id: uid(), source: '', amount: 0, tags: [], date: now.getFullYear() + '-' + pad2(m+1) + '-' + pad2(now.getDate())}); saveData(data); renderFinances(); }
   function addExpenseRow(m) { const data = loadData(); const now = new Date(); data.expenses.push({id: uid(), source: '', amount: 0, tags: [], date: now.getFullYear() + '-' + pad2(m+1) + '-' + pad2(now.getDate())}); saveData(data); renderFinances(); }
 
+  function _finSparkline(pts, w, h, color) {
+    if (!pts || pts.length < 2) return '';
+    var max = Math.max.apply(null, pts), min = Math.min.apply(null, pts);
+    var range = max - min || 1, pad = 2;
+    var xStep = (w - 2 * pad) / (pts.length - 1);
+    var d = pts.map(function(v, i) {
+      return (i === 0 ? 'M' : 'L') + (pad + i * xStep).toFixed(1) + ',' +
+        (h - pad - ((v - min) / range) * (h - 2 * pad)).toFixed(1);
+    }).join(' ');
+    return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" class="fin-spark-svg"><path d="' + d + '" pathLength="1" class="fin-spark-path" fill="none" stroke="' + color + '" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  function _dailySums(items, daysBack) {
+    var result = [];
+    var now = new Date();
+    for (var i = daysBack - 1; i >= 0; i--) {
+      var d = new Date(now);
+      d.setDate(d.getDate() - i);
+      var key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      var sum = 0;
+      for (var j = 0; j < items.length; j++) {
+        if (items[j].date === key) sum += items[j].amount;
+      }
+      result.push(sum);
+    }
+    return result;
+  }
+
+  function _trendPct(current, previous) {
+    if (previous === 0 && current === 0) return { pct: 0, dir: 'flat' };
+    if (previous === 0) return { pct: 100, dir: 'up' };
+    var pct = ((current - previous) / previous) * 100;
+    var dir = pct > 1 ? 'up' : pct < -1 ? 'down' : 'flat';
+    return { pct: Math.round(pct), dir: dir };
+  }
+
+  function _trendHtml(pctDir) {
+    var arrow = pctDir.dir === 'up' ? '\u25B2' : pctDir.dir === 'down' ? '\u25BC' : '\u25C6';
+    var cls = 'is-' + pctDir.dir;
+    var label = pctDir.dir === 'flat' ? '\u2013' : Math.abs(pctDir.pct) + '%';
+    return '<span class="fin-trend ' + cls + '">' + arrow + ' ' + label + '</span>';
+  }
+
   function renderMetrics(data) {
-    const el = $('finMetrics');
+    var el = $('finMetrics');
     if (!el) return;
-    const months = periodMonths(activePeriod);
-    let totalIncome = 0, totalExpenses = 0;
-    for (let mi = 0; mi < months.length; mi++) {
-      const m = months[mi];
+    var months = periodMonths(activePeriod);
+    var totalIncome = 0, totalExpenses = 0;
+    for (var mi = 0; mi < months.length; mi++) {
+      var m = months[mi];
       totalIncome += monthSum(data.income, m);
       totalExpenses += monthSum(data.expenses, m);
     }
-    const net = totalIncome - totalExpenses;
-    const avg = months.length ? Math.round((totalIncome - totalExpenses) / months.length) : 0;
-    const netColor = net >= 0 ? '#5fd687' : '#FF6B6B';
-    const periodLbl = periodShortLabel(activePeriod);
-    const sw = ' fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
-    const icoIn = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 17l6-6 4 4 7-7"/><path d="M14 7h7v7"/></svg>';
-    const icoOut = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 7l6 6 4-4 7 7"/><path d="M14 17h7v-7"/></svg>';
-    const icoNet = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0M3 8v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5"/><circle cx="16.5" cy="13" r="1"/></svg>';
-    const icoAvg = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 21h18"/><path d="M6 18v-5M12 18V6M18 18v-8"/></svg>';
-    const mc = function (badge, ico, label, num, sub, numStyle) {
-      return '<div class="card fin-mc"><div class="fin-mc-head"><span class="po-badge po-badge-' + badge + '">' + ico + '</span><span class="card-label">' + label + '</span></div>' +
-        '<div class="fin-mc-body"><div><div class="fin-mc-num"' + (numStyle ? ' style="' + numStyle + '"' : '') + '>' + num + '</div><div class="fin-mc-sub">' + sub + '</div></div></div></div>';
+    var net = totalIncome - totalExpenses;
+    var avg = months.length ? Math.round((totalIncome - totalExpenses) / months.length) : 0;
+    var netColor = net >= 0 ? '#5fd687' : '#FF6B6B';
+    var periodLbl = periodShortLabel(activePeriod);
+    var sw = ' fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+    var icoIn = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 17l6-6 4 4 7-7"/><path d="M14 7h7v7"/></svg>';
+    var icoOut = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 7l6 6 4-4 7 7"/><path d="M14 17h7v-7"/></svg>';
+    var icoNet = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v0M3 8v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H5"/><circle cx="16.5" cy="13" r="1"/></svg>';
+    var icoAvg = '<svg viewBox="0 0 24 24" width="12" height="12"' + sw + '><path d="M3 21h18"/><path d="M6 18v-5M12 18V6M18 18v-8"/></svg>';
+
+    // Sparkline data: trailing 7-day daily sums
+    var incDaily = _dailySums(data.income, 7);
+    var expDaily = _dailySums(data.expenses, 7);
+    var netDaily = incDaily.map(function(v, i) { return v - expDaily[i]; });
+    // Monthly avg: trailing 6-month monthly net
+    var netMonthly = [];
+    var now = new Date();
+    for (var mi2 = 5; mi2 >= 0; mi2--) {
+      var d = new Date(now.getFullYear(), now.getMonth() - mi2, 1);
+      var mIdx = d.getMonth();
+      var y = d.getFullYear();
+      var inc = 0, exp = 0;
+      for (var j = 0; j < data.income.length; j++) {
+        if (data.income[j].date.indexOf(y + '-') === 0 && monthIdx(data.income[j].date) === mIdx) inc += data.income[j].amount;
+      }
+      for (var k = 0; k < data.expenses.length; k++) {
+        if (data.expenses[k].date.indexOf(y + '-') === 0 && monthIdx(data.expenses[k].date) === mIdx) exp += data.expenses[k].amount;
+      }
+      netMonthly.push(inc - exp);
+    }
+
+    // Trend: compare trailing 7 days vs prior 7 days
+    var prevIncSum = 0, prevExpSum = 0;
+    var priorDate = new Date(); priorDate.setDate(priorDate.getDate() - 14);
+    var splitDate = new Date(); splitDate.setDate(splitDate.getDate() - 7);
+    function sumBetween(items, from, to) {
+      var s = 0;
+      for (var si = 0; si < items.length; si++) {
+        if (items[si].date >= from && items[si].date < to) s += items[si].amount;
+      }
+      return s;
+    }
+    var todayStr = new Date();
+    var splitStr = splitDate.toISOString().slice(0, 10);
+    var priorStr = priorDate.toISOString().slice(0, 10);
+    var nowStr = new Date(); nowStr.setDate(nowStr.getDate() + 1);
+    var endStr = nowStr.toISOString().slice(0, 10);
+
+    var curIncSum = sumBetween(data.income, splitStr, endStr);
+    prevIncSum = sumBetween(data.income, priorStr, splitStr);
+    var curExpSum = sumBetween(data.expenses, splitStr, endStr);
+    prevExpSum = sumBetween(data.expenses, priorStr, splitStr);
+    var curNetSum = curIncSum - curExpSum;
+    var prevNetSum = prevIncSum - prevExpSum;
+
+    var sparkColor = function(pts, defaultColor) {
+      if (!pts || pts.length < 2) return defaultColor;
+      var avg2 = pts.reduce(function(a, b) { return a + b; }, 0) / pts.length;
+      var last2 = pts[pts.length - 1];
+      return last2 >= avg2 ? defaultColor : 'var(--danger)';
     };
+
+    function mc(badge, ico, label, num, sub, numStyle, sparkPts, sparkColorVal, trendObj) {
+      var sparkHtml = sparkPts ? '<div class="fin-mc-visual">' + _finSparkline(sparkPts, 52, 22, sparkColorVal || 'var(--accent)') + (trendObj ? _trendHtml(trendObj) : '') + '</div>' : '';
+      return '<div class="card fin-mc"><div class="fin-mc-head"><span class="po-badge po-badge-' + badge + '">' + ico + '</span><span class="card-label">' + label + '</span></div>' +
+        '<div class="fin-mc-body"><div><div class="fin-mc-num"' + (numStyle ? ' style="' + numStyle + '"' : '') + '>' + num + '</div><div class="fin-mc-sub">' + sub + '</div></div>' + sparkHtml + '</div></div>';
+    }
+
     el.innerHTML =
-      mc('green', icoIn, 'Total Income', fmtK(totalIncome), periodLbl) +
-      mc('amber', icoOut, 'Total Expenses', fmtK(totalExpenses), periodLbl) +
-      mc('accent', icoNet, 'Net Savings', (net < 0 ? '-' : '') + fmtK(Math.abs(net)), periodLbl, 'color:' + netColor) +
-      mc('blue', icoAvg, 'Monthly Avg', fmtK(avg), 'per month');
+      mc('green', icoIn, 'Total Income', fmtK(totalIncome), periodLbl, '', incDaily, '#5fd687', _trendPct(curIncSum, prevIncSum)) +
+      mc('amber', icoOut, 'Total Expenses', fmtK(totalExpenses), periodLbl, '', expDaily, '#FF6B6B', _trendPct(curExpSum, prevExpSum)) +
+      mc('accent', icoNet, 'Net Savings', (net < 0 ? '-' : '') + fmtK(Math.abs(net)), periodLbl, 'color:' + netColor, netDaily, '#d1809b', _trendPct(curNetSum, prevNetSum)) +
+      mc('blue', icoAvg, 'Monthly Avg', fmtK(avg), 'per month', '', netMonthly, '#5ba8f7', null);
   }
 
-  function renderFinances() { const data = loadData(); renderDashboard(data); renderIncomeTable(data, activeQuarters.income); renderExpenseTable(data, activeQuarters.expense); bindQuarterBtns(); bindPeriodBtns(); renderGoals(); }
+  function renderFinances() { const data = loadData(); renderDashboard(data); renderIncomeTable(data, activeQuarters.income); renderExpenseTable(data, activeQuarters.expense); bindQuarterBtns(); bindPeriodBtns(); renderGoals(); finPopulateTagFilter('income'); finPopulateTagFilter('expense'); finBindSearchEvents('income'); finBindSearchEvents('expense'); }
   function renderDashboard(data) { renderMetrics(data); renderYearlySavings(data); renderIncomeDonut(data); renderExpenseDonut(data); }
 
   const GOALS_KEY = 'finance_goals_v1';
@@ -1745,16 +1909,15 @@
     const nameEl = $('gtName');
     if (nameEl) nameEl.addEventListener('click', () => { const v = prompt('Goal name:', goal.name); if (v === null) return; const trimmed = v.trim(); if (!trimmed) return; goal.name = trimmed; saveGoals(state); renderGoals(); });
     const delBtn = $('gtDelete');
-    if (delBtn) delBtn.addEventListener('click', () => { gtConfirmDelete(state, goal); });
-    function gtConfirmDelete(state, goal) {
-      const overlay = document.createElement('div');
-      overlay.className = 'gt-modal-overlay';
-      overlay.innerHTML = '<div class="gt-modal"><div class="gt-modal-title">Delete goal "' + gtEscape(goal.name) + '"?</div><div class="gt-modal-actions"><button class="gt-btn" id="gtModalCancel">Cancel</button><button class="gt-btn danger" id="gtModalConfirm">Delete</button></div></div>';
-      document.body.appendChild(overlay);
-      $('gtModalConfirm').addEventListener('click', () => { document.body.removeChild(overlay); state.goals = state.goals.filter((x) => x.id !== goal.id); state.activeGoalId = state.goals.length ? state.goals[0].id : null; saveGoals(state); renderGoals(); });
-      $('gtModalCancel').addEventListener('click', () => { document.body.removeChild(overlay); });
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) document.body.removeChild(overlay); });
-    }
+    if (delBtn) delBtn.addEventListener('click', () => {
+      const msg = 'Delete goal "' + gtEscape(goal.name) + '"?';
+      window.showConfirm(msg, () => {
+        state.goals = state.goals.filter((x) => x.id !== goal.id);
+        state.activeGoalId = state.goals.length ? state.goals[0].id : null;
+        saveGoals(state);
+        renderGoals();
+      }, true);
+    });
     const addBtn = $('gtAddAnother');
     if (addBtn) addBtn.addEventListener('click', (e) => { e.stopPropagation(); gtOpenAddForm(state); });
     const editBtn = $('gtEdit');
@@ -2014,16 +2177,50 @@
   window.renderGoals = renderGoals;
   window.renderFinances = renderFinances;
 
-  // --- Sub-view switching (overview / details) ---
-  document.querySelector('.fin-sub-nav')?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.fin-sub-btn');
+  // --- Sub-view switching with fade transition ---
+  var _finViewSwitchTimer = null;
+  function switchFinView(view) {
+    if (_finViewSwitchTimer) { clearTimeout(_finViewSwitchTimer); _finViewSwitchTimer = null; }
+    var views = document.querySelectorAll('.fin-view');
+    var current = null;
+    for (var vi = 0; vi < views.length; vi++) {
+      if (views[vi].style.display !== 'none' && window.getComputedStyle(views[vi]).display !== 'none') {
+        current = views[vi]; break;
+      }
+    }
+    var target = document.getElementById('fin' + view.charAt(0).toUpperCase() + view.slice(1));
+    if (!target || target === current) return;
+    document.querySelectorAll('.fin-sub-btn').forEach(function(b) { b.classList.remove('is-active'); });
+    var activeBtn = document.querySelector('.fin-sub-btn[data-finview="' + view + '"]');
+    if (activeBtn) activeBtn.classList.add('is-active');
+    if (current) {
+      current.style.transition = 'opacity 0.12s ease';
+      current.style.opacity = '0';
+      _finViewSwitchTimer = setTimeout(function() {
+        current.style.display = 'none';
+        target.style.display = '';
+        target.style.opacity = '0';
+        target.style.transition = 'opacity 0.3s ease';
+        requestAnimationFrame(function() { target.style.opacity = '1'; });
+        _finViewSwitchTimer = null;
+      }, 120);
+    } else {
+      target.style.display = '';
+      target.style.opacity = '1';
+    }
+  }
+  document.querySelector('.fin-sub-nav')?.addEventListener('click', function(e) {
+    var btn = e.target.closest('.fin-sub-btn');
     if (!btn) return;
-    const view = btn.getAttribute('data-finview');
-    document.querySelectorAll('.fin-sub-btn').forEach((b) => b.classList.remove('is-active'));
-    btn.classList.add('is-active');
-    document.querySelectorAll('.fin-view').forEach((v) => v.style.display = 'none');
-    const target = document.getElementById('fin' + view.charAt(0).toUpperCase() + view.slice(1));
-    if (target) target.style.display = '';
+    switchFinView(btn.getAttribute('data-finview'));
+  });
+
+  // --- Event-driven reactivity: re-render when data changes externally ---
+  window.addEventListener('finances-changed', function() {
+    var tab = document.getElementById('tab-finances');
+    if (tab && tab.classList.contains('is-visible') && !tab.querySelector('.fin-cell-inner.is-editing')) {
+      renderFinances();
+    }
   });
 
 })();

@@ -1587,6 +1587,22 @@ body {
   line-height: 1; color: var(--text); font-family: var(--font-mono);
 }
 .fin-mc-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.fin-mc-visual { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.fin-spark-svg { display: block; flex-shrink: 0; }
+.fin-trend { font-size: 11px; font-weight: 700; font-family: var(--font-mono); display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.fin-trend.is-up { color: var(--green); }
+.fin-trend.is-down { color: var(--danger); }
+.fin-trend.is-flat { color: var(--muted); }
+
+/* Entrance: sparkline draw-in on tab enter */
+#tab-finances.is-entering .fin-spark-path {
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: hl-spark-draw 0.9s var(--ease-out) both;
+}
+#tab-finances.is-entering .fin-mc:nth-child(1) .fin-spark-path { animation-delay: 0.15s; }
+#tab-finances.is-entering .fin-mc:nth-child(2) .fin-spark-path { animation-delay: 0.25s; }
+#tab-finances.is-entering .fin-mc:nth-child(3) .fin-spark-path { animation-delay: 0.35s; }
+#tab-finances.is-entering .fin-mc:nth-child(4) .fin-spark-path { animation-delay: 0.45s; }
 
 /* ---------- Compact overview dashboard ---------- */
 .finance-dashboard {
@@ -1833,6 +1849,54 @@ margin-top: 15px;
 
 .fin-period-group-children.is-visible {
   display: flex;
+}
+
+/* ---------- Table search / tag filter ---------- */
+.fin-table-search {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 4px;
+  flex-shrink: 0;
+}
+.fin-search-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+}
+.fin-search-input:focus {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.06);
+}
+.fin-search-input::placeholder {
+  color: var(--muted-2);
+}
+.fin-tag-filter {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  max-width: 130px;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+}
+.fin-tag-filter:focus {
+  border-color: var(--accent);
+}
+.fin-tag-filter option {
+  background: var(--surface);
+  color: var(--text);
 }
 
 /* ---------- Quarter bar ---------- */
@@ -2107,13 +2171,38 @@ margin-top: 15px;
   align-items: center;
   outline: none;
   border-radius: 4px;
-  transition: background var(--dur-fast) var(--ease-smooth);
+  transition: background var(--dur-fast) var(--ease-smooth), outline-color var(--dur-fast) var(--ease-smooth);
   cursor: text;
   word-break: break-word;
+  position: relative;
+  outline: 1px solid transparent;
 }
 
 .fin-cell-inner:hover {
-  background: rgba(255,255,255,0.03);
+  background: var(--surface-2);
+  outline-color: var(--line-2);
+}
+
+.fin-cell-inner::after {
+  content: '\u270E';
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: var(--muted-2);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
+  pointer-events: none;
+  font-family: sans-serif;
+}
+
+.fin-cell-inner:hover::after {
+  opacity: 0.5;
+}
+
+.fin-cell-inner.is-editing::after {
+  display: none;
 }
 
 .fin-cell-inner.is-editing {
@@ -2538,17 +2627,21 @@ margin-top: 15px;
 
 /* ---------- Paystub Importer ---------- */
 .ps-import-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; margin-left: auto;
-  background: rgba(107,227,164,0.10);
-  border: 1px solid rgba(107,227,164,0.30);
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; margin-left: auto;
+  background: rgba(107,227,164,0.15);
+  border: 1px solid rgba(107,227,164,0.35);
   color: var(--success);
-  border-radius: 8px; font-size: 12px; font-weight: 600;
+  border-radius: 10px; font-size: 13px; font-weight: 600;
   cursor: pointer; font-family: inherit;
+  transition: all 0.15s ease;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-.ps-import-btn:hover { background: rgba(107,227,164,0.18); }
-.ps-import-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ps-import-btn:hover { background: rgba(107,227,164,0.28); border-color: rgba(107,227,164,0.55); }
+.ps-import-btn:active { transform: scale(0.97); }
+.ps-import-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .ps-icon { flex-shrink: 0; display: inline-block; vertical-align: -2px; }
 
 .ps-warn {
@@ -3322,9 +3415,9 @@ margin-top: 15px;
 
 .gt-chip {
   flex: 0 0 auto; min-width: 180px;
-  background: rgba(255,255,255,0.04);
+  background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--r);
   padding: 12px 14px;
   cursor: pointer;
   display: flex; flex-direction: column; gap: 8px;
@@ -3338,11 +3431,11 @@ margin-top: 15px;
 .gt-chip-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
 .gt-chip-bar-fill { height: 100%; background: var(--success); border-radius: 2px; transition: width 0.45s var(--ease-out); }
 
-.gt-addform { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--line); border-radius: 14px; align-items: center; }
-.gt-input { background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; transition: border-color var(--dur-normal) var(--ease-out); }
+.gt-addform { display: flex; gap: 8px; flex-wrap: wrap; padding: 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); align-items: center; }
+.gt-input { background: rgba(255,255,255,0.05); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 7px 10px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; transition: border-color var(--dur-normal) var(--ease-out); }
 .gt-input:focus { border-color: rgba(255,255,255,0.25); }
 .gt-input.num { font-family: 'JetBrains Mono', monospace; width: 130px; }
-.gt-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; color: var(--text); cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; transition: background var(--dur-normal) var(--ease-out), border-color var(--dur-normal) var(--ease-out); }
+.gt-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 7px 12px; color: var(--text); cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 12px; transition: background var(--dur-normal) var(--ease-out), border-color var(--dur-normal) var(--ease-out); }
 .gt-btn:hover { background: rgba(255,255,255,0.10); }
 .gt-btn.primary { background: rgba(107,227,164,0.15); border-color: rgba(107,227,164,0.35); color: var(--success); }
 .gt-btn.primary:hover { background: rgba(107,227,164,0.22); }
@@ -3416,9 +3509,9 @@ margin-top: 15px;
 .gt-etas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .gt-eta {
-  background: rgba(255,255,255,0.03);
+  background: var(--surface-2);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--r-sm);
   padding: 12px 14px;
   transition: border-color var(--dur-normal) var(--ease-out);
 }
@@ -3476,7 +3569,7 @@ margin-top: 15px;
 }
 
 .gt-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-.gt-modal { background: #1a1a1a; border: 1px solid var(--line); border-radius: 16px; padding: 24px; min-width: 320px; max-width: 400px; box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+.gt-modal { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; min-width: 320px; max-width: 400px; box-shadow: var(--shadow-lg); }
 .gt-modal-title { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--text); margin-bottom: 20px; }
 .gt-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .gt-modal-actions .gt-btn { min-width: 80px; }
