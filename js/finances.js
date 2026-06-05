@@ -2193,6 +2193,8 @@
     document.querySelectorAll('.fin-sub-btn').forEach(function(b) { b.classList.remove('is-active'); });
     var activeBtn = document.querySelector('.fin-sub-btn[data-finview="' + view + '"]');
     if (activeBtn) activeBtn.classList.add('is-active');
+    var periodBar = document.getElementById('financePeriodBar');
+    if (periodBar) { periodBar.style.display = view === 'overview' ? '' : 'none'; }
     if (current) {
       current.style.transition = 'opacity 0.12s ease';
       current.style.opacity = '0';

@@ -322,39 +322,39 @@
   <button class="fin-sub-btn is-active" data-finview="overview">Overview</button>
   <button class="fin-sub-btn" data-finview="goals">Goals</button>
   <button class="fin-sub-btn" data-finview="data">Data</button>
+  <div class="fin-period-bar" data-scope="finance-period" id="financePeriodBar">
+    <button class="fin-qbtn fin-qbtn-standalone" data-period="all">All Year</button>
+    <div class="fin-period-group">
+      <button class="fin-period-group-toggle">Quarter<span class="fin-period-group-arrow">▾</span></button>
+      <div class="fin-period-group-children">
+        <button class="fin-qbtn" data-period="q1">Q1</button>
+        <button class="fin-qbtn" data-period="q2">Q2</button>
+        <button class="fin-qbtn" data-period="q3">Q3</button>
+        <button class="fin-qbtn" data-period="q4">Q4</button>
+      </div>
+    </div>
+    <div class="fin-period-group">
+      <button class="fin-period-group-toggle">Months<span class="fin-period-group-arrow">▾</span></button>
+      <div class="fin-period-group-children">
+        <button class="fin-qbtn" data-period="m0">Jan</button>
+        <button class="fin-qbtn" data-period="m1">Feb</button>
+        <button class="fin-qbtn" data-period="m2">Mar</button>
+        <button class="fin-qbtn" data-period="m3">Apr</button>
+        <button class="fin-qbtn" data-period="m4">May</button>
+        <button class="fin-qbtn" data-period="m5">Jun</button>
+        <button class="fin-qbtn" data-period="m6">Jul</button>
+        <button class="fin-qbtn" data-period="m7">Aug</button>
+        <button class="fin-qbtn" data-period="m8">Sep</button>
+        <button class="fin-qbtn" data-period="m9">Oct</button>
+        <button class="fin-qbtn" data-period="m10">Nov</button>
+        <button class="fin-qbtn" data-period="m11">Dec</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Overview -->
 <div class="fin-view" id="finOverview">
-<div class="fin-period-bar" data-scope="finance-period" id="financePeriodBar">
-  <button class="fin-qbtn fin-qbtn-standalone" data-period="all">All Year</button>
-  <div class="fin-period-group">
-    <button class="fin-period-group-toggle">Quarter<span class="fin-period-group-arrow">▾</span></button>
-    <div class="fin-period-group-children">
-      <button class="fin-qbtn" data-period="q1">Q1</button>
-      <button class="fin-qbtn" data-period="q2">Q2</button>
-      <button class="fin-qbtn" data-period="q3">Q3</button>
-      <button class="fin-qbtn" data-period="q4">Q4</button>
-    </div>
-  </div>
-  <div class="fin-period-group">
-    <button class="fin-period-group-toggle">Months<span class="fin-period-group-arrow">▾</span></button>
-    <div class="fin-period-group-children">
-      <button class="fin-qbtn" data-period="m0">Jan</button>
-      <button class="fin-qbtn" data-period="m1">Feb</button>
-      <button class="fin-qbtn" data-period="m2">Mar</button>
-      <button class="fin-qbtn" data-period="m3">Apr</button>
-      <button class="fin-qbtn" data-period="m4">May</button>
-      <button class="fin-qbtn" data-period="m5">Jun</button>
-      <button class="fin-qbtn" data-period="m6">Jul</button>
-      <button class="fin-qbtn" data-period="m7">Aug</button>
-      <button class="fin-qbtn" data-period="m8">Sep</button>
-      <button class="fin-qbtn" data-period="m9">Oct</button>
-      <button class="fin-qbtn" data-period="m10">Nov</button>
-      <button class="fin-qbtn" data-period="m11">Dec</button>
-    </div>
-  </div>
-</div>
 
 <div class="fin-metrics" id="finMetrics"></div>
 
@@ -400,9 +400,6 @@
 
 <!-- Goals -->
 <div class="fin-view" id="finGoals" style="display:none">
-<div class="card-head" style="margin-bottom:10px">
-  <span class="card-label">Financial Goals</span>
-</div>
 <div class="gt-wrap" id="gtRoot"></div>
 </div>
 

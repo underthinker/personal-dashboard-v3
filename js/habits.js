@@ -236,7 +236,7 @@
   }
 
   function moodHabitCorrelation() {
-    var MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
+    var MOOD_SCALE = { happy: 10, motivated: 9, calm: 8, tired: 6, anxious: 5, frustrated: 4, numb: 3, sad: 1 };
     var defs = getDefinitions().filter(function(d) { return d.active; });
     if (!defs.length) return null;
     var bestCorr = null, bestDiff = 0;
@@ -1557,7 +1557,7 @@
     // Sparkline
     var sparkEl = document.getElementById('moodSparkline');
     if (sparkEl) {
-      const MOOD_SCALE = { motivated: 5, happy: 5, calm: 4, numb: 2, tired: 2, anxious: 2, frustrated: 2, sad: 1 };
+      const MOOD_SCALE = { happy: 10, motivated: 9, calm: 8, tired: 6, anxious: 5, frustrated: 4, numb: 3, sad: 1 };
       const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
       const days = [];
       for (let i = 6; i >= 0; i--) {
@@ -1578,7 +1578,7 @@
         var dayLbl = DAY_NAMES[d.date.getDay()][0];
         labels += '<text x="' + Math.round(x) + '" y="' + labelY + '">' + dayLbl + '</text>';
         if (d.score < 0) { prev = null; return; }
-        var y = h - padBottom - ((d.score - 1) / 4) * (h - padBottom - padTop);
+        var y = h - padBottom - ((d.score - 1) / 9) * (h - padBottom - padTop);
         if (prev) {
           lines += '<line x1="' + Math.round(prev.x) + '" y1="' + Math.round(prev.y) + '" x2="' + Math.round(x) + '" y2="' + Math.round(y) + '"/>';
         }

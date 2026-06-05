@@ -1507,8 +1507,8 @@ body {
 
 /* ---------- Sub-navigation (compact segmented control) ---------- */
 .fin-sub-nav {
-  display: inline-flex;
-  align-self: flex-start;
+  display: flex;
+  align-items: center;
   gap: 2px;
   padding: 3px;
   margin-bottom: 12px;
@@ -1790,8 +1790,9 @@ margin-top: 15px;
 }
 
 .fin-period-bar {
-  margin-bottom: 6px;
+  margin-left: auto;
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
 }
