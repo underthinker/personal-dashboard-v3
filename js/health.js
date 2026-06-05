@@ -564,7 +564,7 @@
     if (!bg) return;
 
     const val = day[field === 'bed' ? 'sleep_bedtime' : 'sleep_waketime'] || '';
-    let h24 = 22, m = 0;
+    let h24 = 0, m = 0;
     if (val) {
       const p = val.split(':');
       h24 = parseInt(p[0], 10);
