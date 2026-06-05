@@ -14,7 +14,7 @@ A personal dashboard for goals, finances, habits, health, and daily flow. Zero f
 
 **Gym** - Work in progress.
 
-**System** - First-run setup (name, city, accent), 9 accent themes, sidebar with custom avatar, mobile responsive, fully offline (except optional weather).
+**System** - First-run setup (name, city, accent), 9 accent themes, light/dark theme toggle, sidebar with custom avatar, mobile responsive, fully offline (except optional weather).
 
 ## Tech Stack
 
@@ -22,7 +22,7 @@ A personal dashboard for goals, finances, habits, health, and daily flow. Zero f
 |-------|--------|
 | Language | Vanilla HTML / CSS / JS (IIFE pattern) |
 | Storage | `localStorage` only |
-| Design | Custom CSS (~6K lines, custom properties) |
+| Design | Custom CSS (~7.2K lines, custom properties, light/dark themes) |
 | Fonts | Geist, JetBrains Mono, Cormorant Garamond (Google Fonts) |
 | Icons | Lucide (CDN) + inline SVGs |
 | OCR | Tesseract.js + PDF.js (`vendor/`) |
@@ -44,13 +44,13 @@ First launch shows a setup overlay (name, city, accent). All optional - configur
 
 ## Data Storage
 
-All data in `localStorage`. Key patterns: `goals:YYYY-MM-DD`, `finances_data_v1`, `habits:*`, `mood:*`, `health:YYYY-MM-DD`, `health_settings`, `po_coach_v1`, `timeline_blocks_v2`, `recurring_blocks_v1`, `schedule_templates_v1`, `weather_config_v1`, `weather_cache_v1`, `tweak_accent`, `sidebar_user_name_v1`, `sidebar_user_avatar_v1`, `goal_streak_v1`, `focus_session_v1`, `dashboard_setup_v1`.
+All data in `localStorage`. Key patterns: `goals:YYYY-MM-DD`, `finances_data_v1`, `habits:*`, `mood:*`, `health:YYYY-MM-DD`, `health_settings`, `po_coach_v1`, `timeline_blocks_v2`, `recurring_blocks_v1`, `schedule_templates_v1`, `weather_config_v1`, `weather_cache_v1`, `tweak_accent`, `tweak_theme`, `sidebar_user_name_v1`, `sidebar_user_avatar_v1`, `goal_streak_v1`, `focus_session_v1`, `dashboard_setup_v1`.
 
 ## Project Structure
 
 ```
-index.html              ← Entry point (~880 lines)
-css/styles.css          ← All styles (~6.2K lines)
+index.html              ← Entry point (~980 lines)
+css/styles.css          ← All styles (~7.2K lines)
 js/
   shared.js             ← Utilities (pad2, escHtml, date helpers)
   sidebar.js            ← User name, avatar
@@ -65,6 +65,7 @@ vendor/
   tesseract/            ← Tesseract.js (OCR)
   pdfjs/                ← PDF.js
   sortable.min.js       ← SortableJS
+  weather-icons/        ← Weather SVGs
 assets/
   avatars/              ← Avatar images per accent
 ```
