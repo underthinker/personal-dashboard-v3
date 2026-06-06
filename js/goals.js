@@ -736,7 +736,103 @@
 
   let drLastFocus = null;
 
+  // ---- Custom time picker (consistent across Chromium / Firefox / Zen) ----
+  const CLOCK_SVG = "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>";
+  let drOpenPop = null;
+
+  function closeTimePop() {
+    if (drOpenPop) { drOpenPop.remove(); drOpenPop = null; }
+  }
+
+  function buildTimeField(input) {
+    const field = document.createElement('div');
+    field.className = 'dr-time-field';
+    input.parentNode.insertBefore(field, input);
+    field.appendChild(input);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'dr-time-clock';
+    btn.setAttribute('aria-label', 'Open time picker');
+    btn.innerHTML = CLOCK_SVG;
+    field.appendChild(btn);
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (drOpenPop && drOpenPop._field === field) { closeTimePop(); return; }
+      closeTimePop();
+      openTimePop(field, input);
+    });
+    return field;
+  }
+
+  function openTimePop(field, input) {
+    const [h24, m] = (input.value || '00:00').split(':').map(Number);
+    let curH = h24 % 12; if (curH === 0) curH = 12;
+    const curAp = h24 < 12 ? 'AM' : 'PM';
+    const curMin = Math.round(m / 5) * 5 % 60;
+
+    const pop = document.createElement('div');
+    pop.className = 'dr-tp';
+    pop._field = field;
+
+    const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+    const mins = Array.from({ length: 12 }, (_, i) => i * 5);
+    const aps = ['AM', 'PM'];
+
+    const state = { h: curH, m: curMin, ap: curAp };
+
+    function commit() {
+      let h = state.h % 12;
+      if (state.ap === 'PM') h += 12;
+      const hh = String(h).padStart(2, '0');
+      const mm = String(state.m).padStart(2, '0');
+      input.value = hh + ':' + mm;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function makeCol(items, key, fmt) {
+      const col = document.createElement('div');
+      col.className = 'dr-tp-col';
+      items.forEach((v) => {
+        const opt = document.createElement('button');
+        opt.type = 'button';
+        opt.className = 'dr-tp-opt';
+        opt.textContent = fmt(v);
+        if (v === state[key]) opt.classList.add('sel');
+        opt.addEventListener('click', () => {
+          state[key] = v;
+          col.querySelectorAll('.dr-tp-opt').forEach((o) => o.classList.remove('sel'));
+          opt.classList.add('sel');
+          commit();
+        });
+        col.appendChild(opt);
+      });
+      return col;
+    }
+
+    const colH = makeCol(hours, 'h', (v) => String(v).padStart(2, '0'));
+    const colM = makeCol(mins, 'm', (v) => String(v).padStart(2, '0'));
+    const colA = makeCol(aps, 'ap', (v) => v);
+    pop.appendChild(colH);
+    pop.appendChild(colM);
+    pop.appendChild(colA);
+
+    field.appendChild(pop);
+    drOpenPop = pop;
+
+    // scroll selected into view
+    pop.querySelectorAll('.dr-tp-opt.sel').forEach((o) => {
+      o.scrollIntoView({ block: 'center' });
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (drOpenPop && !drOpenPop._field.contains(e.target)) closeTimePop();
+  });
+
   function closeDrModal() {
+    closeTimePop();
     drModalBg.classList.remove('show');
     if (drLastFocus) { drLastFocus.focus(); drLastFocus = null; }
   }
@@ -764,6 +860,7 @@
         updateDayBar();
       });
       row.appendChild(startIn);
+      buildTimeField(startIn);
 
       const arrow = document.createElement('span');
       arrow.className = 'dr-block-to';
@@ -781,6 +878,7 @@
         updateDayBar();
       });
       row.appendChild(endIn);
+      buildTimeField(endIn);
 
       drModalBody.appendChild(row);
     });

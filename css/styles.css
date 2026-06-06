@@ -105,7 +105,6 @@
 :root[data-theme="light"] .nt-modal { background: var(--surface); }
 :root[data-theme="light"] .nt-form-input,
 :root[data-theme="light"] .nt-form-select { background: rgba(var(--tint),0.04); }
-:root[data-theme="light"] .nt-form-input[type="time"]::-webkit-calendar-picker-indicator { filter: none; }
 :root[data-theme="light"] .fin-tm-scope-btn.is-active,
 :root[data-theme="light"] .fin-tm-close-btn { background: linear-gradient(180deg, #2a2a30 0%, #1a1a1f 100%); color: #fff; }
 :root[data-theme="light"] .fin-tm-toast { background: rgba(255,255,255,0.97); border: 1px solid var(--line); }
@@ -4757,7 +4756,9 @@ margin-top: 15px;
   font-size: 12px;
   font-weight: 600;
   padding: 6px 8px;
-  width: 96px;
+  width: auto;
+  min-width: 124px;
+  box-sizing: border-box;
   outline: none;
   cursor: pointer;
   transition: border-color var(--dur-fast) var(--ease-smooth),
@@ -4773,11 +4774,117 @@ margin-top: 15px;
   background: rgba(0,0,0,0.40);
 }
 
+/* Hide native picker indicator — custom clock button used in all browsers */
 .dr-time-input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.4;
-  cursor: pointer;
+  display: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
+.dr-time-input::-webkit-datetime-edit { padding: 0; }
+.dr-time-input::-webkit-datetime-edit-text { color: var(--muted-2); padding: 0 1px; }
+.dr-time-input::-webkit-datetime-edit-hour-field,
+.dr-time-input::-webkit-datetime-edit-minute-field,
+.dr-time-input::-webkit-datetime-edit-ampm-field {
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.dr-time-input::-webkit-datetime-edit-hour-field:focus,
+.dr-time-input::-webkit-datetime-edit-minute-field:focus,
+.dr-time-input::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--accent);
+  color: #fff;
+  outline: none;
+}
+
+/* ---------- Custom time picker (cross-browser) ---------- */
+.dr-time-field {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.dr-time-field .dr-time-input {
+  padding-right: 30px;
+}
+.dr-time-clock {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  opacity: 0.55;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: opacity var(--dur-fast) var(--ease-smooth),
+              background var(--dur-fast) var(--ease-smooth);
+}
+.dr-time-clock svg { width: 14px; height: 14px; }
+.dr-time-field:hover .dr-time-clock,
+.dr-time-clock:hover { opacity: 1; }
+.dr-time-clock:hover { background: rgba(var(--tint),0.10); }
+.dr-time-field:has(.dr-tp) .dr-time-clock { opacity: 1; background: var(--accent-soft); }
+.dr-time-field:has(.dr-tp) .dr-time-input { border-color: rgba(var(--tint),0.28); }
+
+.dr-tp {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  gap: 0;
+  padding: 6px;
+  background: var(--surface, rgba(20,20,24,0.96));
+  border: 1px solid var(--line);
+  border-radius: var(--r-md, 12px);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.5);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: dr-tp-in var(--dur-fast) var(--ease-out);
+}
+@keyframes dr-tp-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.dr-tp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 5px;
+  max-height: 168px;
+  overflow-y: auto;
+  scroll-snap-type: y proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--tint),0.18) transparent;
+}
+.dr-tp-col + .dr-tp-col { border-left: 1px solid var(--line); }
+.dr-tp-col::-webkit-scrollbar { width: 4px; }
+.dr-tp-col::-webkit-scrollbar-thumb { background: rgba(var(--tint),0.18); border-radius: 2px; }
+.dr-tp-opt {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  min-width: 44px;
+  color: var(--muted, var(--text));
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: background var(--dur-fast) var(--ease-smooth),
+              color var(--dur-fast) var(--ease-smooth);
+}
+.dr-tp-opt:hover { background: rgba(var(--tint),0.10); color: var(--text); }
+.dr-tp-opt.sel { background: var(--accent); color: #fff; box-shadow: 0 2px 8px var(--accent-soft); }
 
 /* ============================================================
    HEALTH TAB  (hl-* / ql-* / nt-*)
@@ -5609,9 +5716,30 @@ input.sleep-picker-val:focus {
 .nt-form-input:focus { border-color: rgba(var(--tint),0.22); }
 .nt-form-input::placeholder { color: var(--muted-2); }
 .nt-form-input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-  opacity: 0.4;
+  width: 14px;
+  height: 14px;
+  background-color: var(--accent);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E") center / contain no-repeat;
+  opacity: 0.5;
   cursor: pointer;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
+}
+.nt-form-input[type="time"]:hover::-webkit-calendar-picker-indicator,
+.nt-form-input[type="time"]:focus::-webkit-calendar-picker-indicator { opacity: 1; }
+.nt-form-input[type="time"]::-webkit-datetime-edit-text { color: var(--muted-2); padding: 0 1px; }
+.nt-form-input[type="time"]::-webkit-datetime-edit-hour-field,
+.nt-form-input[type="time"]::-webkit-datetime-edit-minute-field,
+.nt-form-input[type="time"]::-webkit-datetime-edit-ampm-field {
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.nt-form-input[type="time"]::-webkit-datetime-edit-hour-field:focus,
+.nt-form-input[type="time"]::-webkit-datetime-edit-minute-field:focus,
+.nt-form-input[type="time"]::-webkit-datetime-edit-ampm-field:focus {
+  background: var(--accent);
+  color: #fff;
+  outline: none;
 }
 
 .nt-form-select {
