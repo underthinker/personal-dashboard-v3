@@ -475,7 +475,7 @@
       var pct30 = completionPct(def.id, 30);
       var streak = streakFor(def.id).current;
 
-      var pts14 = habitSparklinePts(def.id, 14);
+      var pts14 = habitSparklinePts(def.id, 28);
       var recentPct = completionPct(def.id, 14);
       var prevDone = 0;
       for (var k = 14; k < 28; k++) {
