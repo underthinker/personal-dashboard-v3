@@ -359,11 +359,17 @@
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
-  // ---- Throttled render (water rapid-click guard) ----
-  let _lastRender = 0;
-  function _throttledRender() {
-    const now = Date.now();
-    if (now - _lastRender > 200) { _lastRender = now; renderHealth(); }
+  // ---- Surgical DOM update for water (avoid full re-render on rapid click) ----
+  function _updateWaterDOM(date, day, settings) {
+    var numEl = $('qlWaterNum');
+    if (numEl) numEl.textContent = day.water_oz || 0;
+    var pct = Math.min((day.water_oz || 0) / settings.water_goal_oz * 100, 100);
+    var logCard = $('hlLogCard');
+    if (logCard) {
+      var fillEl = logCard.querySelector('.ql-water-fill');
+      if (fillEl) fillEl.style.width = pct.toFixed(1) + '%';
+    }
+    renderMetricRow(date, settings);
   }
 
   // ---- Quick Log ----
@@ -429,7 +435,7 @@
       btn.addEventListener('click', () => {
         day.water_oz = Math.max(0, (day.water_oz || 0) + parseInt(btn.dataset.add, 10));
         saveDay(date, day);
-        _throttledRender();
+        _updateWaterDOM(date, day, getSettings());
       });
     });
 
@@ -441,7 +447,7 @@
         day.water_oz = Math.max(0, (day.water_oz || 0) + val);
         saveDay(date, day);
         customInput.value = '';
-        renderHealth();
+        _updateWaterDOM(date, day, getSettings());
       }
       customInput.addEventListener('blur', _addCustomWater);
       customInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); _addCustomWater(); } });
@@ -1513,7 +1519,11 @@
   window.calcReadiness = calcReadiness;
   window.getSettings = getSettings;
   window.renderStatsPanel && window.renderStatsPanel();
-  window.addEventListener('focus-updated', renderHealth);
+  window.addEventListener('focus-updated', function() {
+    var date = _resolveViewDate();
+    var settings = getSettings();
+    renderMetricRow(date, settings);
+  });
 
   document.addEventListener('DOMContentLoaded', () => { initDateNav(); });
 })();

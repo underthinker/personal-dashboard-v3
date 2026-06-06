@@ -3732,11 +3732,11 @@ margin-top: 15px;
 }
 
 @keyframes ht-flash {
-  0% { opacity: 0.5; }
+  0% { opacity: 0.85; }
   100% { opacity: 1; }
 }
 .ht-flash {
-  animation: ht-flash 0.25s ease-out;
+  animation: ht-flash 0.18s ease-out;
 }
 
 @media (min-width: 1401px) {
