@@ -136,6 +136,11 @@ body {
   line-height: 1.45;
 }
 
+/* ─── Scrollbar (Chromium base — overridden per-element where needed) ─── */
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(var(--tint),0.10); border-radius: 2px; }
+
 /* ─── App Shell ─── */
 .app {
   display: grid;
