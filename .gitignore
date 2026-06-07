@@ -37,3 +37,10 @@ health-tab-plan.md
 
 # Test output
 test-results/
+
+# Node / Vite
+node_modules/
+dist/
+.env
+.env.local
+*.local
