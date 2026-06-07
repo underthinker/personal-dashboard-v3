@@ -1,44 +1,49 @@
-// First-login migration: upload an existing local-only user's data to the cloud.
-// Idempotent via a 'migrated' marker stored in the settings table (so it runs
-// once per account, not once per device).
+// First-login merge-up: upload a device's local-only data to the cloud.
+// Runs once per device per account (local flag), so a second device's unique
+// local data is merged up instead of being silently overwritten by the pull.
+// Must run AFTER pullAll() so shadows mark which keys the cloud already has.
 import { supabase, sbWrite } from '../config/supabase';
 import { readLocal } from '../storage/local';
-import { enqueue } from '../storage/queue';
+import { enqueue, getShadow } from '../storage/queue';
 import { listTrackedLocalKeys } from './mappers';
 
 const MARKER_KEY = 'migrated';
 
-export async function isAccountMigrated(userId: string): Promise<boolean> {
-  if (!supabase) return true;
-  const { data, error } = await supabase
-    .from('settings')
-    .select('key')
-    .eq('user_id', userId)
-    .eq('key', MARKER_KEY)
-    .maybeSingle();
-  if (error) return false;
-  return Boolean(data);
+/** Per-device, per-account flag so every new device merges its local data up. */
+function deviceMigratedKey(userId: string): string {
+  return `__sync_migrated__${userId}`;
+}
+
+export function isDeviceMigrated(userId: string): boolean {
+  return localStorage.getItem(deviceMigratedKey(userId)) === '1';
 }
 
 /**
- * Enqueue every tracked local key as a mutation so the normal push path uploads
- * it, then write the migration marker. Returns number of keys queued.
+ * Upload only the local keys that the pull did NOT reconcile — an empty shadow
+ * means the cloud lacks that key, so it is local-only and must be pushed up.
+ * Cloud-present keys are left exactly as the pull resolved them (cloud has a
+ * real timestamp; legacy local data does not). Returns the number of keys
+ * queued. Must run AFTER pullAll() so shadows are populated.
  */
 export async function migrateLocalData(userId: string): Promise<number> {
   if (!supabase) return 0;
   const keys = listTrackedLocalKeys();
   const now = new Date().toISOString();
+  let queued = 0;
   for (const key of keys) {
     const value = readLocal(key);
     if (value == null) continue;
+    if (await getShadow(key)) continue; // cloud already has it → keep pull result
     await enqueue({ key, value, updatedAt: now });
+    queued++;
   }
-  // Marker is written directly (not via the queue) so re-runs short-circuit.
+  // Account marker kept for back-compat/info; gating is now the device flag.
   await sbWrite!
     .from('settings')
     .upsert(
       { user_id: userId, key: MARKER_KEY, payload: now, updated_at: now, deleted: false },
       { onConflict: 'user_id,key' },
     );
-  return keys.length;
+  localStorage.setItem(deviceMigratedKey(userId), '1');
+  return queued;
 }

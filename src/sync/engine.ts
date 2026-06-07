@@ -26,7 +26,7 @@ import {
   rowsToHabitDefs,
   valueToPayload,
 } from './mappers';
-import { isAccountMigrated, migrateLocalData } from './migration';
+import { isDeviceMigrated, migrateLocalData } from './migration';
 import type { Mutation, SyncStateEvent, SyncStatus, SyncTable } from './types';
 
 const EPOCH = '1970-01-01T00:00:00Z';
@@ -71,9 +71,9 @@ export class SyncEngine {
     window.addEventListener('offline', this.offlineHandler);
 
     try {
-      await this.pullAll(); // also fetches the migration marker if present
-      if (!(await isAccountMigrated(userId))) {
-        await migrateLocalData(userId);
+      await this.pullAll(); // populates shadows for every cloud-present key
+      if (!isDeviceMigrated(userId)) {
+        await migrateLocalData(userId); // merge up only this device's local-only keys
       }
       await this.push();
     } catch (e) {
