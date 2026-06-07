@@ -5054,6 +5054,8 @@ margin-top: 15px;
 }
 
 .hl-ring-svg { width: 100%; height: 100%; transform: scale(1.18); overflow: visible; }
+.hl-ring-track { stroke: rgba(255,255,255,0.06); }
+:root[data-theme="light"] .hl-ring-track { stroke: rgba(var(--tint),0.09); }
 /* Ring draw-in (health readiness) — CIRC = 2*PI*48 = 301.59 */
 @media (prefers-reduced-motion: no-preference) {
   .hl-ring-fill { animation: hl-ring-draw 0.9s var(--ease-out) both; }

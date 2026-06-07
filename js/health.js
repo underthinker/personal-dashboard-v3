@@ -330,7 +330,7 @@
     const pct = readiness != null ? readiness / 100 : 0;
     const ringColor = readiness == null ? 'rgba(255,255,255,0.06)' : 'var(--accent)';
     const ringSvg = `<svg class="hl-ring-svg" viewBox="0 0 124 124" aria-hidden="true">
-      <circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
+      <circle class="hl-ring-track" cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke-width="9"/>
       <circle class="hl-ring-fill" cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ringColor}" stroke-width="9"
         stroke-dasharray="${CIRC.toFixed(2)}"
         stroke-dashoffset="${(CIRC * (1 - pct)).toFixed(2)}"
