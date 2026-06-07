@@ -1207,13 +1207,12 @@ body {
 .mood-pick-icon { width: 18px; height: 18px; object-fit: contain; display: block; }
 
 /* ─── Weather Widget ─── */
-#weatherWidget { flex: 1; display: flex; flex-direction: column; gap: 5px; margin-top: -10px; }
+#weatherWidget { flex: 1; display: flex; flex-direction: column; gap: 4px; margin-top: -10px; }
 .weather-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
-.weather-icon-mid { height: 0; display: flex; justify-content: center; overflow: visible; position: relative; z-index: 1; }
-.weather-icon-mid .weather-icon { transform: translateY(-50%); }
+.weather-icon-mid { display: flex; justify-content: center; align-items: center; margin: -6px 0; }
 .weather-icon {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1221,8 +1220,8 @@ body {
   flex-shrink: 0;
   color: var(--accent);
 }
-.weather-icon svg { display: block; width: 40px; height: 40px; stroke-width: 1.75; }
-.weather-temp { font-family: var(--font-mono); font-size: 30px; font-weight: 700; color: var(--text); }
+.weather-icon svg { display: block; width: 34px; height: 34px; stroke-width: 1.75; }
+.weather-temp { font-family: var(--font-mono); font-size: 27px; font-weight: 700; color: var(--text); }
 .weather-cond { font-size: 14px; font-weight: 600; color: var(--text); }
 .weather-hl { display: flex; justify-content: space-between; font-size: 13px; font-family: var(--font-mono); }
 .weather-sun-row { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); }
@@ -1237,8 +1236,7 @@ body {
   line-height: 1.4;
   margin-top: auto;
   padding: 7px 10px;
-  position: relative;
-  top: 5px;
+  margin-bottom: 4px;
   background: var(--accent-soft);
   border-radius: var(--r-sm);
 }
