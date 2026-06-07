@@ -430,6 +430,9 @@ body {
 
 /* ─── Home grid card containment ─── */
 .home-grid .card { overflow: hidden; min-height: 0; }
+/* Input rows must never be clipped when a grid row is short */
+.home-grid .add-goal { flex-shrink: 0; }
+.home-grid .a-tomorrow > div[style*="flex:1"] { overflow: hidden; }
 /* Performance Overview: spans rows 1+2 — more room to breathe */
 .home-grid .a-stats { gap: 14px; padding: 18px; }
 .home-grid .po-hero { flex: 1; min-height: 0; overflow: hidden; }
@@ -1533,6 +1536,16 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════ */
+/* Laptop tier (e.g. MacBook Pro 14" @ default 1512px): keep dense fit-to-height
+   5-col dashboard but compact padding/gaps so no card content clips. */
+@media (min-width: 1401px) and (max-width: 1620px) {
+  .home-grid { gap: 12px; }
+  .home-grid .card { padding: 14px; gap: 10px; }
+  .home-grid .a-stats { padding: 14px; gap: 10px; }
+  .home-grid .a-activity { padding: 10px; }
+  .home-grid { grid-template-rows: minmax(0, 3fr) minmax(0, 2.4fr) minmax(0, 2.5fr); }
+}
+
 @media (max-width: 1400px) {
   .home-grid {
     grid-template-columns: 1fr 1fr 1fr;
