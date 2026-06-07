@@ -49,14 +49,14 @@
 
   // ----------- Default habit definitions -----------
   const DEFAULT_HABITS = [
-    { id: 'journal', name: 'Journal', icon: 'notebook', active: true },
-    { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
     { id: 'hygiene', name: 'Personal Hygiene', icon: 'sparkles', active: true },
     { id: 'healthy_meals', name: 'Eat healthy meals', icon: 'utensils', active: true },
-    { id: 'no_alcohol', name: 'No Alcohol', icon: 'wine', active: true },
     { id: 'go_outside', name: 'Go outside', icon: 'sun', active: true },
-    { id: 'creativity', name: 'Creativity', icon: 'pen-tool', active: true },
+    { id: 'no_alcohol', name: 'No Alcohol', icon: 'wine', active: true },
     { id: 'no_fap', name: 'No fap', icon: 'ban', active: true },
+    { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
+    { id: 'creativity', name: 'Creativity', icon: 'pen-tool', active: true },
+    { id: 'journal', name: 'Journal', icon: 'notebook', active: true },
     { id: 'reading', name: 'Reading', icon: 'book', active: true },
   ];
 
