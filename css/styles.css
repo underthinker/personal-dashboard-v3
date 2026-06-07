@@ -7036,6 +7036,9 @@ input.sleep-picker-val:focus {
   border-bottom: 1px solid var(--line);
 }
 .ht-ov-row:last-child { border-bottom: none; }
+@media (max-width: 1600px) {
+  .ht-ov-row, .ht-ov-hdr { grid-template-columns: 16px 1fr 90px 70px 120px; }
+}
 .ht-ov-habit { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .ht-ov-icon { flex-shrink: 0; color: var(--muted); }
 .ht-ov-name {
