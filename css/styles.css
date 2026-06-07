@@ -6654,7 +6654,9 @@ input.sleep-picker-val:focus {
   flex-wrap: wrap;
   row-gap: 8px;
 }
-.hl-date-nav > .card-label { margin-right: auto; white-space: nowrap; }
+.hl-date-nav > .card-label { flex: 1 1 100%; white-space: nowrap; }
+.hl-date-prev, .hl-date-next { flex: 0 0 auto; }
+.hl-date-display { flex: 1 1 auto; min-width: 0; }
 
 /* Header spacing for Health cards that collapse their own gap */
 .htrend-card > .card-head,
