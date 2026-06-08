@@ -68,6 +68,16 @@ export class SyncStatusIndicator {
     if (this.lastState) this.update(this.lastState);
   }
 
+  /** Briefly show an error in the pill (e.g. a failed sign-out), then restore. */
+  flashError(text: string): void {
+    if (!this.el || !this.label) return;
+    this.el.dataset.s = 'error';
+    this.label.textContent = `Error: ${text}`;
+    window.setTimeout(() => {
+      if (this.lastState) this.update(this.lastState);
+    }, 4000);
+  }
+
   update(state: SyncStateEvent): void {
     this.lastState = state;
     if (!this.el) return;

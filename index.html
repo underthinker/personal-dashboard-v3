@@ -843,12 +843,14 @@
 
     localStorage.setItem(SETUP_KEY, '1');
     bg.setAttribute('hidden', '');
+    window.dispatchEvent(new CustomEvent('ikigai:setup-done'));
   }
 
   document.getElementById('setupSave').addEventListener('click', saveAndDismiss);
   document.getElementById('setupSkip').addEventListener('click', function() {
     localStorage.setItem(SETUP_KEY, '1');
     bg.setAttribute('hidden', '');
+    window.dispatchEvent(new CustomEvent('ikigai:setup-done'));
   });
 
   document.getElementById('setupName').addEventListener('keydown', function(e) {

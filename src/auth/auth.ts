@@ -19,9 +19,12 @@ function client() {
 /** Begin OAuth flow. Redirects the browser to the provider, then back to origin. */
 export async function signInWithProvider(provider: OAuthProvider): Promise<AuthResult> {
   try {
+    // Return to the current path (minus any query/hash) so OAuth works even when
+    // the app is served from a sub-path, not just the bare origin.
+    const redirectTo = window.location.href.split('?')[0].split('#')[0];
     const { error } = await client().auth.signInWithOAuth({
       provider,
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo },
     });
     if (error) return { ok: false, error: error.message };
     return { ok: true };
@@ -30,9 +33,15 @@ export async function signInWithProvider(provider: OAuthProvider): Promise<AuthR
   }
 }
 
-export async function logout(): Promise<void> {
-  if (!supabase) return;
-  await supabase.auth.signOut();
+export async function logout(): Promise<AuthResult> {
+  if (!supabase) return { ok: true };
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: errMsg(e) };
+  }
 }
 
 export async function getSession(): Promise<Session | null> {

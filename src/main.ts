@@ -22,17 +22,40 @@ function boot(): void {
   // Capture localStorage writes from the legacy modules for the queue.
   installInterceptor((e) => engine.handleCapture(e));
 
+  // Remember when the user chose "Continue offline" so we don't re-prompt the
+  // sign-in overlay on every reload. Cleared on an explicit sign-out.
+  const OFFLINE_OPTOUT_KEY = 'ikigai_offline_optout_v1';
+
   const authScreen = new AuthScreen({
     onOfflineContinue: () => {
-      /* user chose local-only for this session */
+      localStorage.setItem(OFFLINE_OPTOUT_KEY, '1');
     },
   });
 
+  // First-run setup (the inline #setupBg wizard in index.html) must complete
+  // before the sign-in overlay appears. Keys mirror that wizard's storage.
+  const setupPending = (): boolean =>
+    !localStorage.getItem('dashboard_setup_v1') && !localStorage.getItem('sidebar_user_name_v1');
+
+  const showAuthScreen = (): void => {
+    if (localStorage.getItem(OFFLINE_OPTOUT_KEY)) return;
+    if (setupPending()) {
+      window.addEventListener('ikigai:setup-done', () => authScreen.show(), { once: true });
+    } else {
+      authScreen.show();
+    }
+  };
+
   indicator.setHandlers({
     onSignOut: async () => {
-      await logout(); // triggers onAuthChange(null)
+      localStorage.removeItem(OFFLINE_OPTOUT_KEY);
+      const r = await logout(); // on success, triggers onAuthChange(null)
+      if (!r.ok) indicator.flashError(r.error ?? 'Sign out failed.');
     },
-    onSignIn: () => authScreen.show(),
+    onSignIn: () => {
+      localStorage.removeItem(OFFLINE_OPTOUT_KEY);
+      authScreen.show();
+    },
   });
 
   let currentUser: string | null = null;
@@ -45,10 +68,10 @@ function boot(): void {
     } else if (!uid && currentUser) {
       currentUser = null;
       void engine.stop();
-      authScreen.show();
+      showAuthScreen();
     } else if (!uid && !currentUser) {
       // First load, no session: prompt sign-in (offline still available).
-      authScreen.show();
+      showAuthScreen();
     }
   });
 }
