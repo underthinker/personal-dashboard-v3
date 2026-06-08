@@ -32,7 +32,7 @@ function boot(): void {
     onSignOut: async () => {
       await logout(); // triggers onAuthChange(null)
     },
-    onSignIn: () => authScreen.show('login'),
+    onSignIn: () => authScreen.show(),
   });
 
   let currentUser: string | null = null;
@@ -45,10 +45,10 @@ function boot(): void {
     } else if (!uid && currentUser) {
       currentUser = null;
       void engine.stop();
-      authScreen.show('login');
+      authScreen.show();
     } else if (!uid && !currentUser) {
       // First load, no session: prompt sign-in (offline still available).
-      authScreen.show('login');
+      authScreen.show();
     }
   });
 }

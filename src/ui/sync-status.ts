@@ -31,6 +31,7 @@ export class SyncStatusIndicator {
   private action: HTMLButtonElement | null = null;
   private onSignOut: (() => void) | null = null;
   private onSignIn: (() => void) | null = null;
+  private lastState: SyncStateEvent | null = null;
 
   mount(): void {
     if (this.el) return;
@@ -62,9 +63,13 @@ export class SyncStatusIndicator {
   setHandlers(opts: { onSignOut: () => void; onSignIn: () => void }): void {
     this.onSignOut = opts.onSignOut;
     this.onSignIn = opts.onSignIn;
+    // Initial state may have rendered before handlers existed; re-render so the
+    // action button reflects the now-wired handlers.
+    if (this.lastState) this.update(this.lastState);
   }
 
   update(state: SyncStateEvent): void {
+    this.lastState = state;
     if (!this.el) return;
     this.el.dataset.s = state.status;
     const authed = state.status !== 'signedout';
@@ -72,6 +77,10 @@ export class SyncStatusIndicator {
     if (state.status === 'syncing' && state.pending > 0) text = `Syncing ${state.pending}…`;
     if (state.status === 'error' && state.lastError) text = `Error: ${state.lastError}`;
     this.label!.textContent = text;
+    // No handlers wired (Supabase unconfigured) -> hide the action so we never
+    // render a dead "Sign in" button the user can click to no effect.
+    const canAct = authed ? !!this.onSignOut : !!this.onSignIn;
+    this.action!.hidden = !canAct;
     this.action!.textContent = authed ? 'Sign out' : 'Sign in';
     this.action!.dataset.role = authed ? 'out' : 'in';
   }
