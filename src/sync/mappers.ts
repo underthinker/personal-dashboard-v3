@@ -28,6 +28,7 @@ export const SETTINGS_KEYS = new Set<string>([
   'tweak_accent',
   'active_tab',
   'home_macro_slot_v1',
+  'home_layout_v1',
 ]);
 
 const DATE_ENTITY: Record<string, EntryEntity> = {

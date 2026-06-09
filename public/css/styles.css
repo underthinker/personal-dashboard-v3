@@ -7539,3 +7539,175 @@ input.sleep-picker-val:focus {
   .ht-insights-inner { grid-template-columns: 1fr; }
   .ht-insights-right { border-left: none; padding-left: 0; border-top: 1px solid var(--line); padding-top: 14px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   HOME LAYOUT CUSTOMIZATION (GridStack) — desktop only (≥1401px)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Saved custom layout: rendered into the PLAIN CSS grid (no GridStack) ──
+   Explicit grid-column/grid-row is set inline per card by layout.js. The unit
+   row height (--home-cell-h) is sized to the visible fold; rows beyond it flow
+   below and are reached via the .tab-content scroll. Desktop-only — layout.js
+   strips this below 1401px so the responsive named-area stacks take over. */
+.home-grid--custom {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: none;
+  grid-template-areas: none;
+  grid-auto-rows: var(--home-cell-h, 150px);
+  min-height: 100%;
+}
+
+/* ── GridStack coexistence: neutralize the named CSS grid while editing ── */
+.home-grid--gridstack { display: block; min-height: 0; }
+.home-grid--gridstack .grid-stack-item-content {
+  overflow: visible;
+  inset: 0;
+  display: flex;
+}
+.home-grid--gridstack .grid-stack-item-content > .card {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+/* .card already owns overflow:hidden + min-height:0 (governs its own clip). */
+
+/* ── Drag handle (injected per card; hidden unless editing) ── */
+.home-grid .card { position: relative; }
+.card-drag-handle { display: none; }
+body.is-editing-layout .card-drag-handle {
+  display: flex;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: grab;
+  pointer-events: auto;
+  user-select: none;
+}
+body.is-editing-layout .card-drag-handle:active { cursor: grabbing; }
+
+/* ── Edit-mode visuals: clear "mode" signal, inner controls inert ── */
+/* Dim the surrounding chrome so the grid reads as the active surface. */
+body.is-editing-layout .sidebar,
+body.is-editing-layout .topbar { opacity: 0.45; pointer-events: none; transition: opacity 0.2s; }
+body.is-editing-layout .grid-stack-item { cursor: grab; }
+body.is-editing-layout .grid-stack-item-content > .card {
+  outline: 1.5px dashed var(--accent);
+  outline-offset: -3px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+}
+/* Disable inner interactive controls while editing; handle stays live. The
+   GridStack resize grip lives outside .card so it is unaffected. */
+body.is-editing-layout .card * { pointer-events: none; }
+body.is-editing-layout .card-drag-handle { pointer-events: auto; }
+/* Make the SE resize grip visible while editing. */
+body.is-editing-layout .grid-stack-item > .ui-resizable-se {
+  display: block;
+  width: 18px;
+  height: 18px;
+  right: 2px;
+  bottom: 2px;
+  background: none;
+  border-right: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  opacity: 0.8;
+}
+
+/* ── Edit toolbar (fixed; shown only in edit mode) ── */
+.layout-edit-toolbar {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-500, 500);
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.4);
+}
+.layout-edit-toolbar.open { display: flex; }
+.layout-edit-hint { font-size: 12px; color: var(--muted); }
+.layout-edit-toolbar button {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text);
+}
+.layout-edit-reset:hover { border-color: var(--danger); color: var(--danger); }
+.layout-edit-cancel:hover { border-color: var(--line); color: var(--muted); }
+.layout-edit-done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Customize Layout entry (tweaks panel) ── */
+.layout-customize-btn {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.layout-customize-btn:hover { border-color: var(--accent); color: var(--accent); }
+.layout-customize-note { margin-top: 6px; font-size: 11px; color: var(--muted-2); }
+/* Customization is desktop-only — hide entry below the breakpoint. */
+@media (max-width: 1400px) {
+  .tweaks-section--layout { display: none; }
+}
+
+/* ── Fluid text rescaling (container queries) — when cards are resizable
+   (editing) OR rendered at a custom size, so non-desktop stacks are untouched. */
+.home-grid--gridstack .card,
+.home-grid--custom .card { container-type: inline-size; container-name: card; }
+
+.home-grid--gridstack .a-session .pct-num,
+.home-grid--custom .a-session .pct-num { font-size: clamp(22px, 16cqi, 40px); }
+.home-grid--gridstack .a-session .session-status,
+.home-grid--custom .a-session .session-status { font-size: clamp(11px, 4cqi, 14px); }
+.home-grid--gridstack .a-session .cf-task,
+.home-grid--custom .a-session .cf-task { font-size: clamp(12px, 4.5cqi, 15px); }
+
+.home-grid--gridstack .a-stats .po-hero-value,
+.home-grid--custom .a-stats .po-hero-value { font-size: clamp(20px, 7cqi, 38px); }
+.home-grid--gridstack .a-stats .po-metric-val,
+.home-grid--custom .a-stats .po-metric-val { font-size: clamp(14px, 5cqi, 20px); }
+.home-grid--gridstack .a-stats .po-metric-title,
+.home-grid--custom .a-stats .po-metric-title { font-size: clamp(9px, 3cqi, 11px); }
+
+.home-grid--gridstack .a-goals .goal-text,
+.home-grid--gridstack .a-tomorrow .tom-text,
+.home-grid--custom .a-goals .goal-text,
+.home-grid--custom .a-tomorrow .tom-text { font-size: clamp(12px, 4.5cqi, 15px); }
+
+.home-grid--gridstack .a-timeline .tl-content,
+.home-grid--custom .a-timeline .tl-content { font-size: clamp(12px, 4.5cqi, 14px); }
+.home-grid--gridstack .a-timeline .tl-sub,
+.home-grid--gridstack .a-timeline .tl-start,
+.home-grid--custom .a-timeline .tl-sub,
+.home-grid--custom .a-timeline .tl-start { font-size: clamp(10px, 3.5cqi, 12px); }
+
+@container card (max-width: 220px) {
+  .a-stats .po-metric-title { font-size: var(--text-xs); }
+}

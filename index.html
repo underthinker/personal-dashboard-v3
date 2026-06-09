@@ -17,6 +17,8 @@
 <script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
 <link rel="stylesheet" href="vendor/modern-normalize.css">
 <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="vendor/gridstack/gridstack.min.css">
+<link rel="stylesheet" href="vendor/gridstack/gridstack-extra.min.css">
 <script>
   (function() {
     var theme = localStorage.getItem('tweak_theme');
@@ -539,12 +541,26 @@
       <div class="hl-settings-modal-grid" id="tweaksHealthGoals"></div>
     </div>
 
+    <div class="tweaks-section tweaks-section--layout">
+      <div class="tweaks-section-label">Home Layout</div>
+      <button class="layout-customize-btn" id="layoutCustomizeBtn" type="button">Customize Layout</button>
+      <div class="layout-customize-note">Reposition and resize home cards. Desktop only.</div>
+    </div>
+
     <div class="tweaks-section">
       <div class="tweaks-section-label">Account</div>
       <div id="tweaksAccount"></div>
     </div>
 
   </div>
+</div>
+
+<!-- ═══ HOME LAYOUT EDIT TOOLBAR ═══ -->
+<div class="layout-edit-toolbar" id="layoutEditToolbar" role="toolbar" aria-label="Customize home layout">
+  <span class="layout-edit-hint">Drag the handle to move · drag corner to resize</span>
+  <button class="layout-edit-reset" id="layoutResetBtn" type="button">Reset to default</button>
+  <button class="layout-edit-cancel" id="layoutCancelBtn" type="button">Cancel</button>
+  <button class="layout-edit-done" id="layoutDoneBtn" type="button">Done</button>
 </div>
 
 <!-- Tag picker (floats outside main flow) -->
@@ -603,6 +619,10 @@
 <script src="js/gym.js"></script>
 <script src="js/home.js"></script>
 
+<!-- ═══ HOME LAYOUT CUSTOMIZATION (GridStack) ═══ -->
+<script src="vendor/gridstack/gridstack.min.js"></script>
+<script src="js/layout.js"></script>
+
 <!-- ═══ CLOUD SYNC (Vite/TS bundle) ═══ -->
 <script type="module" src="/src/main.ts"></script>
 
@@ -617,6 +637,15 @@
   closeBtn.addEventListener('click', function() { overlay.classList.remove('open'); });
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) overlay.classList.remove('open');
+  });
+
+  /* Customize Layout — hand off to layout.js edit mode */
+  var layoutBtn = document.getElementById('layoutCustomizeBtn');
+  if (layoutBtn) layoutBtn.addEventListener('click', function() {
+    overlay.classList.remove('open');
+    if (window.HomeLayout && typeof window.HomeLayout.setEditMode === 'function') {
+      window.HomeLayout.setEditMode(true);
+    }
   });
 
   /* Theme (light/dark) */
