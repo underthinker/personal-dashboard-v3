@@ -66,6 +66,7 @@
 
   // ---- View date state ----
   let _viewDate = null;
+  let _lastMetricRowHtml = null;
   function _resolveViewDate() { return _viewDate || getActiveDate(); }
   function _setViewDate(dateStr) { _viewDate = dateStr || null; }
 
@@ -297,7 +298,7 @@
       </div>`;
     }
 
-    el.innerHTML =
+    const html =
       tile('heart-pulse', 'READINESS',
         readiness != null ? readiness : '–', readiness != null ? '%' : '',
         readiness != null ? _trendSub(rDiff, '') : 'No data yet',
@@ -314,6 +315,11 @@
         _fmtFocus(focusMin), '',
         `Goal ${_fmtFocus(settings.focus_goal_min)}`,
         _sparkline(focusSeries, 60, 28, focusHit ? 'var(--green)' : 'var(--accent)'));
+
+    if (html === _lastMetricRowHtml) return;
+    _lastMetricRowHtml = html;
+
+    el.innerHTML = html;
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
