@@ -389,6 +389,33 @@ body {
 }
 .card-head { display: flex; align-items: center; justify-content: space-between; }
 
+/* ─── H2: card tiering (uniform surface, border + label weight = hierarchy) ──
+   No fill changes — lighter card patches read muddy on dark. Tier is signaled
+   only by border weight and label color so the surface stays clean.
+   Primary daily-action cards (focus session, goals, timeline, habits) keep the
+   brighter border + accent label = "act here". Ambient reference cards recede
+   with a fainter border and muted labels so accent means action again. */
+.home-grid .a-session,
+.home-grid .a-goals,
+.home-grid .a-timeline,
+.home-grid .a-habits {
+  border-color: var(--line-2);
+}
+.home-grid .a-stats,
+.home-grid .a-activity,
+.home-grid .a-mood,
+.home-grid .a-weather,
+.home-grid .a-calendar {
+  border-color: var(--line);
+}
+.home-grid .a-stats .card-label,
+.home-grid .a-activity .card-label,
+.home-grid .a-mood .card-label,
+.home-grid .a-weather .card-label,
+.home-grid .a-calendar .card-label {
+  color: var(--muted);
+}
+
 /* ─── Pills ─── */
 .pill {
   display: inline-flex;

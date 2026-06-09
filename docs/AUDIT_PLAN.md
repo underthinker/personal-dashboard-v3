@@ -6,6 +6,7 @@ Tracks fixes from the production-readiness audit (2026-06-09).
 - ✅ C1 — XSS: escaped `habits.js:1504` (`def.name`) + `finances.js:1095` (tag `displayName`). Full innerHTML audit done; all other user-data sites already safe (`escHtml`/`gtEscape`/`textContent`).
 - ✅ C3 — render-blocking libs: `defer` on Tesseract + PDF.js; pinned Lucide `@latest`→`@1.17.0`. Sortable/Lucide kept blocking (used at init).
 - ✅ N4 — removed 3 dead empty `card-head` divs + dead `View health` button.
+- ✅ H2 — card tiering: uniform surface (no muddy fill); primary action cards (session/goals/timeline/habits) keep `--line-2` border + accent label, ambient cards (stats/activity/mood/weather/calendar) get `--line` border + `--muted` labels. CSS-only, `styles.css`.
 
 Everything below is **not yet done**.
 
@@ -34,7 +35,7 @@ Everything below is **not yet done**.
 - **Fix**: fold Current Focus / Next Up into the Timeline as a highlighted active row; reclaim Session card for the ring only. Merge the temporal story.
 - **Impact**: faster morning check-in, less eye-bounce. **Difficulty**: Med. **Score 8.**
 
-### H2 — No visual primary action
+### H2 — No visual primary action ✅ DONE
 - **Problem**: every card shares identical chrome (`--surface`/`--line`/`--r`, 10px uppercase accent label). Daily actions (add goal, check task) have no elevation over ambient cards. Accent spent on every label = means nothing.
 - **Fix**: tier the surfaces — primary action cards get stronger border/elevation; reserve accent labels for them; demote ambient (weather/mood/calendar) to muted labels.
 - **Impact**: biggest daily-feel upgrade. **Difficulty**: Low. **Score 8.**
