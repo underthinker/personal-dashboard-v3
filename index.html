@@ -61,7 +61,7 @@
 
   <div class="nav">
     <div class="nav-section-label">Main</div>
-    <button class="nav-item active" data-tab="main">
+    <button class="nav-item active" data-tab="main" aria-current="page">
       <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg>
       Home
       <span class="badge" id="homeBadge">0</span>
@@ -121,7 +121,7 @@
 </header>
 
 <!-- ═══ TAB: HOME ═══ -->
-<div id="tab-main" class="tab-content is-visible">
+<div id="tab-main" class="tab-content is-visible" role="tabpanel">
 
 <div class="home-grid">
 
@@ -172,7 +172,7 @@
     </div>
     <div class="add-goal">
       <input type="text" id="goalInput" placeholder="Add a goal...">
-      <button id="goalAddBtn" class="add-btn">+</button>
+      <button id="goalAddBtn" class="add-btn" type="button" aria-label="Add goal">+</button>
     </div>
     <div id="todayLabel" style="display:none;"></div>
   </div>
@@ -251,7 +251,7 @@
     </div>
     <div class="add-goal">
       <input type="text" id="tomorrowInput" placeholder="Plan ahead...">
-      <button id="tomorrowAddBtn" class="add-btn">+</button>
+      <button id="tomorrowAddBtn" class="add-btn" type="button" aria-label="Add task for tomorrow">+</button>
     </div>
     <div id="tomorrowLabel" style="display:none;"></div>
   </div>
@@ -278,8 +278,8 @@
     <div class="cal-head">
       <span class="cal-month" id="calMonthLabel">May 2026</span>
       <div class="cal-nav">
-        <button id="calPrev">‹</button>
-        <button id="calNext">›</button>
+        <button id="calPrev" type="button" aria-label="Previous month">‹</button>
+        <button id="calNext" type="button" aria-label="Next month">›</button>
       </div>
     </div>
     <div class="cal-grid" id="calGrid"></div>
@@ -320,7 +320,7 @@
 </div><!-- /tab-main -->
 
 <!-- ═══ TAB: FINANCES ═══ -->
-<div id="tab-finances" class="tab-content">
+<div id="tab-finances" class="tab-content" role="tabpanel" aria-hidden="true">
 
   <div class="wip-placeholder">
     <i data-lucide="construction"></i>
@@ -330,7 +330,7 @@
 </div><!-- /tab-finances -->
 
 <!-- ═══ TAB: HABITS ═══ -->
-<div id="tab-habits" class="tab-content">
+<div id="tab-habits" class="tab-content" role="tabpanel" aria-hidden="true">
 
 <div class="section">
 
@@ -403,7 +403,7 @@
 </div><!-- /tab-habits -->
 
 <!-- ═══ TAB: HEALTH ═══ -->
-<div id="tab-health" class="tab-content">
+<div id="tab-health" class="tab-content" role="tabpanel" aria-hidden="true">
 
 <div class="hl-section">
 <div class="hl-metric-row" id="hlMetricRow"></div>
@@ -435,7 +435,7 @@
 </div><!-- /tab-health -->
 
 <!-- ═══ TAB: GYM ═══ -->
-<div id="tab-gym" class="tab-content">
+<div id="tab-gym" class="tab-content" role="tabpanel" aria-hidden="true">
 
   <div class="wip-placeholder">
     <i data-lucide="dumbbell"></i>

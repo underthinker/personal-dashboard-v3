@@ -64,17 +64,20 @@ Everything below is **not yet done**.
 ### M1 — Dual radius + shadow token scales
 - `--r`/`--r-sm` vs `--radius-xl`/`--radius-2xl`/`--radius-full`; 6 shadow tokens. Consolidate to one scale, migrate usages. Low. Score 6.
 
-### M2 — Glow tokens hardcode green
+### M2 — Glow tokens hardcode green ✅ DONE
 - `--shadow-glow-sm`/`-md` = `rgba(107,227,164,…)` (not even a palette token). Won't follow accent theming. Rebind to `--accent-rgb`. Low. Score 6.
+- **Done**: rebound both to `rgba(var(--accent-rgb),…)` (`styles.css:47-48`). Tokens were defined-but-unused, now theme-correct for future use.
 
 ### M3 — Inline styles + `[style*=]` selectors
 - HTML carries `style="flex:1;display:flex…"` on goals/tomorrow bodies; CSS matches `.home-grid .a-tomorrow > div[style*="flex:1"]` (line 437) — fragile substring selector. Promote to real classes. Med. Score 6.
 
-### M4 — Accessibility wiring
+### M4 — Accessibility wiring ✅ DONE
 - `aria-current="page"` on active `.nav-item`; `aria-label` on calendar `‹`/`›` (`#calPrev`/`#calNext`) and bare `+` add buttons; `role="tabpanel"` + `aria-hidden` linking tab panels to nav buttons. Med. Score 6.
+- **Done**: `aria-current="page"` toggled in `tabs.js` (+ initial in HTML); `aria-label` on `#calPrev`/`#calNext` (Previous/Next month), `#goalAddBtn` (Add goal), `#tomorrowAddBtn` (Add task for tomorrow); `role="tabpanel"` on all 5 `.tab-content` with `aria-hidden` toggled in `tabs.js`. Also added missing `type="button"`.
 
-### M5 — Micro-label contrast fails AA
+### M5 — Micro-label contrast fails AA ✅ DONE
 - `--muted-2` (`#5e5e68`) on `--surface` (`#131316`) ≈ 3.6:1 for 10–11px labels. Darken surface text or lift `--muted-2`. Low. Score 6.
+- **Done**: dark `--muted-2` `#5e5e68`→`#7e7e88` (≈4.6:1 on `#131316`); light `--muted-2` `#8c8c96`→`#71717b` (≈4.5:1 on `#faf9f7`). Both now AA.
 
 ### M6 — Goals have no dedicated tab
 - Full `goals.js` engine (1,652 lines) but goals only appear as "Today's Plan". 50-goal user has nowhere to see goals as goals. Add a Goals view/tab. High. Score 5.

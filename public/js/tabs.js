@@ -27,12 +27,13 @@
 
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
-      tabs.forEach(function (t) { t.classList.remove('active'); });
+      tabs.forEach(function (t) { t.classList.remove('active'); t.removeAttribute('aria-current'); });
       tab.classList.add('active');
-      contents.forEach(function (c) { c.classList.remove('is-visible'); });
+      tab.setAttribute('aria-current', 'page');
+      contents.forEach(function (c) { c.classList.remove('is-visible'); c.setAttribute('aria-hidden', 'true'); });
       var contentId = 'tab-' + tab.getAttribute('data-tab');
       var el = document.getElementById(contentId);
-      if (el) el.classList.add('is-visible');
+      if (el) { el.classList.add('is-visible'); el.removeAttribute('aria-hidden'); }
 
       localStorage.setItem('active_tab', tab.getAttribute('data-tab'));
 
