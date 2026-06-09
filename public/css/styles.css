@@ -806,8 +806,10 @@ body {
 
 /* Weekly consistency */
 .po-consistency { display: flex; flex-direction: column; gap: 8px; }
-.po-consistency-header { display: flex; align-items: center; justify-content: space-between; }
-.po-consistency-meta { display: flex; align-items: center; gap: 8px; }
+.po-consistency-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 8px; }
+.po-consistency-meta { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
+.po-consistency-meta .po-metric-title { min-width: 0; }
+.po-consistency-count { flex-shrink: 0; margin-left: auto; }
 .po-consistency-label { font-size: 11px; font-weight: 500; color: var(--muted); }
 .po-consistency-count { font-size: 10.5px; font-weight: 600; color: var(--muted-2); }
 .po-dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }

@@ -4,17 +4,30 @@ import type { SyncStateEvent, SyncStatus } from '../sync/types';
 
 const STYLE_ID = 'ikigai-syncstatus-style';
 const CSS = `
-.iksync{margin:10px 12px 4px;display:flex;align-items:center;gap:8px;font-family:Geist,system-ui,sans-serif;
-  font-size:12px;color:var(--text,#e9e9ef)}
-.iksync-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#888}
-.iksync[data-s="synced"] .iksync-dot{background:#7fd18f}
-.iksync[data-s="syncing"] .iksync-dot{background:#e0b341;animation:iksync-pulse 1s infinite}
-.iksync[data-s="offline"] .iksync-dot{background:#888}
-.iksync[data-s="error"] .iksync-dot{background:#ff6b6b}
-.iksync[data-s="signedout"] .iksync-dot{background:#666}
-@keyframes iksync-pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.iksync-label{flex:1 1 auto;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.iksync-act{background:none;border:none;color:var(--accent,#d1809b);cursor:pointer;font-size:12px;padding:0}
+.iksync{margin:0;display:flex;align-items:center;gap:10px;font-family:Geist,system-ui,sans-serif;
+  font-size:13px;color:var(--text,#e9e9ef)}
+.iksync-dot{position:relative;width:9px;height:9px;border-radius:50%;flex:0 0 auto;background:#888;
+  box-shadow:0 0 0 0 currentColor;transition:background .25s ease}
+.iksync-dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+  background:radial-gradient(circle,currentColor 0%,transparent 70%);opacity:.35;color:inherit}
+.iksync[data-s="synced"] .iksync-dot{background:#7fd18f;color:#7fd18f}
+.iksync[data-s="syncing"] .iksync-dot{background:#e0b341;color:#e0b341;animation:iksync-pulse 1s infinite}
+.iksync[data-s="offline"] .iksync-dot{background:#888;color:#888}
+.iksync[data-s="error"] .iksync-dot{background:#ff6b6b;color:#ff6b6b}
+.iksync[data-s="signedout"] .iksync-dot{background:#777;color:#777}
+@keyframes iksync-pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.iksync-label{flex:1 1 auto;opacity:.7;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.01em}
+.iksync-act{background:color-mix(in srgb,var(--accent,#d1809b) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent,#d1809b) 30%,transparent);
+  color:var(--accent,#d1809b);cursor:pointer;font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:999px;line-height:1;flex:0 0 auto;
+  transition:background .2s ease,border-color .2s ease,transform .15s ease}
+.iksync-act:hover{background:color-mix(in srgb,var(--accent,#d1809b) 24%,transparent);
+  border-color:color-mix(in srgb,var(--accent,#d1809b) 55%,transparent);transform:translateY(-1px)}
+.iksync-act:active{transform:translateY(0)}
+.iksync-act[data-role="out"]{color:var(--text,#e9e9ef);opacity:.7;
+  background:color-mix(in srgb,#fff 6%,transparent);border-color:var(--border,rgba(255,255,255,.12))}
+.iksync-act[data-role="out"]:hover{opacity:1;background:color-mix(in srgb,#fff 10%,transparent)}
 `;
 
 const LABELS: Record<SyncStatus, string> = {
@@ -52,11 +65,16 @@ export class SyncStatusIndicator {
       else if (this.onSignIn) this.onSignIn();
     };
 
-    const sidebar = document.querySelector('.sidebar');
-    const userBlock = document.querySelector('.sidebar-user');
-    if (sidebar && userBlock) sidebar.insertBefore(el, userBlock);
-    else if (sidebar) sidebar.appendChild(el);
-    else document.body.appendChild(el);
+    const account = document.getElementById('tweaksAccount');
+    if (account) {
+      account.appendChild(el);
+    } else {
+      const sidebar = document.querySelector('.sidebar');
+      const userBlock = document.querySelector('.sidebar-user');
+      if (sidebar && userBlock) sidebar.insertBefore(el, userBlock);
+      else if (sidebar) sidebar.appendChild(el);
+      else document.body.appendChild(el);
+    }
     this.el = el;
   }
 

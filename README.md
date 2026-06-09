@@ -33,8 +33,6 @@ No frameworks, no package manager, no build step. Open `index.html` in any brows
 
 ## Getting Started
 
-**Live**: [https://underthinker.github.io/personal-dashboard-v3/](https://underthinker.github.io/personal-dashboard-v3/)
-
 ```bash
 # Serve locally
 python -m http.server 8000
