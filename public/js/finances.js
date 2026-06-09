@@ -1092,7 +1092,7 @@
     let legendHtml = '';
     for (let i = 0; i < labels.length; i++) {
       const displayName = getTagDisplayName(labels[i].tag, scope);
-      legendHtml += '<div class="fin-legend-item"><span class="fin-legend-dot" style="background:' + getTagColor(labels[i].tag, scope) + '"></span>' + displayName + '</div>';
+      legendHtml += '<div class="fin-legend-item"><span class="fin-legend-dot" style="background:' + getTagColor(labels[i].tag, scope) + '"></span>' + escHtml(displayName) + '</div>';
     }
     legend.innerHTML = legendHtml;
     bindDonutClick(svg, scope);

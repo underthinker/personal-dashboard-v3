@@ -1,0 +1,21 @@
+{
+  "hash": "c9ba0c6f",
+  "configHash": "5cfb15cb",
+  "lockfileHash": "35eb6d2e",
+  "browserHash": "35efca5f",
+  "optimized": {
+    "@supabase/supabase-js": {
+      "src": "../../node_modules/@supabase/supabase-js/dist/index.mjs",
+      "file": "@supabase_supabase-js.js",
+      "fileHash": "fd921ffd",
+      "needsInterop": false
+    },
+    "idb": {
+      "src": "../../node_modules/idb/build/index.js",
+      "file": "idb.js",
+      "fileHash": "14384458",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}

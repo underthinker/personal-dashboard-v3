@@ -9,10 +9,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500;1,600&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=optional" rel="stylesheet">
-<script src="vendor/tesseract/tesseract.min.js"></script>
-<script src="vendor/pdfjs/pdf.min.js"></script>
+<!-- OCR/PDF libs: only the (not-yet-loaded) Finances tab uses them; defer so they never block first paint -->
+<script defer src="vendor/tesseract/tesseract.min.js"></script>
+<script defer src="vendor/pdfjs/pdf.min.js"></script>
+<!-- Sortable + Lucide are used by feature scripts at init, so must load before them (no defer) -->
 <script src="vendor/sortable.min.js"></script>
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://unpkg.com/lucide@1.17.0/dist/umd/lucide.js"></script>
 <link rel="stylesheet" href="css/styles.css">
 <script>
   (function() {
@@ -268,9 +270,7 @@
 
   <!-- ═══ HABITS MINI ═══ -->
   <div class="card a-habits">
-    <div class="card-head"></div>
     <div class="readiness-rings" id="habitFullWidget"></div>
-    <button class="view-habits" data-tab="health">View health →</button>
   </div>
 
   <!-- ═══ CALENDAR CARD ═══ -->
@@ -287,14 +287,12 @@
 
   <!-- ═══ INSIGHTS PANEL ═══ -->
   <div class="card a-activity">
-    <div class="card-head"></div>
     <div class="insights-grid" id="insightsGrid"></div>
     <div class="insights-footer" id="insightsFooter"></div>
   </div>
 
   <!-- ═══ MOOD CARD ═══ -->
   <div class="card a-mood">
-    <div class="card-head"></div>
     <div id="moodWidget"></div>
     <svg class="mood-spark" id="moodSparkline" viewBox="0 -6 200 80"></svg>
   </div>

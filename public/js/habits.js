@@ -1501,7 +1501,7 @@
       html += '</svg>';
       html += '<span class="hfr-pct">' + pct + '%</span>';
       html += '</div>';
-      html += '<span class="hfr-name">' + lucideIconHtml(def.icon || 'circle', 14) + ' ' + def.name + '</span>';
+      html += '<span class="hfr-name">' + lucideIconHtml(def.icon || 'circle', 14) + ' ' + escHtml(def.name) + '</span>';
       html += '<span class="hfr-sublabel">' + done + '/7 days</span>';
       html += '</div>';
     });
