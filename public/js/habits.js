@@ -750,6 +750,7 @@
     var show = 4;
     if (total > show) {
       _insTimer = setInterval(function() {
+        if (document.hidden) return;
         _insOffset = (_insOffset + 1) % _allInsights.length;
         _renderInsightWindow();
       }, 720000);
@@ -922,6 +923,7 @@
     // Start rotation timer when there are more insights than slots
     if (total > show) {
       _insTimer = setInterval(function() {
+        if (document.hidden) return;
         _insOffset = (_insOffset + 1) % _allInsights.length;
         _renderInsightWindow();
       }, 720000);
@@ -1459,6 +1461,7 @@
     // Clear note and re-render when calendar day changes
     let _lastDay = todayYMD();
     setInterval(() => {
+      if (document.hidden) return;
       const d = todayYMD();
       if (d !== _lastDay) { _lastDay = d; renderHabitsView(); }
     }, 60000);

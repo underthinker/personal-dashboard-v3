@@ -614,7 +614,7 @@
   function startTicker() {
     if (!tickerStage) return;
     tick();
-    tickerInterval = setInterval(tick, 5000);
+    tickerInterval = setInterval(function () { if (document.hidden) return; tick(); }, 5000);
   }
 
   window.addEventListener('goals-changed', () => {
@@ -1524,7 +1524,7 @@
     s.running = true;
     s.startedAt = Date.now();
     saveFocusSession(s);
-    _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
+    _focusTimerInterval = setInterval(function() { if (document.hidden) return; _updateFocusStatUI(); }, 1000);
     _updateFocusStatUI();
   }
 
@@ -1535,7 +1535,7 @@
     var session = getFocusSession();
     if (session.running) {
       if (sessionStorage.getItem('focus_refresh_flag')) {
-        _focusTimerInterval = setInterval(function() { _updateFocusStatUI(); }, 1000);
+        _focusTimerInterval = setInterval(function() { if (document.hidden) return; _updateFocusStatUI(); }, 1000);
       } else {
         _stopFocusSession();
       }
@@ -1621,6 +1621,7 @@
     });
   }
   setInterval(function() {
+    if (document.hidden) return;
     updateDayBar();
     renderStatsPanel();
     window.renderSidebarAtAGlance();

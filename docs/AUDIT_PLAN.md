@@ -7,6 +7,7 @@ Tracks fixes from the production-readiness audit (2026-06-09).
 - ✅ C3 — render-blocking libs: `defer` on Tesseract + PDF.js; pinned Lucide `@latest`→`@1.17.0`. Sortable/Lucide kept blocking (used at init).
 - ✅ N4 — removed 3 dead empty `card-head` divs + dead `View health` button.
 - ✅ H2 — card tiering: uniform surface (no muddy fill); primary action cards (session/goals/timeline/habits) keep `--line-2` border + accent label, ambient cards (stats/activity/mood/weather/calendar) get `--line` border + `--muted` labels. CSS-only, `styles.css`.
+- ✅ H3 — timer gating: all 9 `setInterval` callbacks early-return on `document.hidden` (home.js 2, goals.js 4, habits.js 3). No render/CPU on backgrounded tabs. Timers left intact (no teardown) for zero orphan risk.
 
 Everything below is **not yet done**.
 
@@ -40,7 +41,7 @@ Everything below is **not yet done**.
 - **Fix**: tier the surfaces — primary action cards get stronger border/elevation; reserve accent labels for them; demote ambient (weather/mood/calendar) to muted labels.
 - **Impact**: biggest daily-feel upgrade. **Difficulty**: Low. **Score 8.**
 
-### H3 — Timers run on hidden tabs / backgrounded doc
+### H3 — Timers run on hidden tabs / backgrounded doc ✅ DONE
 - **Problem**: 9+ `setInterval` (1s focus timer, 5s ticker, 60s timeline/weather) fire regardless of active tab or `document.hidden`.
   - `goals.js:617,1527,1538,1623`, `habits.js:752,924,1461`, `home.js:863,912`.
 - **Fix**: gate ticks on `document.visibilityState === 'visible'` and active tab; pause/resume on `visibilitychange`.

@@ -860,7 +860,7 @@
   renderWeather();
   /* Auto-refresh weather every 5 min so it stays current while the page is open */
   if (weatherRefreshTimer) clearInterval(weatherRefreshTimer);
-  weatherRefreshTimer = setInterval(renderWeather, WEATHER_REFRESH_INTERVAL);
+  weatherRefreshTimer = setInterval(function () { if (document.hidden) return; renderWeather(); }, WEATHER_REFRESH_INTERVAL);
   /* When user returns to the tab, invalidate cache so it re-fetches immediately */
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') {
@@ -909,5 +909,5 @@
     window.renderHomeHealthRings && window.renderHomeHealthRings();
   });
 
-  setInterval(renderTimeline, 60000);
+  setInterval(function () { if (document.hidden) return; renderTimeline(); }, 60000);
 })();
