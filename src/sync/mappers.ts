@@ -11,7 +11,7 @@ export const PROFILE_KEYS = {
 } as const;
 
 /** Settings keys whose localStorage value is a bare string, NOT JSON-encoded. */
-export const RAW_STRING_KEYS = new Set<string>(['tweak_theme', 'tweak_accent', 'active_tab']);
+export const RAW_STRING_KEYS = new Set<string>(['tweak_theme', 'tweak_accent', 'active_tab', 'home_macro_slot_v1']);
 
 /** Singleton keys synced to the `settings` table. */
 export const SETTINGS_KEYS = new Set<string>([
@@ -27,6 +27,7 @@ export const SETTINGS_KEYS = new Set<string>([
   'tweak_theme',
   'tweak_accent',
   'active_tab',
+  'home_macro_slot_v1',
 ]);
 
 const DATE_ENTITY: Record<string, EntryEntity> = {

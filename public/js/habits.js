@@ -1529,6 +1529,10 @@
     var el = document.getElementById(containerId);
     if (!el) return;
 
+    // Re-read slot each render so a synced/remote change shows without reload.
+    try { _homeMacroIdx = parseInt(localStorage.getItem('home_macro_slot_v1'), 10) || 0; } catch(e) {}
+    if (_homeMacroIdx < 0 || _homeMacroIdx >= MACRO_SLOTS.length) _homeMacroIdx = 0;
+
     var ymd = todayYMD();
     var day;
     try { day = JSON.parse(localStorage.getItem('health:' + ymd) || '{}'); } catch(e) { day = {}; }
