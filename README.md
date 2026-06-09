@@ -11,7 +11,7 @@ The core app is vanilla HTML/CSS/JS storing everything in `localStorage` — no 
 **Finances** - Income/expense tracking with tags, yearly savings chart, tag-based donut charts, savings goals, tag management, client-side paystub OCR (image or PDF). Views: year, quarterly, month. Work in progress - fully implemented in `js/finances.js` but not currently loaded; the tab shows a placeholder.
 
 **Habits** - 9 fixed presets (journal, productive tasks, personal hygiene, reading, etc.), per-habit consistency and streaks, weekly heatmap, 28-day trend sparklines, weekly focus suggestions, edit/reorder via settings modal (drag handle).
-
+  
 **Health** - Daily readiness ring (6 blended factors), water/sleep/exercise logs, date navigation, nutrition tracking (calories + macros), 14-day trends, 7-factor recovery rating, configurable goals, JSON export/import.
 
 **Gym** - Work in progress.
