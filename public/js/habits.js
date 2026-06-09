@@ -630,7 +630,7 @@
             if (d) reordered.push(d);
           });
           setDefinitions(reordered);
-          renderHabitsView();
+          renderWeeklyHeatmap();
         }
       });
     }
