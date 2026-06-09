@@ -357,9 +357,11 @@ body {
 .home-grid {
   display: grid;
   gap: 16px;
-  height: 100%;
+  /* Fold = rows 1+2 fill the viewport (no clip); ambient row 3 flows below
+     and is reached via the .tab-content scroll. Was: height:100% (clipped). */
+  min-height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
-  grid-template-rows: minmax(0, 3.2fr) minmax(0, 2.3fr) minmax(0, 2.5fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 0.72fr) auto;
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   stats"
@@ -1542,7 +1544,7 @@ body {
   .home-grid .card { padding: 14px; gap: 10px; }
   .home-grid .a-stats { padding: 14px; gap: 10px; }
   .home-grid .a-activity { padding: 10px; }
-  .home-grid { grid-template-rows: minmax(0, 3fr) minmax(0, 2.4fr) minmax(0, 2.5fr); }
+  .home-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 0.78fr) auto; }
 }
 
 @media (max-width: 1400px) {
