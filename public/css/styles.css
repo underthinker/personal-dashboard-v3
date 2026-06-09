@@ -5125,6 +5125,7 @@ margin-top: 15px;
   flex-direction: column;
   gap: clamp(6px, 0.6vw, 10px);
   padding-block: 4px;
+  overflow: hidden;
 }
 
 @media (max-width: 520px) {
@@ -5855,6 +5856,7 @@ input.sleep-picker-val:focus {
   flex: 1;
   min-height: 0;
   justify-content: space-between;
+  overflow: hidden;
 }
 .rc-row {
   display: flex;
@@ -5864,6 +5866,8 @@ input.sleep-picker-val:focus {
   border-radius: 8px;
   cursor: pointer;
   transition: background var(--dur-fast);
+  flex: 1 1 0;
+  min-height: 0;
 }
 .rc-row:hover { background: rgba(var(--tint),0.04); }
 .rc-row:focus-visible {
@@ -6946,7 +6950,8 @@ input.sleep-picker-val:focus {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
 }
 .hl-factor-pct {
   font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
