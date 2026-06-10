@@ -558,6 +558,10 @@
 <!-- ═══ HOME LAYOUT EDIT TOOLBAR ═══ -->
 <div class="layout-edit-toolbar" id="layoutEditToolbar" role="toolbar" aria-label="Customize home layout">
   <span class="layout-edit-hint">Drag the handle to move · drag corner to resize</span>
+  <div class="layout-add-wrap">
+    <button class="layout-edit-add" id="layoutAddBtn" type="button" aria-haspopup="true" aria-expanded="false">+ Add widget</button>
+    <div class="layout-add-palette" id="layoutAddPalette" role="menu" aria-label="Hidden widgets" hidden></div>
+  </div>
   <button class="layout-edit-reset" id="layoutResetBtn" type="button">Reset to default</button>
   <button class="layout-edit-cancel" id="layoutCancelBtn" type="button">Cancel</button>
   <button class="layout-edit-done" id="layoutDoneBtn" type="button">Done</button>
