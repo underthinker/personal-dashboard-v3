@@ -1186,10 +1186,11 @@
         return '<div class="ins-card">' +
           '<div class="ins-icon" style="background:' + c.iconBg + '">' + c.icon + '</div>' +
           '<div class="ins-body">' +
-          '<div class="ins-title">' + c.title + '</div>' +
-          '<div class="ins-sub">' + c.sub + '</div>' +
+          '<div class="ins-title"><span class="ins-scroll">' + c.title + '</span></div>' +
+          '<div class="ins-sub"><span class="ins-scroll">' + c.sub + '</span></div>' +
           '</div></div>';
       }).join('');
+      setupInsScroll(gridEl);
     }
 
     if (footerEl) {
@@ -1199,6 +1200,28 @@
       footerEl.innerHTML = '<svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="var(--muted-2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="9,1 3,9 8,9 7,15 13,7 8,7"/></svg> ' + escHtml(footerText);
     }
   };
+
+  // Detect text overflow per insight line; enable smooth ping-pong scroll only when clipped.
+  function setupInsScroll(gridEl) {
+    if (!gridEl) return;
+    requestAnimationFrame(function() {
+      var spans = gridEl.querySelectorAll('.ins-scroll');
+      for (var i = 0; i < spans.length; i++) {
+        var span = spans[i];
+        var track = span.parentNode;
+        var overflow = span.scrollWidth - track.clientWidth;
+        if (overflow > 1) {
+          // ~28px/sec travel, min 2.4s each way, plus end pauses baked into keyframes.
+          var dur = Math.max(2.4, overflow / 28);
+          track.style.setProperty('--ins-scroll-dist', '-' + overflow + 'px');
+          track.style.setProperty('--ins-scroll-dur', dur.toFixed(2) + 's');
+          track.classList.add('is-scroll');
+        } else {
+          track.classList.remove('is-scroll');
+        }
+      }
+    });
+  }
 
   // ============ CALENDAR ============
   var calState = (function() { var d = new Date(); return { year: d.getFullYear(), month: d.getMonth(), dir: null }; })();
