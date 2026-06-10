@@ -1,6 +1,71 @@
 (function(){
   'use strict';
 
+  // ───────── Themed confirm modal (replaces window.confirm) ─────────
+  function confirmModal(opts) {
+    var prevFocus = document.activeElement;
+    var backdrop = document.createElement('div');
+    backdrop.className = 'layout-confirm-backdrop';
+    backdrop.setAttribute('role', 'dialog');
+    backdrop.setAttribute('aria-modal', 'true');
+    backdrop.setAttribute('aria-labelledby', 'layoutConfirmTitle');
+    backdrop.setAttribute('aria-describedby', 'layoutConfirmBody');
+    backdrop.innerHTML =
+      '<div class="layout-confirm">' +
+        '<div class="layout-confirm-icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+            '<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>' +
+          '</svg>' +
+        '</div>' +
+        '<h2 class="layout-confirm-title" id="layoutConfirmTitle"></h2>' +
+        '<p class="layout-confirm-body" id="layoutConfirmBody"></p>' +
+        '<div class="layout-confirm-actions">' +
+          '<button type="button" class="layout-confirm-cancel"></button>' +
+          '<button type="button" class="layout-confirm-ok"></button>' +
+        '</div>' +
+      '</div>';
+    backdrop.querySelector('.layout-confirm-title').textContent = opts.title || 'Are you sure?';
+    backdrop.querySelector('.layout-confirm-body').textContent = opts.body || '';
+    var cancelBtn = backdrop.querySelector('.layout-confirm-cancel');
+    var okBtn = backdrop.querySelector('.layout-confirm-ok');
+    cancelBtn.textContent = opts.cancelText || 'Cancel';
+    okBtn.textContent = opts.confirmText || 'Confirm';
+
+    function close(confirmed) {
+      backdrop.classList.remove('open');
+      document.removeEventListener('keydown', onKey, true);
+      window.setTimeout(function() {
+        if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+        if (prevFocus && prevFocus.focus) prevFocus.focus();
+      }, 200);
+      if (confirmed && opts.onConfirm) opts.onConfirm();
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(false); }
+      else if (e.key === 'Enter') { e.preventDefault(); close(true); }
+      else if (e.key === 'Tab') {
+        // Trap focus inside the dialog (two focusable buttons).
+        var focusables = [cancelBtn, okBtn];
+        var first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+      }
+    }
+    okBtn.addEventListener('click', function() { close(true); });
+    cancelBtn.addEventListener('click', function() { close(false); });
+    backdrop.addEventListener('click', function(e) { if (e.target === backdrop) close(false); });
+    document.addEventListener('keydown', onKey, true);
+
+    document.body.appendChild(backdrop);
+    // Force reflow so the open transition runs.
+    void backdrop.offsetWidth;
+    backdrop.classList.add('open');
+    okBtn.focus();
+  }
+
   // ───────── Constants ─────────
   var LAYOUT_KEY = 'home_layout_v1';
   // Fixed unit row height (px). Custom + edit grids use this — NOT the old
@@ -174,8 +239,15 @@
   function renderLayout() {
     homeGrid = getHomeGrid();
     if (!homeGrid) return;
-    if (DESKTOP_MQ.matches && hasCustomLayout()) applyCustomCss(resolveLayout());
-    else clearCustomCss();
+    // Only switch to the equal-column / fixed-row custom grid when card POSITIONS
+    // actually differ from default. Removing widgets (hidden-only change, default
+    // positions) keeps the pristine weighted named-area layout so survivors don't
+    // rescale — we just hide the removed cards' areas.
+    if (DESKTOP_MQ.matches && hasCustomLayout() && !layoutEqualsDefault(resolveLayout())) {
+      applyCustomCss(resolveLayout());
+    } else {
+      clearCustomCss();
+    }
     applyHidden(loadHidden());
   }
 
@@ -219,7 +291,7 @@
       column: COLS,
       cellHeight: cellH,
       margin: MARGIN,
-      float: false,
+      float: true,
       staticGrid: false, // editable immediately — no separate "static" toggle
       handle: '.card-drag-handle',
       resizable: { handles: 'se' }
@@ -436,11 +508,15 @@
       grid.makeWidget(item);
     });
     editHidden = [];
-    CARD_IDS.forEach(function(id) {
-      if (readded.indexOf(id) !== -1) return; // already placed at default
-      var el = homeGrid.querySelector('.grid-stack-item[gs-id="' + id + '"]');
-      if (el) grid.update(el, DEFAULT_LAYOUT.cards[id]);
+    // Reposition every card in one pass. Per-card grid.update() with float:false
+    // makes a moved card collide with cards not yet moved, so GridStack shoves
+    // them to wrong slots — leaving the layout half-reset until clicked again.
+    // grid.load() diffs all positions at once and resolves collisions together.
+    var layout = CARD_IDS.map(function(id) {
+      var pos = DEFAULT_LAYOUT.cards[id];
+      return { id: id, x: pos.x, y: pos.y, w: pos.w, h: pos.h };
     });
+    grid.load(layout, false);
     grid.commit();
     buildPalette();
   }
@@ -483,9 +559,12 @@
     if (cancelBtn) cancelBtn.addEventListener('click', function() { exitEdit(false); });
     if (resetBtn) resetBtn.addEventListener('click', function() {
       // Destructive: wipes the custom layout. Confirm first.
-      if (window.confirm('Reset the home layout to default? This removes your customizations.')) {
-        resetToDefault();
-      }
+      confirmModal({
+        title: 'Reset layout?',
+        body: 'This restores the default home layout and removes your customizations.',
+        confirmText: 'Reset',
+        onConfirm: resetToDefault
+      });
     });
 
     // Keyboard: Esc cancels edit; arrow keys nudge the focused card by one cell.

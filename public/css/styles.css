@@ -7704,7 +7704,7 @@ body.is-editing-layout .grid-stack-item > .ui-resizable-se {
 .layout-edit-toolbar {
   display: none;
   position: fixed;
-  bottom: 24px;
+  top: 18px;
   left: 50%;
   transform: translateX(-50%);
   z-index: var(--z-500, 500);
@@ -7734,6 +7734,118 @@ body.is-editing-layout .grid-stack-item > .ui-resizable-se {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+}
+
+/* ── Reset-to-default confirm modal ── */
+.layout-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-600, 600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity var(--dur-slow, 0.35s) var(--ease-out, ease);
+}
+.layout-confirm-backdrop.open { opacity: 1; }
+
+.layout-confirm {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 16px;
+  padding: 32px 28px 28px;
+  transform: translateY(12px);
+  opacity: 0;
+  transition: transform 0.35s var(--ease-out, ease),
+              opacity 0.25s ease;
+}
+.layout-confirm-backdrop.open .layout-confirm {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.layout-confirm-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.layout-confirm-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.layout-confirm-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  line-height: 1.3;
+}
+
+.layout-confirm-body {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+
+.layout-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.layout-confirm-actions button {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--dur-normal, 0.2s) var(--ease-out, ease);
+}
+
+.layout-confirm-cancel {
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--muted);
+}
+.layout-confirm-cancel:hover {
+  border-color: var(--line);
+  color: var(--text);
+  background: rgba(var(--tint), 0.04);
+}
+
+.layout-confirm-ok {
+  background: var(--danger);
+  border: 1px solid transparent;
+  color: #fff;
+}
+.layout-confirm-ok:hover {
+  background: color-mix(in srgb, var(--danger) 85%, #fff);
+}
+
+.layout-confirm-actions button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-confirm-backdrop,
+  .layout-confirm { transition: none; }
 }
 
 /* ── Customize Layout entry (tweaks panel) ── */
