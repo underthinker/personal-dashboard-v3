@@ -60,10 +60,6 @@
     { id: 'reading', name: 'Reading', icon: 'book', active: true },
   ];
 
-  const ESTIMATED_EFFORT = {
-    journal: 2, reading: 5, hygiene: 3, healthy_meals: 5,
-    productive: 15, no_alcohol: 1, go_outside: 5, creativity: 15, no_fap: 1,
-  };
   const WEEKLY_TARGET_PCT = 0.8;
   const TREND_MIN_PCT = 22; // min ~3/14 days to show directional trend
 
@@ -1052,23 +1048,6 @@
     });
     var recovery = recoveryPool.slice(0, 3);
 
-    var todayData = getDayData(today);
-    function doneToday(id) { return !!(todayData && todayData.entries && todayData.entries[id]); }
-    var winPool = habitStats.filter(function(h) { return h.pct30 > 30 && !doneToday(h.def.id); });
-    winPool.sort(function(a, b) {
-      var ea = ESTIMATED_EFFORT[a.def.id] || 5;
-      var eb = ESTIMATED_EFFORT[b.def.id] || 5;
-      if (ea !== eb) return ea - eb;
-      return b.pct30 - a.pct30;
-    });
-    if (winPool.length < 3) {
-      habitStats.forEach(function(h) {
-        if (winPool.length >= 3) return;
-        if (winPool.indexOf(h) === -1 && !doneToday(h.def.id)) winPool.push(h);
-      });
-    }
-    var quickWins = winPool.slice(0, 3);
-
     var monday = getMonday();
     var weeklyCompletions = 0, totalPossible = 0;
     for (var d = 0; d < 7; d++) {
@@ -1089,7 +1068,6 @@
     return {
       highestImpact: highestImpact,
       recovery: recovery,
-      quickWins: quickWins,
       weeklyGoal: {
         currentPct: currentPct,
         targetPct: targetPct,
@@ -1163,24 +1141,7 @@
     }
     html += '</div>';
 
-    // Section 3: Quick Wins
-    html += '<div class="ht-focus-divider"></div>' +
-      '<div class="ht-focus-section">' +
-      '<div class="ht-focus-section-label">QUICK WINS</div>' +
-      '<div class="ht-focus-wins-row">';
-
-    data.quickWins.forEach(function(h) {
-      html += '<div class="ht-focus-win-item">' +
-        '<span class="ht-focus-win-check">' +
-          '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-        '</span>' +
-        '<span class="ht-focus-win-name">' + escHtml(h.def.name) + '</span>' +
-      '</div>';
-    });
-
-    html += '</div></div>';
-
-    // Section 4: Weekly Goal
+    // Section 3: Weekly Goal
     var wg = data.weeklyGoal;
     var goalPct = Math.min(100, wg.totalPossible > 0 ? Math.round((wg.weeklyCompletions / wg.totalPossible) * 100) : 0);
     html += '<div class="ht-focus-divider"></div>' +
