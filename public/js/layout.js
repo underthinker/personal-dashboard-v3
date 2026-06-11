@@ -87,7 +87,6 @@
     'a-stats':    { title: 'Performance Overview', minW: 1, minH: 1,          removable: true,  config: null },
     'a-tomorrow': { title: 'Plan Ahead',           minW: 1, minH: 1,          removable: true,  config: null },
     'a-timeline': { title: 'Timeline',             minW: 1, minH: 1,          removable: true,  config: null },
-    'a-habits':   { title: 'Habits',               minW: 2, minH: 1,          removable: true,  config: null },
     'a-activity': { title: 'Activity Insight',     minW: 2, minH: 1,          removable: true,  config: null },
     'a-calendar': { title: 'Calendar',             minW: 1, minH: 1,          removable: true,  config: 'calendar' }
   };
@@ -100,8 +99,8 @@
 
   // DEFAULT_LAYOUT — EXACT 1:1 map of the named-area grid (3 rows tall).
   //   "session  session  goals   goals    stats"     y=0
-  //   "tomorrow timeline habits  habits   stats"     y=1
-  //   "activity activity .        .        calendar"  y=2
+  //   "tomorrow timeline .       .        stats"     y=1
+  //   "activity activity .       .        calendar"  y=2
   var DEFAULT_LAYOUT = {
     v: BLOB_V, cols: 5,
     cards: {
@@ -110,7 +109,6 @@
       'a-stats':    { x: 4, y: 0, w: 1, h: 2 },
       'a-tomorrow': { x: 0, y: 1, w: 1, h: 1 },
       'a-timeline': { x: 1, y: 1, w: 1, h: 1 },
-      'a-habits':   { x: 2, y: 1, w: 2, h: 1 },
       'a-activity': { x: 0, y: 2, w: 2, h: 1 },
       'a-calendar': { x: 4, y: 2, w: 1, h: 1 }
     }

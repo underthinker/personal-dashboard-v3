@@ -406,8 +406,8 @@ body {
   grid-template-rows: minmax(0, 1fr) minmax(0, 0.72fr) auto;
   grid-template-areas:
     "session  session  goals     goals    stats"
-    "tomorrow timeline habits    habits   stats"
-    "activity activity .        .        calendar";
+    "tomorrow timeline .         .        stats"
+    "activity activity .         .        calendar";
 }
 
 /* ─── Card Base ─── */
@@ -439,8 +439,7 @@ body {
    with a fainter border and muted labels so accent means action again. */
 .home-grid .a-session,
 .home-grid .a-goals,
-.home-grid .a-timeline,
-.home-grid .a-habits {
+.home-grid .a-timeline {
   border-color: var(--line-2);
 }
 .home-grid .a-stats,
@@ -479,7 +478,6 @@ body {
 .a-stats { grid-area: stats; }
 .a-tomorrow { grid-area: tomorrow; }
 .a-timeline { grid-area: timeline; }
-.a-habits { grid-area: habits; }
 .a-calendar { grid-area: calendar; }
 .a-activity { grid-area: activity; }
 .a-mood { grid-area: mood; }
@@ -1567,7 +1565,7 @@ body {
     grid-template-areas:
       "session  session  goals    goals"
       "stats    stats    stats    stats"
-      "tomorrow timeline habits   habits"
+      "tomorrow timeline .        ."
       "activity activity .        ."
       "calendar calendar calendar calendar";
   }
@@ -1584,7 +1582,7 @@ body {
     grid-template-areas:
       "session  session  goals"
       "stats    stats    stats"
-      "tomorrow timeline habits"
+      "tomorrow timeline ."
       "activity activity activity"
       ".        .        calendar";
   }
@@ -1615,7 +1613,6 @@ body {
       "stats"
       "timeline"
       "tomorrow"
-      "habits"
       "calendar"
       "activity"
       "connect";
@@ -7012,7 +7009,6 @@ input.sleep-picker-val:focus {
       "stats"
       "timeline"
       "tomorrow"
-      "habits"
       "calendar"
       "activity";
     height: auto;
