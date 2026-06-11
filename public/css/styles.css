@@ -407,7 +407,7 @@ body {
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   stats"
-    "activity activity mood      weather  calendar";
+    "activity activity weather   weather  calendar";
 }
 
 /* ─── Card Base ─── */
@@ -1655,7 +1655,7 @@ body {
       "session  session  goals    goals"
       "stats    stats    stats    stats"
       "tomorrow timeline habits   habits"
-      "activity activity mood     weather"
+      "activity activity weather  weather"
       "calendar calendar calendar calendar";
   }
   .home-grid .card { padding: 14px; }
@@ -1673,7 +1673,7 @@ body {
       "stats    stats    stats"
       "tomorrow timeline habits"
       "activity activity activity"
-      "mood     weather  calendar";
+      "weather  weather  calendar";
   }
   .home-grid .card { padding: 12px; gap: 10px; }
 }
@@ -1703,7 +1703,6 @@ body {
       "timeline"
       "tomorrow"
       "habits"
-      "mood"
       "weather"
       "calendar"
       "activity"
@@ -5095,6 +5094,12 @@ margin-top: 15px;
 .htrend2-card { grid-area: trends2; }
 .hi-card { grid-area: insights; }
 
+/* Mood card in Health tab (bottom-left, replaces sleep/energy + hydration) */
+#tab-health .hl-mood-card { display: flex; flex-direction: column; gap: 12px; overflow: hidden; min-height: 168px; }
+.hl-mood-card #moodWidget { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 12px; }
+.hl-mood-card .mood-current { flex: 1; margin-bottom: 0; }
+.hl-mood-card .mood-picker { margin-top: 0; }
+
 @media (min-width: 1401px) {
   #tab-health.is-visible {
     overflow: hidden;
@@ -7104,7 +7109,6 @@ input.sleep-picker-val:focus {
       "timeline"
       "tomorrow"
       "habits"
-      "mood"
       "weather"
       "calendar"
       "activity";

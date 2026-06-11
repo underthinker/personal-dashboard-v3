@@ -1072,15 +1072,13 @@
 
   function renderTrends(date, settings) {
     const el = $('htrendCard');
-    const el2 = $('htrend2Card');
-    if (!el || !el2) return;
+    if (!el) return;
 
     const history = getHistory(date, 7);
     const hasAnyData = history.some(h => Object.keys(h.day).length > 0);
 
     if (!hasAnyData) {
       el.innerHTML = '<div class="card-head"><span class="card-label">READINESS (7 DAYS)</span></div><div class="htrend-empty">Log a few days of health data to see trends.</div>';
-      el2.innerHTML = '<div class="htrend-empty">Log a few days of health data to see trends.</div>';
       return;
     }
 
@@ -1091,18 +1089,6 @@
       </div>
       <div class="htrend-section">
         ${buildReadinessChart(history, settings)}
-      </div>`;
-
-    el2.innerHTML = `
-      <div class="htrend-row2">
-        <div class="htrend-section">
-          <div class="htrend-chart-label">Sleep &amp; Energy</div>
-          ${buildSleepEnergyChart(history, settings)}
-        </div>
-        <div class="htrend-section">
-          <div class="htrend-chart-label">Hydration</div>
-          ${buildHydrationChart(history, settings)}
-        </div>
       </div>`;
   }
 
@@ -1519,6 +1505,7 @@
     renderNutrition(date, day, settings);
     renderTrends(date, settings);
     renderInsights(date, settings);
+    window.renderHomeMood && window.renderHomeMood();
   }
 
   window.renderHealth = renderHealth;

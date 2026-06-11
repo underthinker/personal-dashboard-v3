@@ -292,12 +292,6 @@
     <div class="insights-footer" id="insightsFooter"></div>
   </div>
 
-  <!-- ═══ MOOD CARD ═══ -->
-  <div class="card a-mood">
-    <div id="moodWidget"></div>
-    <svg class="mood-spark" id="moodSparkline" viewBox="0 -6 200 80"></svg>
-  </div>
-
   <!-- ═══ WEATHER CARD ═══ -->
   <div class="card a-weather">
     <div class="card-head"></div>
@@ -423,7 +417,10 @@
   <div class="card hl-recovery-card" id="hlRecoveryCard"></div>
   <div class="card nt-card" id="ntCard"></div>
   <div class="card htrend-card" id="htrendCard"></div>
-  <div class="card htrend-card htrend2-card" id="htrend2Card"></div>
+  <div class="card htrend2-card hl-mood-card">
+    <div class="card-head"><span class="card-label">Mood</span></div>
+    <div id="moodWidget"></div>
+  </div>
   <div class="card hi-card" id="hiCard"></div>
 </div>
 </div><!-- /hl-section -->
