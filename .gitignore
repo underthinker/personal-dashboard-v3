@@ -44,3 +44,4 @@ dist/
 .env
 .env.local
 *.local
+.vite/
