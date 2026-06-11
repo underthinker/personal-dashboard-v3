@@ -720,6 +720,11 @@
   var _insOffset = 0;
   var _allInsights = [];
 
+  // Laptop viewports show 3 insight slots; desktop shows 4 (avoids cramped card).
+  function _insSlots() {
+    return (window.matchMedia && window.matchMedia('(max-width: 1600px)').matches) ? 3 : 4;
+  }
+
   function _stopInsTimer() {
     if (_insTimer) { clearInterval(_insTimer); _insTimer = null; }
   }
@@ -743,7 +748,7 @@
     _insOffset = newOff;
     _renderInsightWindow();
     var total = _allInsights.length;
-    var show = 4;
+    var show = _insSlots();
     if (total > show) {
       _insTimer = setInterval(function() {
         if (document.hidden) return;
@@ -851,7 +856,7 @@
 
     // Render initial window starting from saved offset
     var total = allInsights.length;
-    var show = 4;
+    var show = _insSlots();
     var start = _insOffset % total;
     var items = [];
     for (var i = 0; i < show && i < total; i++) {
@@ -933,7 +938,7 @@
     if (!leftEl || leftEl._fading) return;
 
     var total = _allInsights.length;
-    var show = 4;
+    var show = _insSlots();
     var start = _insOffset % total;
     var items = [];
     for (var i = 0; i < show; i++) {
