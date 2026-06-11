@@ -406,8 +406,8 @@ body {
   grid-template-rows: minmax(0, 1fr) minmax(0, 0.72fr) auto;
   grid-template-areas:
     "session  session  goals     goals    stats"
-    "tomorrow timeline .         .        stats"
-    "activity activity .         .        calendar";
+    "tomorrow tomorrow timeline  timeline stats"
+    "activity activity timeline  timeline calendar";
 }
 
 /* ─── Card Base ─── */

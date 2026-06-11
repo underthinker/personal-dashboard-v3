@@ -98,17 +98,17 @@
   var SVG_RESIZE = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21H3"/><path d="M21 21V3"/><path d="M21 21l-9-9"/></svg>';
 
   // DEFAULT_LAYOUT — EXACT 1:1 map of the named-area grid (3 rows tall).
-  //   "session  session  goals   goals    stats"     y=0
-  //   "tomorrow timeline .       .        stats"     y=1
-  //   "activity activity .       .        calendar"  y=2
+  //   "session  session  goals     goals    stats"      y=0
+  //   "tomorrow timeline timeline  .        stats"      y=1
+  //   "activity timeline timeline  .        calendar"   y=2
   var DEFAULT_LAYOUT = {
     v: BLOB_V, cols: 5,
     cards: {
       'a-session':  { x: 0, y: 0, w: 2, h: 1 },
       'a-goals':    { x: 2, y: 0, w: 2, h: 1 },
       'a-stats':    { x: 4, y: 0, w: 1, h: 2 },
-      'a-tomorrow': { x: 0, y: 1, w: 1, h: 1 },
-      'a-timeline': { x: 1, y: 1, w: 1, h: 1 },
+      'a-tomorrow': { x: 0, y: 1, w: 2, h: 1 },
+      'a-timeline': { x: 2, y: 1, w: 2, h: 2 },
       'a-activity': { x: 0, y: 2, w: 2, h: 1 },
       'a-calendar': { x: 4, y: 2, w: 1, h: 1 }
     }
