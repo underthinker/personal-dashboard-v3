@@ -17,7 +17,6 @@ export const RAW_STRING_KEYS = new Set<string>(['tweak_theme', 'tweak_accent', '
 export const SETTINGS_KEYS = new Set<string>([
   'health_settings',
   'timeline_blocks_v2',
-  'recurring_blocks_v1',
   'schedule_templates_v1',
   'day_ring_blocks_v1',
   'goal_streak_v1',

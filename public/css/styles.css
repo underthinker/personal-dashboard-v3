@@ -963,14 +963,10 @@ body {
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(var(--tint),0.04)); padding: 0 2px; min-width: 40px; }
 
 /* Per-row buttons */
-.tl-row .tl-del-btn,
-.tl-recur-btn { position: absolute; top: 0; background: transparent; border: none; color: var(--muted-2); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 14px; line-height: 1; padding: 2px 6px; display: inline-flex; align-items: center; }
+.tl-row .tl-del-btn { position: absolute; top: 0; background: transparent; border: none; color: var(--muted-2); cursor: pointer; opacity: 0; transition: opacity 0.15s, color 0.15s; font-size: 14px; line-height: 1; padding: 2px 6px; display: inline-flex; align-items: center; }
 .tl-row .tl-del-btn { right: 0; }
-.tl-recur-btn { right: 26px; }
-.tl-row:hover .tl-del-btn,
-.tl-row:hover .tl-recur-btn { opacity: 0.7; }
+.tl-row:hover .tl-del-btn { opacity: 0.7; }
 .tl-row .tl-del-btn:hover { opacity: 1; color: #e07474; }
-.tl-recur-btn:hover { opacity: 1 !important; color: var(--accent); }
 .tl-insert-btn { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; border-radius: 99px; background: var(--accent); border: none; color: #0b0b0e; cursor: pointer; opacity: 0; transition: opacity 0.15s; font-size: 10px; line-height: 14px; text-align: center; z-index: 2; padding: 0; }
 .tl-row:hover .tl-insert-btn { opacity: 1; }
 
@@ -6444,7 +6440,7 @@ input.sleep-picker-val:focus {
   font-style: italic;
 }
 
-/* ═══ PHASE 4: RECURRENCE + TEMPLATES ═══ */
+/* ═══ PHASE 4: TEMPLATES ═══ */
 
 /* Timeline card header layout */
 .tl-head-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -6457,19 +6453,6 @@ input.sleep-picker-val:focus {
 .tl-save-tmpl-btn { background: transparent; border: 1px solid var(--line, rgba(var(--tint),0.08)); color: var(--muted-2); cursor: pointer; padding: 3px 8px; border-radius: 6px; font: inherit; font-size: 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; white-space: nowrap; }
 .tl-save-tmpl-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
 
-/* Recurrence button hover (defined above with .tl-del-btn) */
-.tl-recur-btn:hover { opacity: 1 !important; color: var(--accent); }
-
-/* Recurring block row */
-.tl-recur-row .tl-dot { background: color-mix(in srgb, var(--accent) 55%, #7c7c9a); }
-.tl-recur-row .tl-content { border-left: 2px solid color-mix(in srgb, var(--accent) 35%, transparent); padding-left: 6px; }
-
-/* Recurrence badge (↻ freq) on recurring block rows */
-.tl-recur-badge { font-size: 10px; font-family: var(--font-mono); color: var(--accent); background: var(--accent-soft); padding: 1px 6px; border-radius: 99px; flex-shrink: 0; cursor: pointer; user-select: none; transition: filter 0.15s; }
-.tl-recur-badge:hover { filter: brightness(1.2); }
-
-/* Recurrence popover */
-.tl-recur-pop { position: absolute; background: var(--surface); border: 1px solid var(--line); padding: 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.5); min-width: 180px; }
 .tl-recur-pop-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted-2, #68687a); }
 .tl-pop-lbl { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: #acacb5; text-transform: uppercase; letter-spacing: .05em; }
 .tl-pop-lbl select, .tl-pop-lbl input { background: var(--line-2, rgba(var(--tint),0.04)); border: 1px solid var(--line, rgba(var(--tint),0.08)); color: inherit; padding: 5px 8px; border-radius: 6px; font: inherit; font-size: 12px; outline: none; }
