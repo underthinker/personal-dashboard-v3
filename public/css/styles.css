@@ -7871,20 +7871,20 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 .a-timeline .tl-dur { font-size: clamp(9px, 3cqi, 10px); }
 .a-timeline .tl-qa-start { width: clamp(42px, 15cqi, 52px); }
 
-/* Vertical auto-fit: JS sets --tl-fit (1 → ~0.62) on the widget so the default
+/* Vertical auto-fit: JS sets --tl-fit (1 → ~0.55) on the widget so the default
    schedule fits without scrolling. Folds into the horizontal cqi clamps above. */
 .a-timeline .home-timeline-widget { --tl-fit: 1; }
 .a-timeline .timeline { gap: calc(clamp(5px, 2cqi, 12px) * var(--tl-fit)); }
 .a-timeline .tl-content {
-  padding-block: calc(11px * var(--tl-fit));
+  padding-block: calc(9px * var(--tl-fit));
   font-size: calc(clamp(11px, 4.5cqi, 14px) * var(--tl-fit));
 }
 .a-timeline .tl-icon {
-  width: calc(38px * var(--tl-fit));
-  height: calc(38px * var(--tl-fit));
+  width: calc(32px * var(--tl-fit));
+  height: calc(32px * var(--tl-fit));
 }
-.a-timeline .tl-title { font-size: calc(13.5px * var(--tl-fit)); }
-.a-timeline .tl-sub { font-size: calc(12px * max(var(--tl-fit), 0.82)); margin-top: calc(2px * var(--tl-fit)); }
+.a-timeline .tl-title { font-size: calc(12.5px * var(--tl-fit)); }
+.a-timeline .tl-sub { font-size: calc(11px * max(var(--tl-fit), 0.82)); margin-top: calc(1px * var(--tl-fit)); }
 .a-timeline .tl-start { font-size: calc(clamp(9px, 3.5cqi, 12px) * max(var(--tl-fit), 0.85)); }
 /* Last-resort density: hide subtitles so all blocks fit without scrolling. */
 .a-timeline .home-timeline-widget.tl-fit-dense .tl-sub { display: none; }

@@ -517,9 +517,9 @@
     updateResetBtn();
   }
 
-  /* Shrink row density (via --tl-fit) until the schedule fits without scrolling.
-     Floors at 0.62 so it stays legible; past that the widget falls back to scroll. */
-  var TL_FIT_MIN = 0.64;
+   /* Shrink row density (via --tl-fit) until the schedule fits without scrolling.
+      Floors at 0.55 so it stays legible; past that the widget falls back to scroll. */
+  var TL_FIT_MIN = 0.55;
   function fitTimeline(el) {
     el.classList.remove('tl-fit-dense');
     el.style.setProperty('--tl-fit', '1');
