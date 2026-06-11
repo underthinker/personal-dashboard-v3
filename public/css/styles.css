@@ -6265,6 +6265,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .rc-row:nth-child(4) { animation-delay: 0.26s; }
   #tab-health.is-entering .rc-row:nth-child(5) { animation-delay: 0.33s; }
   #tab-health.is-entering .rc-row:nth-child(6) { animation-delay: 0.40s; }
+  #tab-health.is-entering .rc-row:nth-child(7) { animation-delay: 0.47s; }
   #tab-health.is-entering .rc-row-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
   #tab-health.is-entering .rc-row:nth-child(1) .rc-row-fill { animation-delay: 0.15s; }
   #tab-health.is-entering .rc-row:nth-child(2) .rc-row-fill { animation-delay: 0.22s; }
@@ -6272,6 +6273,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .rc-row:nth-child(4) .rc-row-fill { animation-delay: 0.36s; }
   #tab-health.is-entering .rc-row:nth-child(5) .rc-row-fill { animation-delay: 0.43s; }
   #tab-health.is-entering .rc-row:nth-child(6) .rc-row-fill { animation-delay: 0.50s; }
+  #tab-health.is-entering .rc-row:nth-child(7) .rc-row-fill { animation-delay: 0.57s; }
 
   /* ─── Habits tab ─── */
   /* Top metric tiles + overview trend sparklines — draw in */
