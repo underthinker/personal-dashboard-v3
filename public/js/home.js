@@ -92,7 +92,7 @@
 
   function openSaveTemplatePop() {
     if (_tmplPop) { _tmplPop.remove(); _tmplPop = null; return; }
-    var btn = $('tlSaveTemplate');
+    var btn = _wandAnchor || $('tlSaveTemplate');
     if (!btn) return;
     var pop = document.createElement('div');
     pop.className = 'tl-tmpl-pop'; pop.id = 'tlTemplatePop';
@@ -132,7 +132,7 @@
     var esc = window.escHtml;
     var tmpls = getTemplates();
     if (!tmpls.length) return;
-    var btn = $('tlTemplateSelect');
+    var btn = _wandAnchor || $('tlTemplateSelect');
     var pop = document.createElement('div');
     pop.className = 'tl-tmpl-pop'; pop.id = 'tlManagePop';
     pop.innerHTML = '<div class="tl-recur-pop-title">Manage Templates</div>' +
@@ -160,6 +160,54 @@
         }
       });
     });
+  }
+
+  function applyTemplate(idx) {
+    var tmpls = getTemplates();
+    if (!tmpls[idx]) return;
+    saveBlocks(tmpls[idx].blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
+    renderTimeline();
+    showToast('Template applied');
+    localStorage.setItem(ACTIVE_TMPL_KEY, idx);
+    var sel = $('tlTemplateSelect');
+    if (sel) sel.value = idx;
+  }
+
+  var _wandAnchor = null;
+
+  function openTemplateMenu(anchor) {
+    if (_tmplPop) { _tmplPop.remove(); _tmplPop = null; return; }
+    _wandAnchor = anchor;
+    var esc = window.escHtml;
+    var tmpls = getTemplates();
+    var pop = document.createElement('div');
+    pop.className = 'tl-tmpl-pop tl-wand-menu'; pop.id = 'tlWandMenu';
+    var html = '<div class="tl-recur-pop-title">Templates</div>';
+    if (tmpls.length) {
+      html += tmpls.map(function(t, i) {
+        return '<button class="tl-wand-item" type="button" data-apply="' + i + '">' + esc(t.name) + (t.autoApply ? ' ★' : '') + '</button>';
+      }).join('');
+    } else {
+      html += '<div class="tl-wand-empty">No templates yet</div>';
+    }
+    html += '<div class="tl-wand-sep"></div>' +
+      '<button class="tl-wand-item" type="button" data-act="save">+ Save current as template…</button>' +
+      (tmpls.length ? '<button class="tl-wand-item" type="button" data-act="manage">Manage templates…</button>' : '');
+    pop.innerHTML = html;
+    document.body.appendChild(pop);
+    var rect = anchor.getBoundingClientRect();
+    pop.style.left = Math.max(4, rect.right - 220) + 'px';
+    pop.style.top  = (rect.top - pop.offsetHeight - 6 + window.scrollY) + 'px';
+    function close() { if (_tmplPop) { _tmplPop.remove(); _tmplPop = null; } document.removeEventListener('click', out); }
+    function out(e) { if (_tmplPop && !_tmplPop.contains(e.target) && e.target !== anchor && !anchor.contains(e.target)) close(); }
+    pop.addEventListener('click', function(e) {
+      var ap = e.target.closest('[data-apply]');
+      var ac = e.target.closest('[data-act]');
+      if (ap) { applyTemplate(parseInt(ap.getAttribute('data-apply'), 10)); close(); }
+      else if (ac) { var a = ac.getAttribute('data-act'); close(); if (a === 'save') openSaveTemplatePop(); else openManageTemplates(); }
+    });
+    _tmplPop = pop;
+    requestAnimationFrame(function() { document.addEventListener('click', out); });
   }
 
   function sortedBlocks() {
@@ -317,8 +365,66 @@
     }, 0);
   }
 
+  /* ─── Row visuals ─── */
+  function tlSvg(inner) {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + '</svg>';
+  }
+  var TL_ICON_SVG = tlSvg('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none"/>');
+
+  // Keyword → icon, scanned in order; first match wins. Generic target is fallback.
+  var TL_ICONS = [
+    { re: /\b(morning|wake|stretch|routine|sunrise|meditat|yoga)\b/, svg: tlSvg('<path d="M12 2v3"/><path d="m4.9 6.9 2.1 2.1"/><path d="M2 14h3"/><path d="M19 14h3"/><path d="m17 9 2.1-2.1"/><path d="M22 18H2"/><path d="M18 18a6 6 0 0 0-12 0"/>') },
+    { re: /\b(deep work|focus|coding|study|writing|build)\b/, svg: tlSvg('<path d="M3 12h3l2 6 4-14 2 8h7"/>') },
+    { re: /\b(team|sync|standup|meeting|call|1:1|catch ?up)\b/, svg: tlSvg('<circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="17" cy="9" r="2.2"/><path d="M16 14.2a4.5 4.5 0 0 1 5 4.3"/>') },
+    { re: /\b(lunch|dinner|breakfast|eat|meal|food|break)\b/, svg: tlSvg('<path d="M6 2v8a2 2 0 0 0 4 0V2"/><path d="M8 2v20"/><path d="M17 2c-1.5 1-2 3-2 5v4h2v11"/>') },
+    { re: /\b(admin|email|inbox|message|plan(ning)?)\b/, svg: tlSvg('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>') },
+    { re: /\b(wind ?down|evening|review|reflect|night|sleep|rest)\b/, svg: tlSvg('<path d="M12 5v9"/><path d="m8 11 4 4 4-4"/><path d="M5 19h14"/>') },
+    { re: /\b(exercise|gym|run|walk|workout|train|fitness|sport)\b/, svg: tlSvg('<path d="M6.5 6.5 17.5 17.5"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="M2 6l4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/>') },
+    { re: /\b(read|book|learn|course|lecture|research)\b/, svg: tlSvg('<path d="M2 5a3 3 0 0 1 3-3h5v18H5a3 3 0 0 0-3 3z"/><path d="M22 5a3 3 0 0 0-3-3h-5v18h5a3 3 0 0 1 3 3z"/>') }
+  ];
+
+  function tlIconFor(label) {
+    var s = String(label || '').toLowerCase();
+    for (var i = 0; i < TL_ICONS.length; i++) { if (TL_ICONS[i].re.test(s)) return TL_ICONS[i].svg; }
+    return TL_ICON_SVG;
+  }
+  var TL_CHECK_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  // Pure clock-based state: pending | active | done
+  function tlState(start, end, nowMin) {
+    if (!start) return 'pending';
+    var sm = parseMin(start), em = end ? parseMin(end) : sm;
+    if (nowMin < sm) return 'pending';
+    if (em > sm && nowMin < em) return 'active';
+    return 'done';
+  }
+
+  function tlStatusHtml(state) {
+    if (state === 'done') return '<span class="tl-status tl-status-done" aria-label="Done">' + TL_CHECK_SVG + '</span>';
+    if (state === 'active') return '<span class="tl-status tl-status-active"><span class="tl-status-dot"></span>In progress</span>';
+    return '<span class="tl-status tl-status-pending" aria-label="Upcoming"></span>';
+  }
+
+  // Static title + a calm intention line that rotates by time of day.
+  var TL_SUBS = {
+    morning:   ['Flow with intention.', 'Begin gently, move with focus.', 'One block at a time.'],
+    afternoon: ['Flow with intention.', 'Steady through the middle.', 'Protect your deep work.'],
+    evening:   ['Flow with intention.', 'Wind down with intention.', 'Close the day kindly.']
+  };
+  function updateGreeting() {
+    var el = $('tlGreetSub');
+    if (!el) return;
+    var d = new Date(), h = d.getHours();
+    var part = h < 12 ? 'morning' : (h < 18 ? 'afternoon' : 'evening');
+    var pool = TL_SUBS[part];
+    // Stable per day+part so it doesn't flicker on every re-render.
+    var idx = (d.getFullYear() + d.getMonth() * 31 + d.getDate()) % pool.length;
+    el.textContent = pool[idx];
+  }
+
   /* ─── Render ─── */
   function renderTimeline() {
+    updateGreeting();
     const el = $('timelineWidget');
     if (!el) return;
     const esc = window.escHtml;
@@ -347,56 +453,91 @@
     }
 
     const rows = allEntries.map(function(b, i) {
-      const isActive = nowMin >= parseMin(b.start) && nowMin < parseMin(b.end);
+      const state    = tlState(b.start, b.end, nowMin);
+      const isActive = state === 'active';
       const isLast   = i === allEntries.length - 1;
       const dur = fmtDur(b.start, b.end);
+      const durPill = dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '';
 
       if (b._isGoal) {
         return (
-          '<div class="tl-row tl-goal-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '"' +
+          '<div class="tl-row tl-goal-row tl-state-' + state + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '"' +
               ' data-tl-gkey="' + esc(b._gKey) + '" data-tl-gidx="' + b._gIdx + '">' +
             '<div class="tl-time-col"><span class="tl-start' + (isActive ? ' active' : '') + '">' + esc(b.start) + '</span></div>' +
-            '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
-            '<div class="tl-content' + (isActive ? ' active' : '') + '">' +
-              '<div class="tl-title-row">' +
-                '<input type="checkbox" class="tl-goal-check"' + (b.done ? ' checked' : '') + ' aria-label="Mark done">' +
-                '<span class="tl-title' + (b.done ? ' tl-goal-done' : '') + '">' + esc(b.label) + '</span>' +
-                (dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '') +
+            '<div class="tl-dot-col"><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
+            '<div class="tl-content tl-state-' + state + (isActive ? ' active' : '') + '">' +
+              '<span class="tl-icon">' + TL_ICON_SVG + '</span>' +
+              '<div class="tl-body">' +
+                '<div class="tl-title-row">' +
+                  '<span class="tl-title' + (b.done ? ' tl-goal-done' : '') + '">' + esc(b.label) + '</span>' +
+                  durPill +
+                '</div>' +
               '</div>' +
+              '<input type="checkbox" class="tl-goal-check"' + (b.done ? ' checked' : '') + ' aria-label="Mark done">' +
             '</div>' +
           '</div>'
         );
       }
 
       return (
-        '<div class="tl-row' + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '" data-tl-id="' + esc(b.id) + '">' +
+        '<div class="tl-row tl-state-' + state + (isActive ? ' tl-row-active' : '') + (isLast ? ' tl-row-last' : '') + '" data-tl-id="' + esc(b.id) + '">' +
           '<div class="tl-time-col">' +
             '<span class="tl-start' + (isActive ? ' active' : '') + '" data-tl-time>' + esc(b.start) + '</span>' +
           '</div>' +
-          '<div class="tl-dot-col"><div class="tl-line"></div><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
-          '<div class="tl-content' + (isActive ? ' active' : '') + '">' +
-            '<div class="tl-title-row">' +
-              '<span class="tl-title" data-tl-label>' + esc(b.label) + '</span>' +
-              (dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '') +
+          '<div class="tl-dot-col"><div class="tl-dot' + (isActive ? ' active' : '') + '"></div></div>' +
+          '<div class="tl-content tl-state-' + state + (isActive ? ' active' : '') + '">' +
+            '<span class="tl-icon">' + tlIconFor(b.label) + '</span>' +
+            '<div class="tl-body">' +
+              '<div class="tl-title-row">' +
+                '<span class="tl-title" data-tl-label>' + esc(b.label) + '</span>' +
+                durPill +
+              '</div>' +
+              (b.sub ? '<div class="tl-sub" data-tl-sub>' + esc(b.sub) + '</div>' : '') +
             '</div>' +
-            (b.sub ? '<div class="tl-sub" data-tl-sub>' + esc(b.sub) + '</div>' : '') +
+            tlStatusHtml(state) +
+            '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>' +
           '</div>' +
-          '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>' +
         '</div>'
       );
     }).join('');
 
     el.innerHTML = rows +
       '<div class="tl-quick-add">' +
+        '<button class="tl-qa-btn" type="button" aria-label="Add block">+</button>' +
         '<input class="tl-qa-start" type="text" placeholder="9:00" autocomplete="off">' +
-        '<input class="tl-qa-label" type="text" placeholder="Add block…" autocomplete="off">' +
-        '<button class="tl-qa-btn" type="button">+</button>' +
+        '<input class="tl-qa-label" type="text" placeholder="Add a block…" autocomplete="off">' +
+        '<button class="tl-qa-wand" type="button" aria-label="Templates"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg></button>' +
       '</div>';
+
+    fitTimeline(el);
 
     const activeRow = el.querySelector('.tl-row-active');
     if (activeRow) el.scrollTop = activeRow.offsetTop - el.clientHeight / 2 + activeRow.offsetHeight / 2;
 
     updateResetBtn();
+  }
+
+  /* Shrink row density (via --tl-fit) until the schedule fits without scrolling.
+     Floors at 0.62 so it stays legible; past that the widget falls back to scroll. */
+  var TL_FIT_MIN = 0.64;
+  function fitTimeline(el) {
+    el.classList.remove('tl-fit-dense');
+    el.style.setProperty('--tl-fit', '1');
+    var avail = el.clientHeight;
+    if (!avail) return;
+    if (el.scrollHeight <= avail) return;
+    // 1) Shrink density down to the legibility floor.
+    var f = Math.max(TL_FIT_MIN, avail / el.scrollHeight);
+    el.style.setProperty('--tl-fit', f.toFixed(3));
+    // 2) Still overflowing at the floor → drop subtitles (keeps titles readable),
+    //    then re-shrink to the new content height.
+    if (el.scrollHeight > avail + 1) {
+      el.classList.add('tl-fit-dense');
+      el.style.setProperty('--tl-fit', '1');
+      if (el.scrollHeight > avail) {
+        el.style.setProperty('--tl-fit', Math.max(TL_FIT_MIN, avail / el.scrollHeight).toFixed(3));
+      }
+    }
   }
 
   /* ─── Delegated event handlers (registered once at load) ─── */
@@ -424,6 +565,9 @@
     if (delBtn) { e.stopPropagation(); deleteBlockUndo(delBtn.getAttribute('data-tl-del')); return; }
 
     if (e.target.closest('.tl-qa-btn')) { submitQuickAdd(); return; }
+
+    var wandBtn = e.target.closest('.tl-qa-wand');
+    if (wandBtn) { e.stopPropagation(); openTemplateMenu(wandBtn); return; }
 
     const timeEl = e.target.closest('[data-tl-time]');
     if (timeEl) {
@@ -541,14 +685,7 @@
     var val = _tmplSel.value;
     if (!val) return;
     if (val === '__manage') { openManageTemplates(); _tmplSel.value = ''; return; }
-    var idx = parseInt(val, 10);
-    var tmpls = getTemplates();
-    if (!tmpls[idx]) { _tmplSel.value = ''; return; }
-    saveBlocks(tmpls[idx].blocks.map(function(b) { return Object.assign({ id: tlUid() }, b); }));
-    renderTimeline();
-    showToast('Template applied');
-    _tmplSel.value = idx;
-    localStorage.setItem(ACTIVE_TMPL_KEY, idx);
+    applyTemplate(parseInt(val, 10));
   });
 
   /* SortableJS drag-to-reorder (init once; innerHTML replacement keeps instance valid) */
@@ -570,6 +707,18 @@
         updateResetBtn();
       }
     });
+  }
+
+  /* Refit the schedule when the card is resized (window resize, custom layout). */
+  if (window.ResizeObserver) {
+    var _fitEl = $('timelineWidget');
+    if (_fitEl) {
+      var _fitRaf = 0;
+      new ResizeObserver(function() {
+        if (_fitRaf) return;
+        _fitRaf = requestAnimationFrame(function() { _fitRaf = 0; fitTimeline(_fitEl); });
+      }).observe(_fitEl);
+    }
   }
 
   window.renderHomeInsights && window.renderHomeInsights();

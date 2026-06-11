@@ -259,13 +259,18 @@
 
   <!-- ═══ TIMELINE CARD ═══ -->
   <div class="card a-timeline">
-    <div class="card-head">
-      <div class="tl-head-right">
-        <select class="tl-tmpl-sel" id="tlTemplateSelect"><option value="">Default</option></select>
-        <button class="tl-save-tmpl-btn" id="tlSaveTemplate" type="button">+ Save</button>
-        <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset order</button>
+    <div class="tl-greeting">
+      <span class="tl-greeting-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 6.93 1.41 1.41"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="m17.66 8.34 1.41-1.41"/><path d="M22 18H2"/><path d="M18 18a6 6 0 0 0-12 0"/></svg>
+      </span>
+      <div class="tl-greeting-text">
+        <span class="tl-greeting-title" id="tlGreetTitle">Today's timeline</span>
+        <span class="tl-greeting-sub" id="tlGreetSub">Flow with intention.</span>
       </div>
+      <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset</button>
     </div>
+    <select id="tlTemplateSelect" hidden><option value="">Default</option></select>
+    <button id="tlSaveTemplate" type="button" hidden>+ Save</button>
     <div class="timeline home-timeline-widget" id="timelineWidget"></div>
   </div>
 
