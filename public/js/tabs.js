@@ -35,6 +35,11 @@
       var el = document.getElementById(contentId);
       if (el) { el.classList.add('is-visible'); el.removeAttribute('aria-hidden'); }
 
+      // Clear any lingering entrance class before re-rendering so new DOM
+      // elements aren't created while animation CSS is active (fixes glitch
+      // when switching tabs quickly before the 1800ms timeout expires).
+      if (el) el.classList.remove('is-entering');
+
       localStorage.setItem('active_tab', tab.getAttribute('data-tab'));
 
       if (contentId === 'tab-main') {

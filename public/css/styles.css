@@ -6281,16 +6281,31 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(5) .ht-spark-path { animation-delay: 0.55s; }
 
   /* Overview rows — fade/slide, then 30-day bars grow from zero */
+  /* Overview rows — fade/slide, tight stagger. The 30-day bars grow from zero.
+     Each row's sparkline draws on the SAME delay as the row fade, and its draw
+     (0.4s) is shorter than the fade (0.45s) so the line always finishes drawing
+     by the time the row reaches full opacity — no "visible row, half-drawn line"
+     gap (the old 0.9s draw outlasted the fade and flickered on the last row).
+     If `is-entering` is stripped mid-draw on a rapid swap, the base path has no
+     dash offset, so it falls back to solid rather than blank. */
+  #tab-habits.is-entering .ht-ov-row .ht-spark-path { animation-duration: 0.4s; }
+  /* `.ht-ov-body` clips with overflow:hidden. Every row enters via hl-row-in,
+     which slides it translateY(6px)→0; for all rows but the last that 6px is
+     masked by the row below, but the LAST row's slide reaches the body's bottom
+     clip edge, so its sparkline is nipped then revealed mid-draw — the bottom-
+     row-only flicker. Drop the clip during entrance (the card's bottom padding
+     absorbs the 6px); overflow:hidden returns once `is-entering` is stripped. */
+  #tab-habits.is-entering .ht-ov-body { overflow: visible; }
   #tab-habits.is-entering .ht-ov-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(1) { animation-delay: 0.05s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(2) { animation-delay: 0.11s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(3) { animation-delay: 0.17s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(4) { animation-delay: 0.23s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(5) { animation-delay: 0.29s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(6) { animation-delay: 0.35s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(7) { animation-delay: 0.41s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(8) { animation-delay: 0.47s; }
-  #tab-habits.is-entering .ht-ov-row:nth-child(9) { animation-delay: 0.53s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(1), #tab-habits.is-entering .ht-ov-row:nth-child(1) .ht-spark-path { animation-delay: 0.03s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(2), #tab-habits.is-entering .ht-ov-row:nth-child(2) .ht-spark-path { animation-delay: 0.06s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(3), #tab-habits.is-entering .ht-ov-row:nth-child(3) .ht-spark-path { animation-delay: 0.09s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(4), #tab-habits.is-entering .ht-ov-row:nth-child(4) .ht-spark-path { animation-delay: 0.12s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(5), #tab-habits.is-entering .ht-ov-row:nth-child(5) .ht-spark-path { animation-delay: 0.15s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(6), #tab-habits.is-entering .ht-ov-row:nth-child(6) .ht-spark-path { animation-delay: 0.18s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(7), #tab-habits.is-entering .ht-ov-row:nth-child(7) .ht-spark-path { animation-delay: 0.21s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(8), #tab-habits.is-entering .ht-ov-row:nth-child(8) .ht-spark-path { animation-delay: 0.24s; }
+  #tab-habits.is-entering .ht-ov-row:nth-child(9), #tab-habits.is-entering .ht-ov-row:nth-child(9) .ht-spark-path { animation-delay: 0.27s; }
   #tab-habits.is-entering .ht-ov-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) 0.2s both; }
 
   /* Weekly heatmap cells — pop in, column by column (left → right) */
