@@ -70,8 +70,8 @@ function boot(): void {
       void engine.stop();
       showAuthScreen();
     } else if (!uid && !currentUser) {
-      // First load, no session: prompt sign-in (offline still available).
-      showAuthScreen();
+      // First load, no session: stay local-only. User can sign in via
+      // the sync status indicator if they want.
     }
   });
 }
