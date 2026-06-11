@@ -67,53 +67,59 @@
   }
 
   // ───────── Constants ─────────
-  var LAYOUT_KEY = 'home_layout_v1';
-  // Fixed unit row height (px). Custom + edit grids use this — NOT the old
-  // fold-fit cellHeight that scaled rows to the viewport (that coupling made the
-  // unit drift on resize). SaaS-standard: fixed row, content-driven span.
+  var LAYOUT_KEY = 'home_layout_v1';   // key unchanged (synced via RAW_STRING_KEYS)
+  var BLOB_V = 3;                       // current blob schema version
+  // Weighted columns — match the named-area homepage exactly so entering
+  // Customize is pixel-identical (no horizontal jump). Sum = 1390.
+  var COL_FR = [305, 285, 245, 195, 360];
+  var COL_SUM = 1390;
+  var COLS = 5;
+  var GAP = 16;                         // matches `.home-grid { gap: 16px }`
+  var BASE_ROWS = 3;                    // the named-area grid is 3 rows tall
+  // Fallback row unit (px) only — used when live row heights can't be measured.
   var ROW_H = 150;
+
   // ── Widget registry: single source of truth (metadata over the static cards) ──
-  // minW/minH are the keystone clip fix — GridStack + custom render refuse sizes
-  // the content can't survive, so text never gets crushed mid-word. removable +
-  // config are reserved for Phase 2/3 (add/remove + per-widget settings).
+  // min/max re-tuned for the 3-row model (1 cell-row ≈ one full named row).
   var WIDGETS = {
-    'a-session':  { title: 'Focus Session',        minW: 2, minH: 2, maxW: 3, removable: false, config: null },
-    'a-goals':    { title: "Today's Plan",          minW: 2, minH: 2,          removable: false, config: null },
-    'a-stats':    { title: 'Performance Overview',  minW: 1, minH: 2,          removable: true,  config: null },
-    'a-tomorrow': { title: 'Plan Ahead',            minW: 1, minH: 1,          removable: true,  config: null },
-    'a-timeline': { title: 'Timeline',              minW: 1, minH: 2,          removable: true,  config: null },
-    'a-habits':   { title: 'Habits',                minW: 2, minH: 1,          removable: true,  config: null },
-    'a-activity': { title: 'Activity Insight',      minW: 2, minH: 1,          removable: true,  config: null },
-    'a-mood':     { title: 'Mood',                  minW: 1, minH: 1,          removable: true,  config: null },
-    'a-weather':  { title: 'Weather',               minW: 1, minH: 1,          removable: true,  config: 'weather' },
-    'a-calendar': { title: 'Calendar',              minW: 1, minH: 1,          removable: true,  config: 'calendar' }
+    'a-session':  { title: 'Focus Session',       minW: 2, minH: 1, maxW: 3, removable: false, config: null },
+    'a-goals':    { title: "Today's Plan",         minW: 2, minH: 1,          removable: false, config: null },
+    'a-stats':    { title: 'Performance Overview', minW: 1, minH: 1,          removable: true,  config: null },
+    'a-tomorrow': { title: 'Plan Ahead',           minW: 1, minH: 1,          removable: true,  config: null },
+    'a-timeline': { title: 'Timeline',             minW: 1, minH: 1,          removable: true,  config: null },
+    'a-habits':   { title: 'Habits',               minW: 2, minH: 1,          removable: true,  config: null },
+    'a-activity': { title: 'Activity Insight',     minW: 2, minH: 1,          removable: true,  config: null },
+    'a-mood':     { title: 'Mood',                 minW: 1, minH: 1,          removable: true,  config: null },
+    'a-weather':  { title: 'Weather',              minW: 1, minH: 1,          removable: true,  config: 'weather' },
+    'a-calendar': { title: 'Calendar',             minW: 1, minH: 1,          removable: true,  config: 'calendar' }
   };
   var CARD_IDS = Object.keys(WIDGETS);
-  var COLS = 5;
-  // Inline SVG icons (Lucide: grip-vertical, x) — replaces unicode glyphs so the
-  // controls render consistently and theme via currentColor.
+  // Inline SVG icons (Lucide: grip, x) — theme via currentColor.
   var SVG_GRIP = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
   var SVG_X = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  // Default reproduces the original named-grid layout (5 cols; fold = y0..y3,
-  // ambient = y4). When the saved layout equals this, we DELETE the key and fall
-  // back to the pristine named-area CSS (weighted columns), not an equal-col grid.
+  // SE resize grip (diagonal arrow).
+  var SVG_RESIZE = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21H3"/><path d="M21 21V3"/><path d="M21 21l-9-9"/></svg>';
+
+  // DEFAULT_LAYOUT — EXACT 1:1 map of the named-area grid (3 rows tall).
+  //   "session  session  goals   goals    stats"     y=0
+  //   "tomorrow timeline habits  habits   stats"     y=1
+  //   "activity activity mood    weather  calendar"  y=2
   var DEFAULT_LAYOUT = {
-    v: 1, cols: 5,
+    v: BLOB_V, cols: 5,
     cards: {
-      'a-session':  { x: 0, y: 0, w: 2, h: 2 },
-      'a-goals':    { x: 2, y: 0, w: 2, h: 2 },
-      'a-stats':    { x: 4, y: 0, w: 1, h: 4 },
-      'a-tomorrow': { x: 0, y: 2, w: 1, h: 2 },
-      'a-timeline': { x: 1, y: 2, w: 1, h: 2 },
-      'a-habits':   { x: 2, y: 2, w: 2, h: 2 },
-      'a-activity': { x: 0, y: 4, w: 2, h: 1 },
-      'a-mood':     { x: 2, y: 4, w: 1, h: 1 },
-      'a-weather':  { x: 3, y: 4, w: 1, h: 1 },
-      'a-calendar': { x: 4, y: 4, w: 1, h: 1 }
+      'a-session':  { x: 0, y: 0, w: 2, h: 1 },
+      'a-goals':    { x: 2, y: 0, w: 2, h: 1 },
+      'a-stats':    { x: 4, y: 0, w: 1, h: 2 },
+      'a-tomorrow': { x: 0, y: 1, w: 1, h: 1 },
+      'a-timeline': { x: 1, y: 1, w: 1, h: 1 },
+      'a-habits':   { x: 2, y: 1, w: 2, h: 1 },
+      'a-activity': { x: 0, y: 2, w: 2, h: 1 },
+      'a-mood':     { x: 2, y: 2, w: 1, h: 1 },
+      'a-weather':  { x: 3, y: 2, w: 1, h: 1 },
+      'a-calendar': { x: 4, y: 2, w: 1, h: 1 }
     }
   };
   var DESKTOP_MQ = window.matchMedia('(min-width:1401px)');
-  var MARGIN = 8;
 
   // ───────── Storage helpers (mirror habits.js) ─────────
   function storeGet(key) {
@@ -130,26 +136,34 @@
   }
 
   // ───────── State ─────────
-  // GridStack is now EDIT-ONLY: it exists only while the user is customizing.
-  // Normal viewing is pure CSS grid — named areas (default) or explicit
-  // grid-column/grid-row placement (a saved custom layout). No always-on
-  // pixel-row sizing, so the fold/cutoff math can't drift outside edit mode.
-  var grid = null;     // GridStack instance, non-null ONLY during edit
+  // No GridStack. Edit mode is a custom pointer drag/resize layer over the real
+  // weighted CSS grid. Cards never leave .home-grid; we only toggle inline grid
+  // props + handle elements, so existing listeners survive untouched.
+  var editing = false;
   var homeGrid = null;
-  var editHidden = [];  // ids hidden during the current edit session
+  var editHidden = [];     // ids hidden during the current edit session
+  var positions = null;    // in-memory {id:{x,y,w,h}} while editing
+  var editRows = null;     // [h0,h1,h2] measured row heights (px) for this session
+  var editUnit = ROW_H;    // auto-row unit (px) for rows beyond BASE_ROWS
 
   function getHomeGrid() { return document.querySelector('.home-grid'); }
-  function hasCustomLayout() { return storeGet(LAYOUT_KEY) != null; }
 
-  // Hidden widgets: read from the saved blob (v2). v1 blobs lack `hidden` → [].
-  function loadHidden() {
+  // A custom layout only counts when it's a valid v3 blob. Older v1/v2 blobs use
+  // an incompatible 5-row coordinate encoding → treated as "no custom layout".
+  function getBlob() {
     var saved = storeGet(LAYOUT_KEY);
-    var h = saved && Array.isArray(saved.hidden) ? saved.hidden : [];
+    return (saved && saved.v === BLOB_V) ? saved : null;
+  }
+  function hasCustomLayout() { return getBlob() != null; }
+
+  // Hidden widgets from the saved v3 blob.
+  function loadHidden() {
+    var blob = getBlob();
+    var h = blob && Array.isArray(blob.hidden) ? blob.hidden : [];
     return h.filter(function(id) { return CARD_IDS.indexOf(id) !== -1; });
   }
 
-  // Detached holder keeping hidden .card nodes alive across edit/innerHTML wipes
-  // (they're static HTML, so we must not drop them — re-adding needs the element).
+  // Detached holder keeping hidden .card nodes alive across edit sessions.
   function getHiddenHolder() {
     var el = document.getElementById('layoutHiddenHolder');
     if (!el) {
@@ -161,18 +175,16 @@
     return el;
   }
 
-  // Read saved layout, validating each card against CARD_IDS; unknown/missing
+  // Read saved v3 layout, validating each card against CARD_IDS; unknown/missing
   // cards fall back to their default slot so a stale blob never blanks the grid.
   function resolveLayout() {
-    var saved = storeGet(LAYOUT_KEY);
+    var blob = getBlob();
     var cards = {};
-    var srcCards = (saved && saved.cards && typeof saved.cards === 'object') ? saved.cards : {};
+    var srcCards = (blob && blob.cards && typeof blob.cards === 'object') ? blob.cards : {};
     CARD_IDS.forEach(function(id) {
       var p = srcCards[id];
       var def = DEFAULT_LAYOUT.cards[id];
       if (p && isFinite(p.x) && isFinite(p.y)) {
-        // A saved card may lack w/h (older lossy blobs). Fall back to the
-        // widget's registry min — never below what its content needs.
         var meta = WIDGETS[id] || {};
         cards[id] = {
           x: +p.x, y: +p.y,
@@ -193,21 +205,74 @@
     });
   }
 
-  // Fixed unit row height. Was a fold-fit calc (viewport/5) that drifted on
-  // resize; now a constant so a card's height tracks its span, not the window.
-  function computeCellHeight() { return ROW_H; }
+  // ───────── Column geometry (pointer → cell math over weighted cols) ─────────
+  // Returns { left:[], width:[], top0 } in px relative to the grid content box.
+  function computeGeom() {
+    var rect = homeGrid.getBoundingClientRect();
+    var cs = getComputedStyle(homeGrid);
+    var padL = parseFloat(cs.paddingLeft) || 0;
+    var padT = parseFloat(cs.paddingTop) || 0;
+    var gap = parseFloat(cs.columnGap);
+    if (!isFinite(gap)) gap = GAP;
+    var innerW = homeGrid.clientWidth - padL - (parseFloat(cs.paddingRight) || 0);
+    var usableW = innerW - gap * (COLS - 1);
+    var width = [], left = [], acc = 0;
+    for (var i = 0; i < COLS; i++) {
+      width[i] = usableW * COL_FR[i] / COL_SUM;
+      left[i] = acc + gap * i;
+      acc += width[i];
+    }
+    return {
+      left: left, width: width, gap: gap,
+      originX: rect.left + padL,
+      originY: rect.top + padT
+    };
+  }
+
+  // Nearest valid left column index for a card of span `w` given a target px.
+  function colAtX(geom, px, w) {
+    var best = 0, bestD = Infinity;
+    for (var i = 0; i <= COLS - w; i++) {
+      var d = Math.abs(geom.left[i] - px);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+  }
+  // Column whose right edge is nearest target px (for resize width).
+  function colRightAtX(geom, px, xStart) {
+    var best = xStart, bestD = Infinity;
+    for (var i = xStart; i < COLS; i++) {
+      var rightEdge = geom.left[i] + geom.width[i];
+      var d = Math.abs(rightEdge - px);
+      if (d < bestD) { bestD = d; best = i; }
+    }
+    return best;
+  }
+
+  // ───────── Row measurement (the "no jump" guarantee) ─────────
+  // Read the live rendered row heights of the current .home-grid BEFORE editing.
+  function measureBaseRows() {
+    var cs = getComputedStyle(homeGrid);
+    var rows = (cs.gridTemplateRows || '').split(/\s+/).map(parseFloat).filter(isFinite);
+    if (rows.length >= BASE_ROWS) return rows.slice(0, BASE_ROWS);
+    return [ROW_H, ROW_H, ROW_H];
+  }
 
   // ───────── Render a saved custom layout into the plain CSS grid ─────────
-  function applyCustomCss(cards) {
+  function applyCustomCss(blob) {
     if (!homeGrid) return;
-    homeGrid.style.setProperty('--home-cell-h', computeCellHeight() + 'px');
     homeGrid.classList.add('home-grid--custom');
+    homeGrid.style.gridTemplateColumns = COL_FR.map(function(f){ return f + 'fr'; }).join(' ');
+    var rows = (blob && Array.isArray(blob.rows) && blob.rows.length >= BASE_ROWS)
+      ? blob.rows : [ROW_H, ROW_H, ROW_H];
+    homeGrid.style.gridTemplateRows = rows.slice(0, BASE_ROWS).map(function(h){ return h + 'px'; }).join(' ');
+    var unit = isFinite(blob && blob.rowUnit) ? blob.rowUnit : rows[0];
+    homeGrid.style.gridAutoRows = unit + 'px';
+    var cards = resolveLayout();
     CARD_IDS.forEach(function(id) {
       var card = homeGrid.querySelector('.' + id);
       if (!card) return;
       var p = cards[id];
-      // Clamp so a stale/corrupt blob can't overflow the column count and force
-      // the grid to silently grow a 6th column. w capped to COLS, x kept in range.
       var w = Math.max(1, Math.min(p.w, COLS));
       var x = Math.max(0, Math.min(p.x, COLS - w));
       card.style.gridColumn = (x + 1) + ' / span ' + w;
@@ -217,17 +282,16 @@
   function clearCustomCss() {
     if (!homeGrid) return;
     homeGrid.classList.remove('home-grid--custom');
-    homeGrid.style.removeProperty('--home-cell-h');
+    homeGrid.style.gridTemplateColumns = '';
+    homeGrid.style.gridTemplateRows = '';
+    homeGrid.style.gridAutoRows = '';
     CARD_IDS.forEach(function(id) {
       var card = homeGrid.querySelector('.' + id);
       if (card) { card.style.gridColumn = ''; card.style.gridRow = ''; }
     });
   }
 
-  // Desktop + custom saved → explicit placement; else pristine named areas /
-  // responsive stacks (CSS owns it).
-  // Toggle display:none per card from the hidden list. Only a saved custom blob
-  // ever carries hidden ids, so the default named-area grid never gets holes.
+  // Toggle display:none per card from the hidden list.
   function applyHidden(hidden) {
     if (!homeGrid) return;
     CARD_IDS.forEach(function(id) {
@@ -239,82 +303,109 @@
   function renderLayout() {
     homeGrid = getHomeGrid();
     if (!homeGrid) return;
-    // Only switch to the equal-column / fixed-row custom grid when card POSITIONS
-    // actually differ from default. Removing widgets (hidden-only change, default
-    // positions) keeps the pristine weighted named-area layout so survivors don't
-    // rescale — we just hide the removed cards' areas.
+    // Switch to the weighted custom render only when card POSITIONS differ from
+    // default. Hidden-only changes keep the pristine named-area grid.
     if (DESKTOP_MQ.matches && hasCustomLayout() && !layoutEqualsDefault(resolveLayout())) {
-      applyCustomCss(resolveLayout());
+      applyCustomCss(getBlob());
     } else {
       clearCustomCss();
     }
     applyHidden(loadHidden());
   }
 
-  // ───────── Edit mode (GridStack lives only here) ─────────
+  // ───────── Edit mode (custom pointer layer) ─────────
   function setToolbar(on) {
     var tb = document.getElementById('layoutEditToolbar');
     if (tb) tb.classList.toggle('open', !!on);
   }
 
+  // Occupancy of all visible cards except `exceptId`, as a Set of "x,y".
+  function occupancy(exceptId) {
+    var occ = {};
+    CARD_IDS.forEach(function(id) {
+      if (id === exceptId || editHidden.indexOf(id) !== -1) return;
+      var p = positions[id];
+      if (!p) return;
+      for (var dx = 0; dx < p.w; dx++)
+        for (var dy = 0; dy < p.h; dy++)
+          occ[(p.x + dx) + ',' + (p.y + dy)] = true;
+    });
+    return occ;
+  }
+  function fits(pos, exceptId) {
+    if (pos.x < 0 || pos.y < 0 || pos.x + pos.w > COLS) return false;
+    var occ = occupancy(exceptId);
+    for (var dx = 0; dx < pos.w; dx++)
+      for (var dy = 0; dy < pos.h; dy++)
+        if (occ[(pos.x + dx) + ',' + (pos.y + dy)]) return false;
+    return true;
+  }
+
+  function applyPos(id) {
+    var card = homeGrid.querySelector('.' + id);
+    if (!card) return;
+    var p = positions[id];
+    card.style.gridColumn = (p.x + 1) + ' / span ' + p.w;
+    card.style.gridRow = (p.y + 1) + ' / span ' + p.h;
+  }
+
   function enterEdit() {
-    if (grid) return;
+    if (editing) return;
     homeGrid = getHomeGrid();
-    if (!homeGrid || !DESKTOP_MQ.matches || typeof GridStack === 'undefined') return;
+    if (!homeGrid || !DESKTOP_MQ.matches) return;
+    if (homeGrid.clientHeight === 0) return; // tab hidden → don't edit
 
-    // Drop any custom-css render so GridStack owns positioning cleanly.
-    clearCustomCss();
+    // Measure live rows BEFORE mutating anything (zero-jump guarantee).
+    editRows = measureBaseRows();
+    editUnit = editRows[0];
 
-    var layout = resolveLayout();
-    var cellH = computeCellHeight();
+    positions = resolveLayout();
     editHidden = loadHidden();
     var holder = getHiddenHolder();
 
-    // Wrap each VISIBLE .card in GridStack's required DOM (move, never clone, so
-    // all existing listeners — home.js, goals.js, SortableJS — keep working).
-    // Hidden cards are stashed in the holder so their element survives and can be
-    // re-added from the palette.
-    var items = [];
+    editing = true;
+    homeGrid.classList.add('home-grid--editing');
+    homeGrid.style.gridTemplateColumns = COL_FR.map(function(f){ return f + 'fr'; }).join(' ');
+    homeGrid.style.gridTemplateRows = editRows.map(function(h){ return h + 'px'; }).join(' ');
+    homeGrid.style.gridAutoRows = editUnit + 'px';
+
     CARD_IDS.forEach(function(id) {
-      var card = homeGrid.querySelector('.' + id);
+      var card = homeGrid.querySelector('.' + id) || holder.querySelector('.' + id);
       if (!card) return;
-      card.style.display = ''; // undo any persisted hide before wrapping
-      if (editHidden.indexOf(id) !== -1) { holder.appendChild(card); return; }
-      items.push(buildItem(id, layout[id], card));
+      card.style.display = '';
+      if (editHidden.indexOf(id) !== -1) {
+        stripHandles(card);
+        holder.appendChild(card);
+        return;
+      }
+      if (card.parentNode !== homeGrid) homeGrid.appendChild(card);
+      addHandles(id, card);
+      applyPos(id);
     });
-
-    homeGrid.innerHTML = '';
-    items.forEach(function(i) { homeGrid.appendChild(i); });
-    homeGrid.classList.add('home-grid--gridstack');
-
-    grid = GridStack.init({
-      column: COLS,
-      cellHeight: cellH,
-      margin: MARGIN,
-      float: true,
-      staticGrid: false, // editable immediately — no separate "static" toggle
-      handle: '.card-drag-handle',
-      resizable: { handles: 'se' }
-    }, homeGrid);
 
     document.body.classList.add('is-editing-layout');
     setToolbar(true);
     buildPalette();
   }
 
-  // Build a grid-stack-item wrapping a live .card. Injects the drag handle and,
-  // for removable widgets, a × remove button. Reused by enterEdit + addWidget.
-  function buildItem(id, pos, card) {
+  // Inject drag handle, resize grip, remove button + a11y onto a live card.
+  function addHandles(id, card) {
     var meta = WIDGETS[id] || {};
-    // Drag handle is a full-card overlay (whole card is draggable in edit mode),
-    // with a small grip badge in the corner as the affordance — so the handle no
-    // longer sits ON the card's own header pills.
     if (!card.querySelector('.card-drag-handle')) {
       var handle = document.createElement('div');
       handle.className = 'card-drag-handle';
       handle.setAttribute('aria-hidden', 'true');
       handle.innerHTML = '<span class="card-grip">' + SVG_GRIP + '</span>';
+      handle.addEventListener('pointerdown', function(e){ startMove(e, id, card); });
       card.appendChild(handle);
+    }
+    if (!card.querySelector('.card-resize-handle')) {
+      var rz = document.createElement('div');
+      rz.className = 'card-resize-handle';
+      rz.setAttribute('aria-hidden', 'true');
+      rz.innerHTML = SVG_RESIZE;
+      rz.addEventListener('pointerdown', function(e){ startResize(e, id, card); });
+      card.appendChild(rz);
     }
     if (meta.removable && !card.querySelector('.card-remove-btn')) {
       var rm = document.createElement('button');
@@ -327,62 +418,136 @@
       });
       card.appendChild(rm);
     }
-
-    var item = document.createElement('div');
-    item.className = 'grid-stack-item';
-    // Keyboard a11y: focusable, labeled; arrow keys nudge position (see init).
-    item.setAttribute('tabindex', '0');
-    item.setAttribute('role', 'group');
-    item.setAttribute('aria-label', (meta.title || id) + ' — use arrow keys to move');
-    item.setAttribute('gs-id', id);
-    item.setAttribute('gs-x', pos.x);
-    item.setAttribute('gs-y', pos.y);
-    item.setAttribute('gs-w', pos.w);
-    item.setAttribute('gs-h', pos.h);
-    if (meta.minW) item.setAttribute('gs-min-w', meta.minW);
-    if (meta.minH) item.setAttribute('gs-min-h', meta.minH);
-    if (meta.maxW) item.setAttribute('gs-max-w', meta.maxW);
-    if (meta.maxH) item.setAttribute('gs-max-h', meta.maxH);
-    var content = document.createElement('div');
-    content.className = 'grid-stack-item-content';
-    content.appendChild(card); // moves card out of its current parent
-    item.appendChild(content);
-    return item;
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('role', 'group');
+    card.setAttribute('aria-label', (meta.title || id) + ' — use arrow keys to move');
+  }
+  function stripHandles(card) {
+    ['.card-drag-handle', '.card-resize-handle', '.card-remove-btn'].forEach(function(sel) {
+      var el = card.querySelector(sel); if (el) el.remove();
+    });
+    card.removeAttribute('tabindex');
+    card.removeAttribute('role');
+    card.removeAttribute('aria-label');
+    card.classList.remove('is-dragging', 'drop-invalid');
   }
 
-  // ── Remove a widget (edit only): stash its card, drop the grid item, mark hidden.
+  // ── Pointer-driven MOVE ──
+  function startMove(e, id, card) {
+    if (!editing || e.button !== 0) return;
+    e.preventDefault();
+    var geom = computeGeom();
+    var cardRect = card.getBoundingClientRect();
+    var grabX = e.clientX - cardRect.left;   // pointer offset inside card
+    var grabY = e.clientY - cardRect.top;
+    var start = Object.assign({}, positions[id]);
+    card.classList.add('is-dragging');
+    var handle = e.currentTarget;
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+
+    function onMove(ev) {
+      var leftPx = (ev.clientX - grabX) - geom.originX;
+      var topPx = (ev.clientY - grabY) - geom.originY;
+      var nx = colAtX(geom, leftPx, start.w);
+      var ny = Math.max(0, Math.round(topPx / (editUnit + GAP)));
+      nx = Math.max(0, Math.min(nx, COLS - start.w));
+      if (nx === positions[id].x && ny === positions[id].y) return;
+      var cand = { x: nx, y: ny, w: start.w, h: start.h };
+      positions[id] = cand;
+      applyPos(id);
+      card.classList.toggle('drop-invalid', !fits(cand, id));
+    }
+    function onUp(ev) {
+      try { handle.releasePointerCapture(ev.pointerId); } catch (err) {}
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+      card.classList.remove('is-dragging', 'drop-invalid');
+      if (!fits(positions[id], id)) { positions[id] = start; applyPos(id); }
+    }
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+  }
+
+  // ── Pointer-driven RESIZE (SE handle) ──
+  function startResize(e, id, card) {
+    if (!editing || e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    var meta = WIDGETS[id] || {};
+    var geom = computeGeom();
+    var start = Object.assign({}, positions[id]);
+    var cardTop = card.getBoundingClientRect().top - geom.originY;
+    card.classList.add('is-dragging');
+    var handle = e.currentTarget;
+    try { handle.setPointerCapture(e.pointerId); } catch (err) {}
+
+    function onMove(ev) {
+      var px = ev.clientX - geom.originX;
+      var rightCol = colRightAtX(geom, px, start.x);
+      var nw = rightCol - start.x + 1;
+      nw = Math.max(meta.minW || 1, Math.min(nw, meta.maxW || COLS, COLS - start.x));
+      var hpx = (ev.clientY - geom.originY) - cardTop;
+      var nh = Math.max(1, Math.round(hpx / (editUnit + GAP)));
+      nh = Math.max(meta.minH || 1, Math.min(nh, meta.maxH || Infinity));
+      if (nw === positions[id].w && nh === positions[id].h) return;
+      var cand = { x: start.x, y: start.y, w: nw, h: nh };
+      positions[id] = cand;
+      applyPos(id);
+      card.classList.toggle('drop-invalid', !fits(cand, id));
+    }
+    function onUp(ev) {
+      try { handle.releasePointerCapture(ev.pointerId); } catch (err) {}
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+      card.classList.remove('is-dragging', 'drop-invalid');
+      if (!fits(positions[id], id)) { positions[id] = start; applyPos(id); }
+    }
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+  }
+
+  // ── Remove a widget (edit only) ──
   function removeWidget(id) {
-    if (!grid) return;
-    var item = homeGrid.querySelector('.grid-stack-item[gs-id="' + id + '"]');
-    if (!item) return;
-    var card = item.querySelector('.' + id);
+    if (!editing) return;
+    var card = homeGrid.querySelector('.' + id);
     if (card) {
-      var h = card.querySelector('.card-drag-handle'); if (h) h.remove();
-      var r = card.querySelector('.card-remove-btn'); if (r) r.remove();
+      stripHandles(card);
+      card.style.gridColumn = ''; card.style.gridRow = '';
       getHiddenHolder().appendChild(card);
     }
-    grid.removeWidget(item, true);
     if (editHidden.indexOf(id) === -1) editHidden.push(id);
     buildPalette();
   }
 
-  // ── Add a hidden widget back (edit only): pull its card, wrap, auto-place.
+  // ── Add a hidden widget back (edit only): first free cell scan ──
   function addWidget(id) {
-    if (!grid) return;
+    if (!editing) return;
     var holder = getHiddenHolder();
     var card = holder.querySelector('.' + id);
     if (!card) return;
+    var meta = WIDGETS[id] || {};
     var def = DEFAULT_LAYOUT.cards[id] || { w: 1, h: 1 };
-    var item = buildItem(id, { x: 0, y: 0, w: def.w, h: def.h }, card);
-    // GridStack v11: addWidget no longer takes an element — append the DOM then
-    // makeWidget() to register it. autoPosition drops it in the first free slot.
-    homeGrid.appendChild(item);
-    grid.makeWidget(item, { autoPosition: true });
+    var w = Math.max(meta.minW || 1, def.w), h = Math.max(meta.minH || 1, def.h);
     editHidden = editHidden.filter(function(x) { return x !== id; });
+    var placed = null;
+    for (var y = 0; y < 64 && !placed; y++) {
+      for (var x = 0; x <= COLS - w; x++) {
+        var cand = { x: x, y: y, w: w, h: h };
+        if (fits(cand, id)) { placed = cand; break; }
+      }
+    }
+    positions[id] = placed || { x: 0, y: 0, w: w, h: h };
+    homeGrid.appendChild(card);
+    card.style.display = '';
+    addHandles(id, card);
+    applyPos(id);
     buildPalette();
   }
 
-  // ── Build the "Add widget" palette from currently-hidden widgets.
+  // ── "Add widget" palette from currently-hidden widgets ──
   function buildPalette() {
     var pal = document.getElementById('layoutAddPalette');
     var addBtn = document.getElementById('layoutAddBtn');
@@ -415,141 +580,92 @@
     addBtn.setAttribute('aria-expanded', on ? 'true' : 'false');
   }
 
-  // Pull positions out of GridStack before we tear it down.
-  // Read engine.nodes directly, NOT grid.save() — save() omits w/h when they
-  // equal the node's minW/minH (our registry sets gs-min-w/h), so a saved blob
-  // would lose real widths and every w:2 card would collapse to 1 on reload.
-  function readGridLayout() {
-    var cards = {};
-    grid.engine.nodes.forEach(function(n) {
-      if (n.id && CARD_IDS.indexOf(n.id) !== -1) {
-        cards[n.id] = { x: n.x || 0, y: n.y || 0, w: n.w || 1, h: n.h || 1 };
-      }
+  // ── Reset: restore default positions + all widgets while still editing ──
+  function resetToDefault() {
+    if (!editing) return;
+    var holder = getHiddenHolder();
+    // Restore any hidden cards back into the grid.
+    editHidden.slice().forEach(function(id) {
+      var card = holder.querySelector('.' + id);
+      if (card) { homeGrid.appendChild(card); card.style.display = ''; addHandles(id, card); }
     });
-    return cards;
-  }
-
-  // Destroy GridStack and unwrap cards back into the plain .home-grid.
-  function unwrap() {
-    if (!grid) return;
-    grid.destroy(false); // keep DOM
-    grid = null;
+    editHidden = [];
+    positions = {};
     CARD_IDS.forEach(function(id) {
-      var item = homeGrid.querySelector('.grid-stack-item[gs-id="' + id + '"]');
-      if (!item) return;
-      var card = item.querySelector('.' + id);
-      if (card) {
-        var handle = card.querySelector('.card-drag-handle');
-        if (handle) handle.remove();
-        var rm = card.querySelector('.card-remove-btn');
-        if (rm) rm.remove();
-        homeGrid.appendChild(card);
-      }
-      item.remove();
+      positions[id] = Object.assign({}, DEFAULT_LAYOUT.cards[id]);
+      applyPos(id);
     });
-    // Return any stashed hidden cards to homeGrid (renderLayout re-applies their
-    // display:none from the saved blob; on Cancel they reappear if not saved).
-    var holder = document.getElementById('layoutHiddenHolder');
-    if (holder) {
-      CARD_IDS.forEach(function(id) {
-        var card = holder.querySelector('.' + id);
-        if (card) {
-          var h = card.querySelector('.card-drag-handle'); if (h) h.remove();
-          var r = card.querySelector('.card-remove-btn'); if (r) r.remove();
-          homeGrid.appendChild(card);
-        }
-      });
-    }
-    homeGrid.classList.remove('home-grid--gridstack');
-    // GridStack.destroy() leaves its own classes behind (grid-stack, gs-N,
-    // gs-id-N, grid-stack-animate); strip them so .grid-stack CSS can't leak
-    // into the plain/custom render before the next reload.
-    [].slice.call(homeGrid.classList).forEach(function(c) {
-      if (c === 'grid-stack' || c === 'grid-stack-animate' || /^gs-/.test(c)) {
-        homeGrid.classList.remove(c);
-      }
-    });
+    buildPalette();
   }
 
   // persist=true → save (Done); persist=false → discard (Cancel / forced exit).
   function exitEdit(persist) {
-    if (!grid) return;
-    var cards = persist ? readGridLayout() : null;
+    if (!editing) return;
+    var cards = persist ? positions : null;
     var hidden = persist ? editHidden.slice() : null;
+    var rows = editRows ? editRows.slice() : null;
+    var unit = editUnit;
     setPalette(false);
-    unwrap();
+
+    // Strip all handles + inline edit props from every card (grid + holder).
+    var holder = document.getElementById('layoutHiddenHolder');
+    CARD_IDS.forEach(function(id) {
+      var card = homeGrid.querySelector('.' + id) || (holder && holder.querySelector('.' + id));
+      if (!card) return;
+      stripHandles(card);
+      card.style.gridColumn = ''; card.style.gridRow = '';
+      if (card.parentNode !== homeGrid) homeGrid.appendChild(card);
+    });
+    homeGrid.classList.remove('home-grid--editing');
+    homeGrid.style.gridTemplateColumns = '';
+    homeGrid.style.gridTemplateRows = '';
+    homeGrid.style.gridAutoRows = '';
+
+    editing = false;
     document.body.classList.remove('is-editing-layout');
     setToolbar(false);
+
     if (persist) {
-      // Default positions AND nothing hidden ⇒ delete key so the pristine
-      // named-area layout returns. Any hidden widget forces a saved custom blob.
-      if (layoutEqualsDefault(cards) && !hidden.length) storeDelete(LAYOUT_KEY);
-      else storeSet(LAYOUT_KEY, { v: 2, cols: COLS, cards: cards, hidden: hidden });
+      if (layoutEqualsDefault(cards) && !hidden.length) {
+        storeDelete(LAYOUT_KEY);
+      } else {
+        storeSet(LAYOUT_KEY, {
+          v: BLOB_V, cols: COLS,
+          rowUnit: unit,
+          rows: rows,
+          cards: cards,
+          hidden: hidden
+        });
+      }
     }
     editHidden = [];
+    positions = null;
     renderLayout();
-  }
-
-  // Reset just moves cards back to default slots while still editing; the actual
-  // key delete happens on Done (layoutEqualsDefault ⇒ storeDelete).
-  function resetToDefault() {
-    if (!grid) return;
-    var readded = editHidden.slice();
-    grid.batchUpdate();
-    // Re-add hidden widgets directly at their default slots (explicit position,
-    // NOT autoPosition) so makeWidget reads the final coords from gs-* attrs.
-    // Calling grid.update() on a just-made widget nulls its gs-id, so re-added
-    // widgets are placed once here and skipped in the update loop below.
-    readded.forEach(function(id) {
-      var card = getHiddenHolder().querySelector('.' + id);
-      if (!card) return;
-      var item = buildItem(id, DEFAULT_LAYOUT.cards[id], card);
-      homeGrid.appendChild(item);
-      grid.makeWidget(item);
-    });
-    editHidden = [];
-    // Reposition every card in one pass. Per-card grid.update() with float:false
-    // makes a moved card collide with cards not yet moved, so GridStack shoves
-    // them to wrong slots — leaving the layout half-reset until clicked again.
-    // grid.load() diffs all positions at once and resolves collisions together.
-    var layout = CARD_IDS.map(function(id) {
-      var pos = DEFAULT_LAYOUT.cards[id];
-      return { id: id, x: pos.x, y: pos.y, w: pos.w, h: pos.h };
-    });
-    grid.load(layout, false);
-    grid.commit();
-    buildPalette();
   }
 
   // ───────── Viewport / wiring ─────────
   function onViewport() {
-    if (grid && !DESKTOP_MQ.matches) {
+    if (editing && !DESKTOP_MQ.matches) {
       // Dropped below the desktop breakpoint mid-edit: bail without saving.
       exitEdit(false);
       return;
     }
-    renderLayout();
-  }
-
-  function onResize() {
-    if (grid) {
-      grid.cellHeight(computeCellHeight());
-    } else if (homeGrid && homeGrid.classList.contains('home-grid--custom')) {
-      homeGrid.style.setProperty('--home-cell-h', computeCellHeight() + 'px');
-    }
+    if (!editing) renderLayout();
   }
 
   function init() {
     homeGrid = getHomeGrid();
+    // Discard stale pre-v3 blobs so they don't re-render as broken layouts.
+    var raw = storeGet(LAYOUT_KEY);
+    if (raw && raw.v !== BLOB_V) storeDelete(LAYOUT_KEY);
     renderLayout();
 
     DESKTOP_MQ.addEventListener('change', onViewport);
-    window.addEventListener('resize', debounce(onResize, 200));
 
     // Cross-tab / cross-device: re-apply when the synced key changes (not while
-    // we're mid-edit — GridStack owns the DOM then).
+    // we're mid-edit — the editor owns the DOM then).
     window.addEventListener('storage', function(e) {
-      if (e.key === LAYOUT_KEY && !grid) renderLayout();
+      if (e.key === LAYOUT_KEY && !editing) renderLayout();
     });
 
     var doneBtn = document.getElementById('layoutDoneBtn');
@@ -558,7 +674,6 @@
     if (doneBtn) doneBtn.addEventListener('click', function() { exitEdit(true); });
     if (cancelBtn) cancelBtn.addEventListener('click', function() { exitEdit(false); });
     if (resetBtn) resetBtn.addEventListener('click', function() {
-      // Destructive: wipes the custom layout. Confirm first.
       confirmModal({
         title: 'Reset layout?',
         body: 'This restores the default home layout and removes your customizations.',
@@ -569,19 +684,20 @@
 
     // Keyboard: Esc cancels edit; arrow keys nudge the focused card by one cell.
     document.addEventListener('keydown', function(e) {
-      if (!grid) return;
+      if (!editing) return;
       if (e.key === 'Escape') { exitEdit(false); return; }
       var dirs = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
       var d = dirs[e.key];
       if (!d) return;
-      var item = document.activeElement;
-      if (!item || !item.classList || !item.classList.contains('grid-stack-item')) return;
+      var card = document.activeElement;
+      if (!card || !card.classList || !card.classList.contains('card')) return;
+      var id = CARD_IDS.filter(function(x){ return card.classList.contains(x); })[0];
+      if (!id || !positions[id]) return;
       e.preventDefault();
-      var node = item.gridstackNode;
-      if (!node) return;
-      var nx = Math.max(0, Math.min(node.x + d[0], COLS - node.w));
-      var ny = Math.max(0, node.y + d[1]);
-      grid.update(item, { x: nx, y: ny });
+      var p = positions[id];
+      var cand = { x: Math.max(0, Math.min(p.x + d[0], COLS - p.w)),
+                   y: Math.max(0, p.y + d[1]), w: p.w, h: p.h };
+      if (fits(cand, id)) { positions[id] = cand; applyPos(id); }
     });
 
     var addBtn = document.getElementById('layoutAddBtn');
@@ -590,9 +706,8 @@
       var pal = document.getElementById('layoutAddPalette');
       setPalette(pal ? pal.hidden : true);
     });
-    // Click-away closes the palette.
     document.addEventListener('click', function(e) {
-      if (!grid) return;
+      if (!editing) return;
       var wrap = document.querySelector('.layout-add-wrap');
       if (wrap && !wrap.contains(e.target)) setPalette(false);
     });
@@ -607,7 +722,6 @@
   // Public API (consumed by tweaks "Customize Layout" button)
   window.HomeLayout = {
     edit: enterEdit,
-    // Back-compat: index.html calls setEditMode(true) to open the editor.
     setEditMode: function(on) { if (on) enterEdit(); else exitEdit(true); },
     reset: resetToDefault,
     reload: renderLayout
