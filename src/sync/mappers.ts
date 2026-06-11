@@ -20,7 +20,6 @@ export const SETTINGS_KEYS = new Set<string>([
   'recurring_blocks_v1',
   'schedule_templates_v1',
   'day_ring_blocks_v1',
-  'weather_config_v1',
   'goal_streak_v1',
   'goal_rollover_v1',
   'focus_session_v1',

@@ -70,7 +70,6 @@ const RENDER_FNS = [
   'renderHomeInsights',
   'renderCalendar',
   'renderTimeline',
-  'renderWeather',
   'renderStatsPanel',
   'renderSidebarAtAGlance',
   'updateGreeting',

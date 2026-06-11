@@ -407,7 +407,7 @@ body {
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow timeline habits    habits   stats"
-    "activity activity weather   weather  calendar";
+    "activity activity .        .        calendar";
 }
 
 /* ─── Card Base ─── */
@@ -446,14 +446,12 @@ body {
 .home-grid .a-stats,
 .home-grid .a-activity,
 .home-grid .a-mood,
-.home-grid .a-weather,
 .home-grid .a-calendar {
   border-color: var(--line);
 }
 .home-grid .a-stats .card-label,
 .home-grid .a-activity .card-label,
 .home-grid .a-mood .card-label,
-.home-grid .a-weather .card-label,
 .home-grid .a-calendar .card-label {
   color: var(--muted);
 }
@@ -485,7 +483,6 @@ body {
 .a-calendar { grid-area: calendar; }
 .a-activity { grid-area: activity; }
 .a-mood { grid-area: mood; }
-.a-weather { grid-area: weather; }
 .a-connections { grid-area: connect; flex-direction: row; align-items: center; padding: 10px 18px; }
 .connections-flow { display: flex; align-items: center; gap: 12px; flex: 1; }
 .conn-node { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 60px; }
@@ -1307,92 +1304,6 @@ body {
 .mood-pick.active { border-color: var(--accent); background: var(--accent-soft); }
 .mood-pick-icon { width: 18px; height: 18px; object-fit: contain; display: block; }
 
-/* ─── Weather Widget ─── */
-#weatherWidget { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; justify-content: space-between; margin-top: -2px; overflow: hidden; }
-.weather-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
-.weather-icon-mid { display: flex; justify-content: center; align-items: center; }
-.weather-icon {
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9px;
-  flex-shrink: 0;
-  color: var(--accent);
-}
-.weather-icon svg { display: block; width: 22px; height: 22px; stroke-width: 1.75; }
-.weather-temp { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.1; }
-.weather-cond { font-size: 13px; font-weight: 600; color: var(--text); }
-.weather-hl { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-mono); }
-.weather-sun-row { display: flex; justify-content: space-between; font-size: 11px; font-family: var(--font-mono); }
-.weather-hl-hi, .weather-hl-lo, .weather-sun-rise, .weather-sun-set { color: var(--text); }
-.weather-meta-row { display: flex; gap: 10px; font-size: 11px; color: var(--muted-2); flex-wrap: wrap; }
-.weather-rec {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.35;
-  padding: 6px 9px;
-  margin-bottom: 0;
-  background: var(--accent-soft);
-  border-radius: var(--r-sm);
-}
-.weather-rec::before { content: '💡'; font-size: 11px; opacity: 0.7; flex-shrink: 0; margin-top: 1px; }
-
-.weather-cfg-btn { background: transparent; border: 0; color: var(--muted-2); cursor: pointer; padding: 3px; font-size: 13px; border-radius: 6px; line-height: 1; transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
-.weather-cfg-btn:hover { color: var(--text); background: var(--surface-2); }
-.weather-form { display: flex; flex-direction: column; gap: 8px; }
-.weather-form input {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 12px;
-  color: var(--text);
-  font-family: inherit;
-  outline: none;
-}
-.weather-form input:focus { border-color: var(--line-2); }
-.weather-unit-row { display: flex; gap: 6px; padding: 4px 0; }
-.weather-unit-btn {
-  padding: 6px 14px;
-  border-radius: 99px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
-}
-.weather-unit-btn:hover { color: var(--text); border-color: var(--line-2); }
-.weather-unit-btn.is-active { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.weather-save-btn {
-  padding: 7px 14px;
-  background: var(--accent);
-  color: #1a0710;
-  border: 0;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.weather-loading, .weather-error { color: var(--muted); font-size: 12px; }
-
-/* ─── Weather condition tints ─── */
-.card[data-weather="Clear"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(242,192,99,0.04) 100%); }
-.card[data-weather="Clouds"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(139,139,149,0.04) 100%); }
-.card[data-weather="Rain"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(91,168,247,0.05) 100%); }
-.card[data-weather="Thunderstorm"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(167,139,250,0.06) 100%); }
-.card[data-weather="Snow"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(237,237,239,0.04) 100%); }
-.card[data-weather="Drizzle"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(91,168,247,0.04) 100%); }
-.card[data-weather="Mist"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(139,139,149,0.03) 100%); }
-.card[data-weather="Fog"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(139,139,149,0.03) 100%); }
-.card[data-weather="Haze"] { background: linear-gradient(135deg, var(--surface) 0%, rgba(242,192,99,0.03) 100%); }
 /* ─── Note Bar ─── */
 /* ═══════════════════════════════════════════════════════════════
    TWEAKS PANEL
@@ -1655,7 +1566,7 @@ body {
       "session  session  goals    goals"
       "stats    stats    stats    stats"
       "tomorrow timeline habits   habits"
-      "activity activity weather  weather"
+      "activity activity .        ."
       "calendar calendar calendar calendar";
   }
   .home-grid .card { padding: 14px; }
@@ -1673,7 +1584,7 @@ body {
       "stats    stats    stats"
       "tomorrow timeline habits"
       "activity activity activity"
-      "weather  weather  calendar";
+      ".        .        calendar";
   }
   .home-grid .card { padding: 12px; gap: 10px; }
 }
@@ -1703,7 +1614,6 @@ body {
       "timeline"
       "tomorrow"
       "habits"
-      "weather"
       "calendar"
       "activity"
       "connect";
@@ -6291,7 +6201,7 @@ input.sleep-picker-val:focus {
   .hl-factor-row, .nt-macro-row, .hi-item, .rc-row,
   .ht-ov-row, .ht-focus-inner > *,
   .ins-card, .goal-item, .tl-row,
-  #weatherWidget > div, .session-status, .session-range {
+  .session-status, .session-range {
     transform: translateZ(0);
   }
 
@@ -6464,16 +6374,6 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .tl-row:nth-child(5) { animation-delay: 0.30s; }
   #tab-main.is-entering .tl-row:nth-child(6) { animation-delay: 0.36s; }
   #tab-main.is-entering .tl-row:nth-child(n+7) { animation-delay: 0.42s; }
-
-  /* Weather widget rows — staggered fade/slide */
-  #tab-main.is-entering #weatherWidget > div { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(1) { animation-delay: 0.10s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(2) { animation-delay: 0.16s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(3) { animation-delay: 0.22s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(4) { animation-delay: 0.28s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(5) { animation-delay: 0.34s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(6) { animation-delay: 0.40s; }
-  #tab-main.is-entering #weatherWidget > div:nth-child(n+7) { animation-delay: 0.46s; }
 
   /* Session card — day ring draws in (JS sets dashoffset; no transition on it),
      plus status + range text fade in */
@@ -7109,7 +7009,6 @@ input.sleep-picker-val:focus {
       "timeline"
       "tomorrow"
       "habits"
-      "weather"
       "calendar"
       "activity";
     height: auto;

@@ -292,12 +292,6 @@
     <div class="insights-footer" id="insightsFooter"></div>
   </div>
 
-  <!-- ═══ WEATHER CARD ═══ -->
-  <div class="card a-weather">
-    <div class="card-head"></div>
-    <div id="weatherWidget"></div>
-  </div>
-
 </div><!-- /home-grid -->
 
 <!-- Day Ring Settings Modal -->
@@ -479,15 +473,6 @@
     <div class="setup-field">
       <label class="setup-label" for="setupName">Your name</label>
       <input class="setup-input" id="setupName" type="text" placeholder="What should we call you?" autocomplete="off">
-    </div>
-    <div class="setup-field">
-      <label class="setup-label" for="setupCity">City (for weather)</label>
-      <input class="setup-input" id="setupCity" type="text" placeholder="e.g. Tokyo" autocomplete="off">
-    </div>
-    <div class="setup-field">
-      <label class="setup-label" for="setupApiKey">OpenWeatherMap API key</label>
-      <input class="setup-input" id="setupApiKey" type="text" placeholder="Paste your free API key" autocomplete="off">
-      <span class="setup-hint">Free at openweathermap.org - you can skip this and add it later in Settings.</span>
     </div>
     <div class="setup-field">
       <label class="setup-label">Accent color</label>
@@ -853,21 +838,11 @@
 
   function saveAndDismiss() {
     var name   = document.getElementById('setupName').value.trim();
-    var city   = document.getElementById('setupCity').value.trim();
-    var apiKey = document.getElementById('setupApiKey').value.trim();
 
     if (name) {
       localStorage.setItem(NAME_KEY, name);
       var nameEl = document.querySelector('.su-name');
       if (nameEl) nameEl.textContent = name;
-    }
-
-    if (city || apiKey) {
-      var cfg = {};
-      try { cfg = JSON.parse(localStorage.getItem('weather_config_v1') || '{}'); } catch(e) {}
-      if (city)   cfg.city   = city;
-      if (apiKey) cfg.apiKey = apiKey;
-      localStorage.setItem('weather_config_v1', JSON.stringify(cfg));
     }
 
     applyAccent(selectedColor);
@@ -885,10 +860,7 @@
   });
 
   document.getElementById('setupName').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('setupCity').focus();
-  });
-  document.getElementById('setupCity').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.getElementById('setupApiKey').focus();
+    if (e.key === 'Enter') document.getElementById('setupSave').click();
   });
 })();
 </script>
