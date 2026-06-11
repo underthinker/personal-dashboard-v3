@@ -941,7 +941,9 @@ body {
 .view-all:hover { color: var(--text); }
 
 /* ─── Timeline Card v2 ─── */
-.a-timeline { position: relative; }
+/* Always a query container so the schedule rescales on any width change
+   (window resize, responsive reflow, custom layout) — not just in edit mode. */
+.a-timeline { position: relative; container-type: inline-size; container-name: card; }
 .timeline { display: flex; flex-direction: column; gap: 12px; position: relative; }
 .tl-row { display: grid; grid-template-columns: 62px 12px 1fr; gap: 10px; align-items: start; position: relative; }
 .tl-time-col { display: flex; flex-direction: column; align-items: flex-start; }
@@ -984,7 +986,7 @@ body {
 .tl-drag-ghost { opacity: 0.4; }
 
 /* Quick-add bar */
-.tl-quick-add { display: flex; gap: 6px; align-items: center; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--line, rgba(var(--tint),0.08)); }
+.tl-quick-add { display: flex; gap: 6px; align-items: center; padding-top: 10px; margin-top: auto; border-top: 1px solid var(--line, rgba(var(--tint),0.08)); }
 .tl-qa-start { width: 52px; flex-shrink: 0; background: var(--line-2, rgba(var(--tint),0.04)); border: 1px solid var(--line, rgba(var(--tint),0.08)); color: inherit; padding: 5px 6px; border-radius: 6px; font: inherit; font-size: 11px; font-family: var(--font-mono); outline: none; }
 .tl-qa-label { flex: 1; min-width: 0; background: var(--line-2, rgba(var(--tint),0.04)); border: 1px solid var(--line, rgba(var(--tint),0.08)); color: inherit; padding: 5px 8px; border-radius: 6px; font: inherit; font-size: 12px; outline: none; }
 .tl-qa-start:focus, .tl-qa-label:focus { border-color: var(--accent); }
@@ -7820,12 +7822,20 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 .home-grid--custom .a-goals .goal-text,
 .home-grid--custom .a-tomorrow .tom-text { font-size: clamp(12px, 4.5cqi, 15px); }
 
-.home-grid--editing .a-timeline .tl-content,
-.home-grid--custom .a-timeline .tl-content { font-size: clamp(12px, 4.5cqi, 14px); }
-.home-grid--editing .a-timeline .tl-sub,
-.home-grid--editing .a-timeline .tl-start,
-.home-grid--custom .a-timeline .tl-sub,
-.home-grid--custom .a-timeline .tl-start { font-size: clamp(10px, 3.5cqi, 12px); }
+/* Timeline rescaling — applies on ANY container width (window resize, responsive
+   reflow, custom layout), keeping text + structure in step so the schedule never
+   cramps or wraps oddly when narrow. Container set on .a-timeline (always-on). */
+.a-timeline .tl-content { font-size: clamp(11px, 4.5cqi, 14px); }
+.a-timeline .tl-sub,
+.a-timeline .tl-start { font-size: clamp(9px, 3.5cqi, 12px); }
+.a-timeline .timeline { gap: clamp(5px, 2cqi, 12px); }
+.a-timeline .tl-row {
+  grid-template-columns: clamp(42px, 16cqi, 62px) clamp(8px, 3cqi, 12px) 1fr;
+  gap: clamp(6px, 2.5cqi, 10px);
+}
+.a-timeline .tl-dot { width: clamp(6px, 2cqi, 7px); height: clamp(6px, 2cqi, 7px); }
+.a-timeline .tl-dur { font-size: clamp(9px, 3cqi, 10px); }
+.a-timeline .tl-qa-start { width: clamp(42px, 15cqi, 52px); }
 
 @container card (max-width: 220px) {
   .a-stats .po-metric-title { font-size: var(--text-xs); }
