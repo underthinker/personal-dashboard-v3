@@ -1644,19 +1644,42 @@ body {
   .home-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 0.78fr) auto; }
 }
 
-@media (max-width: 1400px) {
+/* ── 4-column intermediate (1025px–1400px) ── */
+@media (max-width: 1400px) and (min-width: 1025px) {
+  .home-grid {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto;
+    height: auto;
+    gap: 14px;
+    grid-template-areas:
+      "session  session  goals    goals"
+      "stats    stats    stats    stats"
+      "tomorrow timeline habits   habits"
+      "activity activity mood     weather"
+      "calendar calendar calendar calendar";
+  }
+  .home-grid .card { padding: 14px; }
+}
+
+/* ── 3-column tablet (901px–1024px) ── */
+@media (max-width: 1024px) and (min-width: 901px) {
   .home-grid {
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: auto;
     height: auto;
+    gap: 12px;
     grid-template-areas:
-      "session session goals"
-      "stats stats stats"
+      "session  session  goals"
+      "stats    stats    stats"
       "tomorrow timeline habits"
       "activity activity activity"
-      "mood weather calendar"
-      "connect connect connect";
+      "mood     weather  calendar";
   }
+  .home-grid .card { padding: 12px; gap: 10px; }
+}
+
+/* ── Finance tab: applies across all ≤1400px ── */
+@media (max-width: 1400px) {
   .fin-donut-row { grid-template-columns: 1fr; }
   .fin-tables { grid-template-columns: 1fr; }
   #finOverview { overflow-y: auto; }
@@ -1677,13 +1700,13 @@ body {
       "session"
       "goals"
       "stats"
-      "tomorrow"
       "timeline"
+      "tomorrow"
       "habits"
-      "activity"
       "mood"
       "weather"
       "calendar"
+      "activity"
       "connect";
   }
   .po-log-grid { grid-template-columns: 1fr; }
