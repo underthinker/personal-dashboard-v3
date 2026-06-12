@@ -539,11 +539,7 @@ body {
 .home-grid .tl-content { padding: 8px 10px; gap: 9px; border-radius: 12px; }
 .home-grid .tl-icon { width: 32px; height: 32px; border-radius: 9px; }
 .home-grid .tl-title { font-size: 12.5px; }
-.home-grid .tl-sub { font-size: 11px; margin-top: 1px; }
 .home-grid .tl-dur { font-size: 9px; }
-.home-grid .tl-greeting { margin-bottom: 12px; }
-.home-grid .tl-greeting-title { font-size: 14.5px; }
-.home-grid .tl-greeting-sub { font-size: 11.5px; }
 /* Tomorrow */
 .home-grid .tom-text { font-size: 12px; }
 .home-grid .tom-item { padding: 3px 0; }
@@ -948,14 +944,6 @@ body {
    (window resize, responsive reflow, custom layout) — not just in edit mode. */
 .a-timeline { position: relative; container-type: inline-size; container-name: card; }
 
-/* Greeting header */
-.tl-greeting { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.tl-greeting-icon { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
-.tl-greeting-text { display: flex; flex-direction: column; min-width: 0; }
-.tl-greeting-title { font-size: 16px; font-weight: 600; color: var(--text, #f2f2f5); line-height: 1.3; }
-.tl-greeting-sub { font-size: 12.5px; color: var(--muted, #9191a0); line-height: 1.3; }
-.tl-greeting .tl-reset-sort-btn { margin-left: auto; }
-
 .timeline { --tl-gap: 8px; display: flex; flex-direction: column; gap: var(--tl-gap); position: relative; }
 .tl-row { display: grid; grid-template-columns: 50px 12px 1fr; gap: 10px; align-items: stretch; position: relative; }
 .tl-time-col { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
@@ -967,28 +955,34 @@ body {
 .tl-dot-col:active { cursor: grabbing; }
 .tl-dot-col::before { content: ''; position: absolute; top: 0; bottom: calc(-1 * var(--tl-gap)); left: 50%; width: 1px; transform: translateX(-50%); background: var(--line, rgba(var(--tint),0.08)); z-index: 0; }
 .tl-row-last .tl-dot-col::before { display: none; }
-.tl-dot { position: relative; z-index: 1; width: 8px; height: 8px; border-radius: 99px; background: var(--line-2); box-shadow: 0 0 0 3px var(--bg, #0b0b0e); transition: background 200ms, box-shadow 200ms; }
-.tl-dot.active { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tl-dot { position: relative; z-index: 1; width: 8px; height: 8px; border-radius: 99px; background: var(--line-2); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg, #0b0b0e) 88%, var(--accent)); transition: background 220ms, box-shadow 220ms, transform 220ms; }
+.tl-row:hover .tl-dot { background: color-mix(in srgb, var(--accent) 55%, var(--line-2)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bg, #0b0b0e) 78%, var(--accent)), 0 0 8px color-mix(in srgb, var(--accent) 45%, transparent); transform: scale(1.18); }
+.tl-dot.active { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft), 0 0 10px color-mix(in srgb, var(--accent) 55%, transparent); }
 .tl-state-done .tl-dot { background: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
 
 /* Row card */
-.tl-content { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 11px 12px; background: rgba(var(--tint),0.022); border: 1px solid var(--line, rgba(var(--tint),0.07)); border-radius: 14px; transition: border-color 0.2s, background 0.2s, opacity 0.2s; }
+.tl-content { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 11px 12px; background: rgba(var(--tint),0.022); border: 1px solid var(--line, rgba(var(--tint),0.07)); border-radius: 14px; transition: border-color 0.2s, background 0.2s, opacity 0.2s, transform 0.18s; }
+.tl-row:hover .tl-content { border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); background: color-mix(in srgb, var(--accent) 4%, rgba(var(--tint),0.022)); transform: translateX(2px); }
+.tl-content:active { transform: scale(0.985); }
+@media (prefers-reduced-motion: reduce) { .tl-row:hover .tl-content, .tl-row:hover .tl-dot, .tl-row:hover .tl-icon { transform: none; } }
 .tl-content.active { border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 7%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent); }
 .tl-content.tl-state-done { opacity: 0.62; }
-.tl-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(var(--tint),0.05); color: var(--muted, #9191a0); }
+.tl-icon { flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(var(--tint),0.05); color: var(--muted, #9191a0); transition: background 220ms, color 220ms, transform 220ms; }
+.tl-row:hover .tl-icon { background: color-mix(in srgb, var(--accent) 12%, transparent); color: color-mix(in srgb, var(--accent) 80%, var(--muted)); transform: translateY(-1px); }
 .tl-content.active .tl-icon { background: var(--accent-soft); color: var(--accent); }
 .tl-body { flex: 1; min-width: 0; }
 .tl-content.active .tl-title { color: var(--accent); font-weight: 600; }
 .tl-title { font-size: 13.5px; font-weight: 600; color: var(--text, #f2f2f5); }
 .tl-title-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
 .tl-dur { font-size: 10px; color: #8a8a96; font-family: var(--font-mono); background: rgba(var(--tint),0.06); padding: 1.5px 6px; border-radius: 99px; flex-shrink: 0; font-weight: 500; }
-.tl-sub { font-size: 12px; color: var(--muted, #9191a0); margin-top: 2px; }
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(var(--tint),0.04)); padding: 0 2px; min-width: 40px; }
 
 /* Status chip */
 .tl-status { flex-shrink: 0; display: inline-flex; align-items: center; }
-.tl-status-done { width: 24px; height: 24px; border-radius: 50%; justify-content: center; background: rgba(var(--tint),0.07); color: var(--muted, #9191a0); }
-.tl-status-pending { width: 22px; height: 22px; border-radius: 50%; border: 1.5px dashed color-mix(in srgb, var(--tint-c, #acacb5) 22%, transparent); }
+.tl-status-done { width: 24px; height: 24px; border-radius: 50%; justify-content: center; background: color-mix(in srgb, var(--accent) 18%, transparent); color: color-mix(in srgb, var(--accent) 85%, #fff); transition: background 220ms, transform 220ms; cursor: pointer; }
+.tl-status-done:hover { background: color-mix(in srgb, var(--accent) 28%, transparent); transform: scale(1.08); }
+.tl-status-pending { width: 22px; height: 22px; border-radius: 50%; border: 1.5px dashed color-mix(in srgb, var(--accent) 30%, transparent); transition: border-color 220ms, transform 220ms, background 220ms; cursor: pointer; }
+.tl-status-pending:hover { border-style: solid; border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 10%, transparent); transform: scale(1.08); }
 .tl-status-active { gap: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
 .tl-status-active .tl-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
@@ -7860,7 +7854,6 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
    reflow, custom layout), keeping text + structure in step so the schedule never
    cramps or wraps oddly when narrow. Container set on .a-timeline (always-on). */
 .a-timeline .tl-content { font-size: clamp(11px, 4.5cqi, 14px); }
-.a-timeline .tl-sub,
 .a-timeline .tl-start { font-size: clamp(9px, 3.5cqi, 12px); }
 .a-timeline .timeline { gap: clamp(5px, 2cqi, 12px); }
 .a-timeline .tl-row {
@@ -7874,20 +7867,21 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 /* Vertical auto-fit: JS sets --tl-fit (1 → ~0.55) on the widget so the default
    schedule fits without scrolling. Folds into the horizontal cqi clamps above. */
 .a-timeline .home-timeline-widget { --tl-fit: 1; }
-.a-timeline .timeline { gap: calc(clamp(5px, 2cqi, 12px) * var(--tl-fit)); }
+/* Distribute any leftover vertical space evenly between rows so the schedule
+   fills a tall card instead of clustering at the top. When the schedule
+   overflows there is no free space, so this collapses back to the gap value. */
+.a-timeline .timeline { gap: calc(clamp(5px, 2cqi, 12px) * var(--tl-fit)); justify-content: space-between; }
+.a-timeline .tl-quick-add { margin-top: 0; }
 .a-timeline .tl-content {
   padding-block: calc(9px * var(--tl-fit));
-  font-size: calc(clamp(11px, 4.5cqi, 14px) * var(--tl-fit));
+  font-size: calc(clamp(12px, 5cqi, 15.5px) * var(--tl-fit));
 }
 .a-timeline .tl-icon {
   width: calc(32px * var(--tl-fit));
   height: calc(32px * var(--tl-fit));
 }
-.a-timeline .tl-title { font-size: calc(12.5px * var(--tl-fit)); }
-.a-timeline .tl-sub { font-size: calc(11px * max(var(--tl-fit), 0.82)); margin-top: calc(1px * var(--tl-fit)); }
-.a-timeline .tl-start { font-size: calc(clamp(9px, 3.5cqi, 12px) * max(var(--tl-fit), 0.85)); }
-/* Last-resort density: hide subtitles so all blocks fit without scrolling. */
-.a-timeline .home-timeline-widget.tl-fit-dense .tl-sub { display: none; }
+.a-timeline .tl-title { font-size: calc(15.5px * var(--tl-fit)); }
+.a-timeline .tl-start { font-size: calc(clamp(11px, 4.2cqi, 14px) * max(var(--tl-fit), 0.85)); }
 /* Quick-add bar shrinks with the schedule so it doesn't dominate short cards. */
 .a-timeline .tl-quick-add { padding-top: calc(14px * var(--tl-fit)); gap: calc(8px * var(--tl-fit)); }
 .a-timeline .tl-qa-btn,

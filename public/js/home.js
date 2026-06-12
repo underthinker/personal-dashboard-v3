@@ -11,14 +11,14 @@
   const ACTIVE_TMPL_KEY = 'tl_active_template';
 
   const DEFAULT_BLOCKS = [
-    { id:'d1', start:'6:00',  end:'7:00',  label:'Morning routine', sub:'Wake up, stretch, coffee' },
-    { id:'d2', start:'7:00',  end:'9:00',  label:'Deep work',       sub:'Focus session' },
-    { id:'d3', start:'9:00',  end:'9:30',  label:'Team sync',       sub:'Standup' },
-    { id:'d4', start:'10:00', end:'12:00', label:'Project work',    sub:'Main task block' },
-    { id:'d5', start:'12:00', end:'13:00', label:'Lunch',           sub:'Break' },
-    { id:'d6', start:'13:00', end:'15:00', label:'Deep work II',    sub:'Second session' },
-    { id:'d7', start:'15:00', end:'17:00', label:'Admin',           sub:'Email, planning' },
-    { id:'d8', start:'17:00', end:'18:00', label:'Wind down',       sub:'Review, plan tomorrow' },
+    { id:'d1', start:'6:00',  end:'7:00',  label:'Morning routine' },
+    { id:'d2', start:'7:00',  end:'9:00',  label:'Deep work' },
+    { id:'d3', start:'9:00',  end:'9:30',  label:'Team sync' },
+    { id:'d4', start:'10:00', end:'12:00', label:'Project work' },
+    { id:'d5', start:'12:00', end:'13:00', label:'Lunch' },
+    { id:'d6', start:'13:00', end:'15:00', label:'Deep work II' },
+    { id:'d7', start:'15:00', end:'17:00', label:'Admin' },
+    { id:'d8', start:'17:00', end:'18:00', label:'Wind down' },
   ];
 
   function tlUid() { return Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
@@ -52,7 +52,7 @@
       const v2 = v1.map(function(b) {
         const start = normalizeTime(b.t || '0:00');
         const em = Math.min(parseMin(start) + 60, 23 * 60 + 59);
-        return { id: tlUid(), start: start, end: normalizeTime(Math.floor(em / 60) + ':' + (em % 60)), label: b.label || '', sub: b.sub || '' };
+        return { id: tlUid(), start: start, end: normalizeTime(Math.floor(em / 60) + ':' + (em % 60)), label: b.label || '' };
       });
       localStorage.setItem(TL_KEY, JSON.stringify(v2));
       localStorage.removeItem(TL_KEY_V1);
@@ -111,7 +111,7 @@
       var name = nameIn.value.trim();
       if (!name) { nameIn.focus(); return; }
       var autoApply = pop.querySelector('.tl-tmpl-auto').checked;
-      var blocks = getBlocks().map(function(b) { return { start: b.start, end: b.end, label: b.label, sub: b.sub || '' }; });
+      var blocks = getBlocks().map(function(b) { return { start: b.start, end: b.end, label: b.label }; });
       var tmpls = getTemplates(); tmpls.push({ name: name, blocks: blocks, autoApply: autoApply });
       saveTemplates(tmpls); updateTemplateSelect();
       pop.remove(); _tmplPop = null;
@@ -356,7 +356,7 @@
     const em = startVal ? Math.min(parseMin(startVal) + 60, 23 * 60 + 59) : 0;
     const end = startVal ? normalizeTime(Math.floor(em / 60) + ':' + (em % 60)) : '';
     const bks = getBlocks();
-    bks.push({ id: tlUid(), start: startVal, end: end, label: label, sub: '-' });
+    bks.push({ id: tlUid(), start: startVal, end: end, label: label });
     saveBlocks(bks);
     renderTimeline();
     setTimeout(function() {
@@ -405,26 +405,8 @@
     return '<span class="tl-status tl-status-pending" aria-label="Upcoming"></span>';
   }
 
-  // Static title + a calm intention line that rotates by time of day.
-  var TL_SUBS = {
-    morning:   ['Flow with intention.', 'Begin gently, move with focus.', 'One block at a time.'],
-    afternoon: ['Flow with intention.', 'Steady through the middle.', 'Protect your deep work.'],
-    evening:   ['Flow with intention.', 'Wind down with intention.', 'Close the day kindly.']
-  };
-  function updateGreeting() {
-    var el = $('tlGreetSub');
-    if (!el) return;
-    var d = new Date(), h = d.getHours();
-    var part = h < 12 ? 'morning' : (h < 18 ? 'afternoon' : 'evening');
-    var pool = TL_SUBS[part];
-    // Stable per day+part so it doesn't flicker on every re-render.
-    var idx = (d.getFullYear() + d.getMonth() * 31 + d.getDate()) % pool.length;
-    el.textContent = pool[idx];
-  }
-
   /* ─── Render ─── */
   function renderTimeline() {
-    updateGreeting();
     const el = $('timelineWidget');
     if (!el) return;
     const esc = window.escHtml;
@@ -492,7 +474,6 @@
                 '<span class="tl-title" data-tl-label>' + esc(b.label) + '</span>' +
                 durPill +
               '</div>' +
-              (b.sub ? '<div class="tl-sub" data-tl-sub>' + esc(b.sub) + '</div>' : '') +
             '</div>' +
             tlStatusHtml(state) +
             '<button class="tl-del-btn" data-tl-del="' + esc(b.id) + '" aria-label="Delete block"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg></button>' +
@@ -521,22 +502,17 @@
       Floors at 0.55 so it stays legible; past that the widget falls back to scroll. */
   var TL_FIT_MIN = 0.55;
   function fitTimeline(el) {
-    el.classList.remove('tl-fit-dense');
     el.style.setProperty('--tl-fit', '1');
-    var avail = el.clientHeight;
-    if (!avail) return;
+    var avail = el.clientHeight - 1; // 1px guard so the quick-add bar never sits on the edge
+    if (avail <= 0) return;
     if (el.scrollHeight <= avail) return;
-    // 1) Shrink density down to the legibility floor.
-    var f = Math.max(TL_FIT_MIN, avail / el.scrollHeight);
-    el.style.setProperty('--tl-fit', f.toFixed(3));
-    // 2) Still overflowing at the floor → drop subtitles (keeps titles readable),
-    //    then re-shrink to the new content height.
-    if (el.scrollHeight > avail + 1) {
-      el.classList.add('tl-fit-dense');
-      el.style.setProperty('--tl-fit', '1');
-      if (el.scrollHeight > avail) {
-        el.style.setProperty('--tl-fit', Math.max(TL_FIT_MIN, avail / el.scrollHeight).toFixed(3));
-      }
+    // Shrink density toward the legibility floor. Iterate: rows scale by --tl-fit
+    // but borders/gaps/min-clamps don't, so one linear pass leaves a few px of
+    // residual overflow — multiply the ratio back in until it actually fits.
+    var f = 1;
+    for (var i = 0; i < 10 && el.scrollHeight > avail && f > TL_FIT_MIN; i++) {
+      f = Math.max(TL_FIT_MIN, f * avail / el.scrollHeight);
+      el.style.setProperty('--tl-fit', f.toFixed(3));
     }
   }
 
@@ -581,12 +557,6 @@
     if (labelEl && labelEl.contentEditable !== 'true') {
       const row = labelEl.closest('[data-tl-id]');
       if (row) { startEdit(labelEl, row.getAttribute('data-tl-id'), 'label'); return; }
-    }
-
-    const subEl = e.target.closest('[data-tl-sub]');
-    if (subEl && subEl.contentEditable !== 'true') {
-      const row = subEl.closest('[data-tl-id]');
-      if (row) { startEdit(subEl, row.getAttribute('data-tl-id'), 'sub'); return; }
     }
   });
 
