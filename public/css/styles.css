@@ -495,7 +495,7 @@ body {
 .connections-insight { font-size: 12px; color: var(--muted); max-width: 220px; text-align: right; border-left: 1px solid var(--line); padding-left: 16px; line-height: 1.5; }
 
 /* ─── Home grid card containment ─── */
-.home-grid .card { overflow: hidden; min-height: 0; }
+.home-grid .card { overflow: hidden; min-height: 0; min-width: 0; }
 /* Card header: when a card is narrow, the label truncates with an ellipsis and
    the trailing pill (streak/badge) stays whole — instead of the pill getting
    hard-clipped mid-word by the card's overflow:hidden (e.g. "DAY STREAK" cut). */
@@ -532,7 +532,7 @@ body {
 
 /* ─── Second-row always-on compact sizing ─── */
 /* Timeline */
-.home-grid .home-timeline-widget { overflow-y: auto; flex: 1; min-height: 0; }
+.home-grid .home-timeline-widget { overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0; }
 .home-grid .timeline { --tl-gap: 6px; gap: var(--tl-gap); }
 .home-grid .tl-row { gap: 8px; grid-template-columns: 46px 10px 1fr; }
 .home-grid .tl-start, .home-grid .tl-end { font-size: 11px; }
@@ -976,6 +976,14 @@ body {
 .tl-title-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
 .tl-dur { font-size: 10px; color: #8a8a96; font-family: var(--font-mono); background: rgba(var(--tint),0.06); padding: 1.5px 6px; border-radius: 99px; flex-shrink: 0; font-weight: 500; }
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(var(--tint),0.04)); padding: 0 2px; min-width: 40px; }
+
+/* Editable affordance — signal tl labels are click-to-edit */
+.tl-title[data-tl-label] { cursor: text; border-radius: 3px; padding: 0 3px; margin: 0 -3px; transition: background .15s ease, box-shadow .15s ease; }
+.tl-title[data-tl-label]::after { content: ""; display: inline-block; width: 11px; height: 11px; margin-left: 5px; vertical-align: -1px; opacity: 0; transform: translateY(1px); transition: opacity .15s ease, transform .15s ease; background: currentColor; -webkit-mask: var(--tl-pencil) center/contain no-repeat; mask: var(--tl-pencil) center/contain no-repeat; }
+.tl-title[data-tl-label]:hover { background: rgba(var(--tint),0.06); box-shadow: inset 0 0 0 1px rgba(var(--tint),0.12); }
+.tl-title[data-tl-label]:hover::after { opacity: .55; transform: translateY(0); }
+.tl-title[data-tl-label].tl-editing::after { display: none; }
+:root { --tl-pencil: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>'); }
 
 /* Status chip */
 .tl-status { flex-shrink: 0; display: inline-flex; align-items: center; }
@@ -3761,6 +3769,7 @@ margin-top: 15px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--bg-home-deep);
   scrollbar-gutter: stable;
 }
