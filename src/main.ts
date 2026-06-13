@@ -19,6 +19,10 @@ function boot(): void {
     return;
   }
 
+  // Marker the vanilla layer reads to know sync is available (e.g. the
+  // onboarding checklist shows its "Sign in to sync" step only when set).
+  document.documentElement.dataset.supabase = '';
+
   // Capture localStorage writes from the legacy modules for the queue.
   installInterceptor((e) => engine.handleCapture(e));
 
@@ -63,6 +67,8 @@ function boot(): void {
     const uid = session?.user?.id ?? null;
     if (uid && uid !== currentUser) {
       currentUser = uid;
+      // Signal the vanilla onboarding checklist that auth completed.
+      localStorage.setItem('ob_auth_done_v1', '1');
       authScreen.hide();
       void engine.start(uid);
     } else if (!uid && currentUser) {
