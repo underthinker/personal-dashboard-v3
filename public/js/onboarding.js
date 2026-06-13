@@ -216,6 +216,10 @@
       state.items.sign_in = true;
       return true;
     }
+    if (localStorage.getItem(OFFLINE_OPTOUT_KEY)) {
+      state.items.sign_in = true;
+      return true;
+    }
     return false;
   }
 
@@ -318,23 +322,8 @@
 
   // ─── Initial Modal ───
 
-  // Gate: when Supabase is configured the auth screen owns the screen on
-  // setup-done, so wait until the user has either signed in or chosen to
-  // continue offline before popping the onboarding modal.
-  function authResolved() {
-    if (!hasSupabase()) return true;
-    if (localStorage.getItem(OFFLINE_OPTOUT_KEY)) return true;
-    if (localStorage.getItem(AUTH_DONE_KEY) === '1') return true;
-    return false;
-  }
-
   function maybeShowModal() {
     if (modalShown || isCompleted() || state.modalDismissed) return;
-    if (!authResolved()) {
-      // Auth screen still up; re-check shortly.
-      setTimeout(maybeShowModal, 600);
-      return;
-    }
     modalShown = true;
     requestAnimationFrame(renderModal);
   }
@@ -352,12 +341,19 @@
     for (var i = 0; i < itemsList.length; i++) {
       var it = itemsList[i];
       var checked = state.items[it.id] ? 'ob-item--done' : '';
-      itemsHtml += '<div class="ob-item ' + checked + '">' +
-        '<span class="ob-item-check">' +
-          (state.items[it.id] ? checkSvg(16) : circleSvg(16)) +
-        '</span>' +
-        '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
-        '</div>';
+      if (it.id === 'sign_in' && !state.items[it.id] && hasSupabase()) {
+        itemsHtml += '<button class="ob-item ob-item--action" data-action="sign-in">' +
+          '<span class="ob-item-check">' + circleSvg(16) + '</span>' +
+          '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
+          '</button>';
+      } else {
+        itemsHtml += '<div class="ob-item ' + checked + '">' +
+          '<span class="ob-item-check">' +
+            (state.items[it.id] ? checkSvg(16) : circleSvg(16)) +
+          '</span>' +
+          '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
+          '</div>';
+      }
     }
 
     bg.innerHTML =
@@ -389,6 +385,15 @@
 
     document.getElementById('obContinueBtn').addEventListener('click', dismiss);
     document.getElementById('obSkipBtn').addEventListener('click', dismiss);
+
+    var signInBtn = bg.querySelector('[data-action="sign-in"]');
+    if (signInBtn) {
+      signInBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        dismiss();
+        window.dispatchEvent(new CustomEvent('ikigai:request-sign-in'));
+      });
+    }
   }
 
   // ─── Sidebar Section ───
@@ -454,6 +459,14 @@
         arrow.textContent = '▶';
       }
     });
+
+    var signInSidebar = section.querySelector('[data-action="sign-in-sidebar"]');
+    if (signInSidebar) {
+      signInSidebar.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('ikigai:request-sign-in'));
+      });
+    }
   }
 
   function getSidebarItemsHtml() {
@@ -462,12 +475,19 @@
     for (var i = 0; i < items.length; i++) {
       var it = items[i];
       var cls = state.items[it.id] ? 'ob-item ob-item--done' : 'ob-item';
-      html += '<div class="' + cls + '">' +
-        '<span class="ob-item-check">' +
-          (state.items[it.id] ? checkSvg(14) : circleSvg(14)) +
-        '</span>' +
-        '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
-        '</div>';
+      if (it.id === 'sign_in' && !state.items[it.id] && hasSupabase()) {
+        html += '<button class="' + cls + ' ob-item--action" data-action="sign-in-sidebar">' +
+          '<span class="ob-item-check">' + circleSvg(14) + '</span>' +
+          '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
+          '</button>';
+      } else {
+        html += '<div class="' + cls + '">' +
+          '<span class="ob-item-check">' +
+            (state.items[it.id] ? checkSvg(14) : circleSvg(14)) +
+          '</span>' +
+          '<span class="ob-item-label">' + escHtml(it.label) + '</span>' +
+          '</div>';
+      }
     }
     return html;
   }
@@ -614,8 +634,8 @@
     setupTabListeners();
 
     if (!state.modalDismissed) {
-      // First run: wait for the setup wizard to finish, then (once any auth
-      // screen is resolved) show the modal.
+      // First run: show the Getting Started modal after the setup wizard
+      // finishes. Auth ("Sign in to sync") is a checklist item.
       window.addEventListener('ikigai:setup-done', function () {
         setTimeout(maybeShowModal, 400);
       }, { once: true });

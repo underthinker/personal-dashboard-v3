@@ -8037,6 +8037,20 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 
 .ob-item-label { flex: 1; }
 
+.ob-item--action {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--accent);
+  padding: 6px 0;
+  width: 100%;
+  text-align: left;
+  transition: opacity 150ms;
+}
+.ob-item--action:hover { opacity: 0.75; }
+
 /* Modal actions */
 .ob-modal-actions {
   display: flex;

@@ -36,6 +36,10 @@ function boot(): void {
     },
   });
 
+  // The legacy onboarding checklist dispatches this when the user clicks
+  // "Sign in to sync" — show the auth screen on demand, not at boot.
+  window.addEventListener('ikigai:request-sign-in', () => authScreen.show());
+
   // First-run setup (the inline #setupBg wizard in index.html) must complete
   // before the sign-in overlay appears. Keys mirror that wizard's storage.
   const setupPending = (): boolean =>
@@ -77,7 +81,7 @@ function boot(): void {
       showAuthScreen();
     } else if (!uid && !currentUser) {
       // First load, no session: stay local-only. User can sign in via
-      // the sync status indicator if they want.
+      // the sync status indicator or the onboarding checklist.
     }
   });
 }
