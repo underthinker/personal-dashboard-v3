@@ -2,7 +2,7 @@
 
 A personal dashboard for goals, finances, habits, health, and daily flow.
 
-The core app is vanilla HTML/CSS/JS storing everything in `localStorage` — no framework needed. An optional TypeScript + Vite + Supabase **cloud-sync layer** (`src/`) is bolted on top without touching any feature module: it observes `localStorage` and syncs across devices. With Supabase credentials absent, the app runs fully local-only (no auth, no sync), exactly as before.
+The core app is vanilla HTML/CSS/JS storing everything in `localStorage` - no framework needed. An optional TypeScript + Vite + Supabase **cloud-sync layer** (`src/`) is bolted on top without touching any feature module: it observes `localStorage` and syncs across devices. With Supabase credentials absent, the app runs fully local-only (no auth, no sync), exactly as before.
 
 ## Features
 
