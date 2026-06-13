@@ -259,7 +259,7 @@
   }
 
   // ============================================================
-  // HABIT TRACKER — ANALYTICS RENDERERS
+  // HABIT TRACKER - ANALYTICS RENDERERS
   // ============================================================
 
   // ============================================================
@@ -588,7 +588,7 @@
       var trendSuppressed = recentPct < TREND_MIN_PCT && prevPct < TREND_MIN_PCT;
       if (trendSuppressed) trendDiff = 0;
       var trendColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
-      var trendArrow = trendDiff > 0 ? '↑' : trendDiff < 0 ? '↓' : '—';
+      var trendArrow = trendDiff > 0 ? '↑' : trendDiff < 0 ? '↓' : '-';
       var trendStr = trendDiff !== 0 ? (trendDiff > 0 ? '+' : '') + trendDiff + '%' : '0%';
       var trendTitle = trendSuppressed ? ' title="Insufficient data (min 3 entries in 14 days)"' : '';
       var sparkColor = trendDiff > 0 ? 'var(--green)' : trendDiff < 0 ? 'var(--danger)' : 'var(--muted)';
@@ -975,7 +975,7 @@
   }
 
   // ============================================================
-  // FOCUS AREAS — COMPUTE
+  // FOCUS AREAS - COMPUTE
   // ============================================================
 
   function computeFocusAreas() {
@@ -1532,7 +1532,7 @@
       {
         label: 'Sleep', color: 'var(--green)', icon: HEALTH_RING_ICONS[0],
         pct: Math.min(100, Math.round(sleepH / settings.sleep_goal_hours * 100)),
-        sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm / ' + settings.sleep_goal_hours + 'h') : '—',
+        sub: sleepH > 0 ? (Math.floor(sleepH) + 'h ' + Math.round((sleepH % 1) * 60) + 'm / ' + settings.sleep_goal_hours + 'h') : '-',
         tip: function(p) {
           return p < 60 ? 'Sleep is low. Aim for ' + settings.sleep_goal_hours + 'h tonight.' : 'Sleep recovery looks stable.';
         }
@@ -1540,7 +1540,7 @@
       {
         label: 'Water', color: '#60a5fa', icon: HEALTH_RING_ICONS[1],
         pct: Math.min(100, Math.round(waterOz / settings.water_goal_oz * 100)),
-        sub: waterOz > 0 ? (Math.round(waterOz) + 'oz / ' + settings.water_goal_oz + 'oz') : '—',
+        sub: waterOz > 0 ? (Math.round(waterOz) + 'oz / ' + settings.water_goal_oz + 'oz') : '-',
         tip: function(p) {
           if (p < 50) return 'Hydration is low. Aim for ' + Math.round(settings.water_goal_oz - waterOz) + 'oz more.';
           return 'Hydration levels look good.';
@@ -1549,7 +1549,7 @@
       {
         label: slot.label, color: 'var(--accent)', icon: lucideIconHtml(slot.icon), macro: true,
         pct: Math.min(100, Math.round(macroVal / macroGoal * 100)),
-        sub: macroVal > 0 ? (Math.round(macroVal) + slot.unit + ' / ' + macroGoal + slot.unit) : '—',
+        sub: macroVal > 0 ? (Math.round(macroVal) + slot.unit + ' / ' + macroGoal + slot.unit) : '-',
         tip: function(p) {
           if (p < 50) return slot.label + ' is below target. Aim for ' + Math.round(macroGoal - macroVal) + slot.unit + ' more.';
           return slot.label + ' intake is on track.';
@@ -1606,7 +1606,7 @@
         '</div>'
       : '<div class="mood-current">' +
           '<div class="mood-svg-placeholder">·</div>' +
-          '<div class="mood-info"><div class="mood-name">—</div><div class="mood-note">How are you feeling?</div></div>' +
+          '<div class="mood-info"><div class="mood-name">-</div><div class="mood-note">How are you feeling?</div></div>' +
         '</div>';
 
     var pickerHtml = '<div class="mood-picker">' +

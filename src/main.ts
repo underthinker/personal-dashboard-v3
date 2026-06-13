@@ -37,7 +37,7 @@ function boot(): void {
   });
 
   // The legacy onboarding checklist dispatches this when the user clicks
-  // "Sign in to sync" — show the auth screen on demand, not at boot.
+  // "Sign in to sync" - show the auth screen on demand, not at boot.
   window.addEventListener('ikigai:request-sign-in', () => authScreen.show());
 
   // First-run setup (the inline #setupBg wizard in index.html) must complete

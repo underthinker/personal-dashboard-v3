@@ -66,7 +66,7 @@
   }
 
   function formatDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     const parts = dateStr.split('-');
     const m = parseInt(parts[1], 10) - 1;
     const d = parseInt(parts[2], 10);
@@ -363,7 +363,7 @@
     if (isBuiltIn) {
       // Built-in tags: rename is display-only. Entries always keep the canonical label.
       // The renames map (canonical → display) drives all label rendering throughout the app.
-      // Do NOT rename entries or mutate INCOME_TAGS/EXPENSE_TAGS — neither is persistent.
+      // Do NOT rename entries or mutate INCOME_TAGS/EXPENSE_TAGS - neither is persistent.
       const renames = loadTagRenames(scope);
       if (newLabel === originalLabel) {
         delete renames[originalLabel];
@@ -372,7 +372,7 @@
       }
       saveTagRenames(scope, renames);
     } else {
-      // Custom tags: the label IS the canonical key — rename it everywhere.
+      // Custom tags: the label IS the canonical key - rename it everywhere.
       const colors = loadCustomTagColors(scope);
       if (colors[originalLabel]) {
         colors[newLabel] = colors[originalLabel];
@@ -1737,7 +1737,7 @@
       card.style.maxHeight = '0';
       card.classList.add('is-expanded');
       void card.offsetHeight;
-      // Measure natural height directly — inner.scrollHeight misses .card base padding
+      // Measure natural height directly - inner.scrollHeight misses .card base padding
       card.style.maxHeight = '99999px';
       void card.offsetHeight;
       const targetH = Math.round(card.getBoundingClientRect().height);
@@ -2029,7 +2029,7 @@
         }
       } catch (e) { setStatus('Failed to load file: ' + e.message, true); return; }
 
-      setStatus('<span class="ps-spinner"></span>Running OCR — may take a few seconds…');
+      setStatus('<span class="ps-spinner"></span>Running OCR - may take a few seconds…');
       try {
         const text = await runOCR(ocrSource);
         const items = parsePaystub(text);
@@ -2123,7 +2123,7 @@
     function buildReview(items, rawText) {
       review.className = 'ps-review show';
       let html = '<div class="ps-review-section-h">Income</div>';
-      html += '<div class="ps-row ps-row-head"><span>Source</span><span>Amount</span><span>✓</span></div>';
+      html += '<div class="ps-row ps-row-head"><span>Source</span><span>Amount</span><span class="ps-head-check"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span></div>';
 
       items.forEach((it, i) => {
         html += '<div class="ps-row is-income">';

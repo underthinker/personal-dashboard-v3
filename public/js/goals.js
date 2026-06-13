@@ -725,7 +725,7 @@
     const cardLabel = document.querySelector('.card-label');
     if (cardLabel) cardLabel.textContent = block.name + ' Session';
 
-    dayRingRange.textContent = formatBlockTime(block.start) + ' – ' + formatBlockTime(block.end);
+    dayRingRange.textContent = formatBlockTime(block.start) + ' - ' + formatBlockTime(block.end);
   }
 
   // ============ DAY RING SETTINGS MODAL ============
@@ -864,7 +864,8 @@
 
       const arrow = document.createElement('span');
       arrow.className = 'dr-block-to';
-      arrow.textContent = '→';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
       row.appendChild(arrow);
 
       const endIn = document.createElement('input');
@@ -944,7 +945,7 @@
       }
     }
 
-    // ── Weekly bars: Mon–Sun of current week ──
+    // ── Weekly bars: Mon-Sun of current week ──
     var dow = now.getDay(); // 0=Sun
     var mondayOffset = dow === 0 ? -6 : 1 - dow;
     var monday = new Date(now); monday.setDate(monday.getDate() + mondayOffset);
@@ -1017,9 +1018,9 @@
     // ── Readiness (7-factor weighted, shared with health tab) ──
     var settings = window.getSettings ? window.getSettings() : { sleep_goal_hours: 8, water_goal_oz: 64, calorie_goal: 2200, protein_goal_g: 118 };
     var readinessScore = window.calcReadiness ? window.calcReadiness(todayYmd, health, settings) : null;
-    var readinessLabel = readinessScore == null ? '—' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
+    var readinessLabel = readinessScore == null ? '-' : readinessScore >= 80 ? 'Strong' : readinessScore >= 60 ? 'Good' : readinessScore >= 40 ? 'Fair' : 'Low';
 
-    var readEl = $('perfReadiness'); if (readEl) readEl.textContent = readinessScore != null ? readinessScore : '—';
+    var readEl = $('perfReadiness'); if (readEl) readEl.textContent = readinessScore != null ? readinessScore : '-';
     var readSubEl = $('perfReadinessSub'); if (readSubEl) readSubEl.textContent = readinessLabel;
     var readFillEl = $('perfReadinessFill'); if (readFillEl) readFillEl.style.width = (readinessScore || 0) + '%';
 
@@ -1542,38 +1543,12 @@
     _updateFocusStatUI();
   }
 
-  function _startFocusSession() {
-    var s = getFocusSession();
-    s.running = true;
-    s.startedAt = Date.now();
-    saveFocusSession(s);
-    _focusTimerInterval = setInterval(function() { if (document.hidden) return; _updateFocusStatUI(); }, 1000);
-    _updateFocusStatUI();
-  }
-
   function initFocusTimer() {
-    var toggle = $('focusStatToggle');
-    if (!toggle) return;
-
+    // Old trigger (click the sidebar online/focus status to start a free-form
+    // focus stopwatch) was removed in favor of the Pomodoro timer modal.
+    // One-time cleanup: credit and stop any session left running from before.
     var session = getFocusSession();
-    if (session.running) {
-      if (sessionStorage.getItem('focus_refresh_flag')) {
-        _focusTimerInterval = setInterval(function() { if (document.hidden) return; _updateFocusStatUI(); }, 1000);
-      } else {
-        _stopFocusSession();
-      }
-    }
-    _updateFocusStatUI();
-
-    toggle.addEventListener('click', function() {
-      var s = getFocusSession();
-      if (s.running) _stopFocusSession();
-      else _startFocusSession();
-    });
-
-    window.addEventListener('beforeunload', function() {
-      sessionStorage.setItem('focus_refresh_flag', '1');
-    });
+    if (session.running) _stopFocusSession();
   }
 
   // ============ FOCUS DATA FIX + EDIT ============

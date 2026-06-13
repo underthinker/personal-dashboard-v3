@@ -44,7 +44,7 @@ export function setCaptureEnabled(on: boolean): void {
   captureEnabled = on;
 }
 
-/** Write a value that originated from the cloud — never re-queued. */
+/** Write a value that originated from the cloud - never re-queued. */
 export function applyRemote(key: string, value: string | null): void {
   applyingRemote = true;
   try {

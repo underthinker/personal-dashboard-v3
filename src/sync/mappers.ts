@@ -22,6 +22,7 @@ export const SETTINGS_KEYS = new Set<string>([
   'goal_streak_v1',
   'goal_rollover_v1',
   'focus_session_v1',
+  'pomodoro_settings_v1',
   'tweak_theme',
   'tweak_accent',
   'active_tab',

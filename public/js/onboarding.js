@@ -1,4 +1,4 @@
-// Onboarding checklist — teaches dashboard features after the setup wizard.
+// Onboarding checklist - teaches dashboard features after the setup wizard.
 // Zero-dependency IIFE in the legacy vanilla layer. All detection is read-only
 // localStorage polling; progress persists to `onboarding_checklist_v1` (not a
 // tracked sync key, so it stays device-local). Modal shows once, then a
@@ -43,7 +43,7 @@
 
   // `data-supabase` is set on <html> by the Vite bundle (src/main.ts) only when
   // Supabase creds are present. It is a deferred module, so it runs before
-  // DOMContentLoaded but after this classic script parses — read it lazily, not
+  // DOMContentLoaded but after this classic script parses - read it lazily, not
   // at top-level, or it would always read false.
   function hasSupabase() {
     return document.documentElement.hasAttribute('data-supabase');
@@ -136,7 +136,7 @@
         state.items.set_habits = true;
         return true;
       }
-      // Same length — flag if any id/name/active differs from defaults. (icon is
+      // Same length - flag if any id/name/active differs from defaults. (icon is
       // intentionally ignored: getDefinitions() migrates legacy emoji→icon and
       // we don't want that to false-trigger the checklist.)
       for (var i = 0; i < defs.length; i++) {
@@ -320,6 +320,17 @@
       '" fill="none" stroke="currentColor" stroke-width="2" opacity="0.3"><circle cx="12" cy="12" r="9"/></svg>';
   }
 
+  function chevronSvg() {
+    return '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+  }
+
+  function checkCircleSvg(size) {
+    return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size +
+      '" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
+      'aria-hidden="true"><path d="M21.8 10A10 10 0 1 1 17 3.34"/><path d="m9 11 3 3L22 4"/></svg>';
+  }
+
   // ─── Initial Modal ───
 
   function maybeShowModal() {
@@ -437,7 +448,7 @@
       '<div class="ob-sidebar-header" id="obSidebarToggle">' +
         '<span class="ob-sidebar-title">Getting Started</span>' +
         '<span class="ob-sidebar-count">' + done + '/' + total + '</span>' +
-        '<span class="ob-sidebar-arrow">' + (wasExpanded ? '▼' : '▶') + '</span>' +
+        '<span class="ob-sidebar-arrow' + (wasExpanded ? ' open' : '') + '">' + chevronSvg() + '</span>' +
       '</div>' +
       '<div class="ob-sidebar-body" id="obSidebarBody" style="display:' + (wasExpanded ? '' : 'none') + '">' +
         '<div class="ob-progress-bar-wrap ob-sidebar-progress">' +
@@ -453,10 +464,10 @@
       var arrow = section.querySelector('.ob-sidebar-arrow');
       if (body.style.display === 'none') {
         body.style.display = '';
-        arrow.textContent = '▼';
+        arrow.classList.add('open');
       } else {
         body.style.display = 'none';
-        arrow.textContent = '▶';
+        arrow.classList.remove('open');
       }
     });
 
@@ -497,8 +508,8 @@
     badge.className = 'ob-completed-badge';
     badge.id = 'ob-sidebar';
     badge.innerHTML =
-      '<span class="ob-completed-icon">🎉</span>' +
-      '<span class="ob-completed-text">All done!</span>';
+      '<span class="ob-completed-icon">' + checkCircleSvg(16) + '</span>' +
+      '<span class="ob-completed-text">All set</span>';
     mountInSidebar(badge);
   }
 

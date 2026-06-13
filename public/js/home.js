@@ -508,7 +508,7 @@
     if (el.scrollHeight <= avail) return;
     // Shrink density toward the legibility floor. Iterate: rows scale by --tl-fit
     // but borders/gaps/min-clamps don't, so one linear pass leaves a few px of
-    // residual overflow — multiply the ratio back in until it actually fits.
+    // residual overflow - multiply the ratio back in until it actually fits.
     var f = 1;
     for (var i = 0; i < 10 && el.scrollHeight > avail && f > TL_FIT_MIN; i++) {
       f = Math.max(TL_FIT_MIN, f * avail / el.scrollHeight);
@@ -600,11 +600,11 @@
       });
 
       const q = data.find(g => g.queued && !g.done);
-      taskEl.textContent = activeTimedGoal ? activeTimedGoal.text : (q ? q.text : '—');
+      taskEl.textContent = activeTimedGoal ? activeTimedGoal.text : (q ? q.text : '-');
       const nextEl = $('cfNextTask');
       if (nextEl) {
         const nextGoal = data.find(g => !g.queued && !g.done);
-        nextEl.textContent = nextGoal ? nextGoal.text : '—';
+        nextEl.textContent = nextGoal ? nextGoal.text : '-';
       }
     } catch(e) { taskEl.textContent = ''; }
   }

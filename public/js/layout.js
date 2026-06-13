@@ -69,14 +69,14 @@
   // ───────── Constants ─────────
   var LAYOUT_KEY = 'home_layout_v1';   // key unchanged (synced via RAW_STRING_KEYS)
   var BLOB_V = 3;                       // current blob schema version
-  // Weighted columns — match the named-area homepage exactly so entering
+  // Weighted columns - match the named-area homepage exactly so entering
   // Customize is pixel-identical (no horizontal jump). Sum = 1390.
   var COL_FR = [305, 285, 245, 195, 360];
   var COL_SUM = 1390;
   var COLS = 5;
   var GAP = 16;                         // matches `.home-grid { gap: 16px }`
   var BASE_ROWS = 3;                    // the named-area grid is 3 rows tall
-  // Fallback row unit (px) only — used when live row heights can't be measured.
+  // Fallback row unit (px) only - used when live row heights can't be measured.
   var ROW_H = 150;
 
   // ── Widget registry: single source of truth (metadata over the static cards) ──
@@ -91,13 +91,13 @@
     'a-calendar': { title: 'Calendar',             minW: 1, minH: 1,          removable: true,  config: 'calendar' }
   };
   var CARD_IDS = Object.keys(WIDGETS);
-  // Inline SVG icons (Lucide: grip, x) — theme via currentColor.
+  // Inline SVG icons (Lucide: grip, x) - theme via currentColor.
   var SVG_GRIP = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
   var SVG_X = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   // SE resize grip (diagonal arrow).
   var SVG_RESIZE = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 21H3"/><path d="M21 21V3"/><path d="M21 21l-9-9"/></svg>';
 
-  // DEFAULT_LAYOUT — EXACT 1:1 map of the named-area grid (3 rows tall).
+  // DEFAULT_LAYOUT - EXACT 1:1 map of the named-area grid (3 rows tall).
   //   "session  session  goals     goals    stats"      y=0
   //   "tomorrow timeline timeline  .        stats"      y=1
   //   "activity timeline timeline  .        calendar"   y=2
@@ -414,7 +414,7 @@
     }
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'group');
-    card.setAttribute('aria-label', (meta.title || id) + ' — use arrow keys to move');
+    card.setAttribute('aria-label', (meta.title || id) + ' - use arrow keys to move');
   }
   function stripHandles(card) {
     ['.card-drag-handle', '.card-resize-handle', '.card-remove-btn'].forEach(function(sel) {
@@ -657,7 +657,7 @@
     DESKTOP_MQ.addEventListener('change', onViewport);
 
     // Cross-tab / cross-device: re-apply when the synced key changes (not while
-    // we're mid-edit — the editor owns the DOM then).
+    // we're mid-edit - the editor owns the DOM then).
     window.addEventListener('storage', function(e) {
       if (e.key === LAYOUT_KEY && !editing) renderLayout();
     });

@@ -85,16 +85,25 @@
     </button>
   </div>
 
+  <button class="nav-focus-btn" id="pomodoroToggle" type="button">
+    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="13" r="8"/>
+      <path d="M12 9v4l2.5 2.5"/>
+      <path d="M5 3 2 6"/>
+      <path d="M22 6l-3-3"/>
+      <path d="M6.38 18.7 4 21"/>
+      <path d="M17.64 18.67 20 21"/>
+      <path d="M12 3V1"/>
+    </svg>
+    Focus
+  </button>
+
   <div class="sidebar-user">
     <div class="su-avatar"></div>
     <div class="su-info">
       <span class="su-name"></span>
-      <div class="su-status-group" id="focusStatToggle">
+      <div class="su-status-group">
         <span class="su-online-status"><span class="su-online-dot">●</span> Online</span>
-        <span class="su-focus-status">
-          <span class="su-focus-dot" id="focusRunningDot" style="display:none"></span>
-          Focus
-        </span>
       </div>
     </div>
   </div>
@@ -146,16 +155,16 @@
         </div>
       </div>
       <div class="session-info">
-        <div class="session-status" id="dayRingStatus">☀️ Morning — fresh start</div>
-        <p class="session-range" id="dayRingRange">—</p>
+        <div class="session-status" id="dayRingStatus">☀️ Morning - fresh start</div>
+        <p class="session-range" id="dayRingRange">-</p>
         <div class="cf-block">
           <div class="cf-label">Current Focus</div>
-          <div class="cf-task" id="cfTaskText">—</div>
+          <div class="cf-task" id="cfTaskText">-</div>
           <div class="cf-meta" id="cfTaskMeta"></div>
         </div>
         <div class="cf-block cf-next-block">
           <div class="cf-label">Next Up</div>
-          <div class="cf-task cf-next-task" id="cfNextTask">—</div>
+          <div class="cf-task cf-next-task" id="cfNextTask">-</div>
         </div>
       </div>
     </div>
@@ -223,8 +232,8 @@
           <span class="po-badge po-badge-blue"><svg viewBox="0 0 14 14" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11.5C7 11.5 1.5 8 1.5 4.5a2.5 2.5 0 0 1 5-0.3 2.5 2.5 0 0 1 5 0.3C12.5 8 7 11.5 7 11.5Z"/></svg></span>
           <span class="po-metric-title">Readiness Score</span>
         </div>
-        <div class="po-metric-val po-val-blue" id="perfReadiness">—</div>
-        <div class="po-metric-sub" id="perfReadinessSub">—</div>
+        <div class="po-metric-val po-val-blue" id="perfReadiness">-</div>
+        <div class="po-metric-sub" id="perfReadinessSub">-</div>
         <div class="po-bar"><div class="po-bar-fill po-bar-blue" id="perfReadinessFill"></div></div>
       </div>
     </div>
@@ -261,7 +270,7 @@
   <div class="card a-timeline">
     <div class="card-head">
       <span class="card-label">Today's Timeline</span>
-      <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none">↑↓ Reset</button>
+      <button class="tl-reset-sort-btn" id="tlResetSort" type="button" style="display:none"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg>Reset</button>
     </div>
     <select id="tlTemplateSelect" hidden><option value="">Default</option></select>
     <button id="tlSaveTemplate" type="button" hidden>+ Save</button>
@@ -307,7 +316,7 @@
 
   <div class="wip-placeholder">
     <i data-lucide="construction"></i>
-    <span>Finances — work in progress</span>
+    <span>Finances - work in progress</span>
   </div>
 
 </div><!-- /tab-finances -->
@@ -394,9 +403,13 @@
   <div class="card hl-snapshot" id="hlSnapshot">
     <div class="hl-date-nav">
       <span class="card-label">READINESS BREAKDOWN</span>
-      <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">←</button>
+      <button type="button" class="hl-date-prev" id="hlDatePrev" aria-label="Previous day">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
       <div class="hl-date-display" id="hlDateDisplay" tabindex="0" role="button" aria-label="Pick date">Today</div>
-      <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">→</button>
+      <button type="button" class="hl-date-next" id="hlDateNext" aria-label="Next day">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
     </div>
     <div id="hlSnapshotBody"></div>
   </div>
@@ -425,7 +438,7 @@
 
   <div class="wip-placeholder">
     <i data-lucide="dumbbell"></i>
-    <span>Gym — work in progress</span>
+    <span>Gym - work in progress</span>
   </div>
 
 </div><!-- /tab-gym -->
@@ -454,6 +467,18 @@
   <button class="mob-tab" data-tab="gym" type="button">
     <svg class="mob-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
     <span>Gym</span>
+  </button>
+  <button class="mob-tab mob-tab-focus" data-tab="pomodoro" type="button">
+    <svg class="mob-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="13" r="8"/>
+      <path d="M12 9v4l2.5 2.5"/>
+      <path d="M5 3 2 6"/>
+      <path d="M22 6l-3-3"/>
+      <path d="M6.38 18.7 4 21"/>
+      <path d="M17.64 18.67 20 21"/>
+      <path d="M12 3V1"/>
+    </svg>
+    <span>Focus</span>
   </button>
 </nav>
 
@@ -603,6 +628,103 @@
 <!-- ═══ ONBOARDING CHECKLIST ═══ -->
 <script src="js/onboarding.js"></script>
 
+<!-- ═══ POMODORO TIMER ═══ -->
+<div class="pomo-overlay" id="pomoOverlay" hidden role="dialog" aria-modal="true" aria-label="Pomodoro timer">
+  <div class="pomo-modal" tabindex="-1">
+    <button class="pomo-icon-btn pomo-mute" id="pomoMute" aria-label="Mute completion sound" aria-pressed="false" type="button">
+      <svg class="pomo-mute-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/>
+      </svg>
+      <svg class="pomo-mute-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 5 6 9H2v6h4l5 4z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/>
+      </svg>
+    </button>
+    <button class="pomo-icon-btn pomo-close" id="pomoClose" aria-label="Close timer" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true">
+        <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="pomo-timer">
+      <div class="pomo-ring-wrapper">
+        <svg class="pomo-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="pomo-ring-track" cx="60" cy="60" r="52" fill="none" stroke-width="6"/>
+          <circle class="pomo-ring-progress" cx="60" cy="60" r="52" fill="none" stroke-width="6"
+            stroke-dasharray="326.73" stroke-dashoffset="0" stroke-linecap="round"
+            transform="rotate(-90, 60, 60)"/>
+        </svg>
+        <div class="pomo-time" id="pomoTime" role="timer" aria-live="off" aria-atomic="true">25:00</div>
+        <div class="pomo-phase" id="pomoPhase" aria-live="polite">FOCUS</div>
+      </div>
+    </div>
+
+    <div class="pomo-dots" id="pomoDots" aria-hidden="true"></div>
+
+    <div class="pomo-controls" id="pomoControls">
+      <button class="pomo-btn pomo-btn-primary" id="pomoStartBtn" type="button">Start</button>
+      <button class="pomo-btn pomo-btn-secondary" id="pomoSkipBtn" type="button" hidden>Skip</button>
+      <button class="pomo-btn pomo-btn-secondary" id="pomoResetBtn" type="button">Reset</button>
+    </div>
+
+    <div class="pomo-progress-label" id="pomoProgress" aria-live="polite"></div>
+
+    <div class="pomo-hint" id="pomoHint">
+      <kbd>Space</kbd> start / pause
+      <span class="pomo-hint-sep">·</span>
+      <kbd>R</kbd> reset
+    </div>
+
+    <div class="pomo-settings" id="pomoSettings">
+      <button class="pomo-settings-toggle" id="pomoSettingsToggle" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1.08 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1.08z"/>
+        </svg>
+        Settings
+      </button>
+      <div class="pomo-settings-body" id="pomoSettingsBody" hidden>
+        <div class="pomo-settings-row">
+          <label class="pomo-settings-label" for="pomoFocusMin">Focus</label>
+          <div class="pomo-stepper">
+            <button class="pomo-step" type="button" data-step="-1" aria-label="Decrease focus duration" tabindex="-1">&minus;</button>
+            <input type="number" inputmode="numeric" id="pomoFocusMin" aria-label="Focus duration in minutes" class="pomo-settings-input" data-key="focusMin" value="25" min="1" max="120">
+            <button class="pomo-step" type="button" data-step="1" aria-label="Increase focus duration" tabindex="-1">+</button>
+          </div>
+          <span class="pomo-settings-unit">min</span>
+        </div>
+        <div class="pomo-settings-row">
+          <label class="pomo-settings-label" for="pomoShortBreakMin">Break</label>
+          <div class="pomo-stepper">
+            <button class="pomo-step" type="button" data-step="-1" aria-label="Decrease break duration" tabindex="-1">&minus;</button>
+            <input type="number" inputmode="numeric" id="pomoShortBreakMin" aria-label="Short break duration in minutes" class="pomo-settings-input" data-key="shortBreakMin" value="5" min="1" max="60">
+            <button class="pomo-step" type="button" data-step="1" aria-label="Increase break duration" tabindex="-1">+</button>
+          </div>
+          <span class="pomo-settings-unit">min</span>
+        </div>
+        <div class="pomo-settings-row">
+          <label class="pomo-settings-label" for="pomoLongBreakMin">Long</label>
+          <div class="pomo-stepper">
+            <button class="pomo-step" type="button" data-step="-1" aria-label="Decrease long break duration" tabindex="-1">&minus;</button>
+            <input type="number" inputmode="numeric" id="pomoLongBreakMin" aria-label="Long break duration in minutes" class="pomo-settings-input" data-key="longBreakMin" value="15" min="1" max="120">
+            <button class="pomo-step" type="button" data-step="1" aria-label="Increase long break duration" tabindex="-1">+</button>
+          </div>
+          <span class="pomo-settings-unit">min</span>
+        </div>
+        <div class="pomo-settings-row">
+          <label class="pomo-settings-label" for="pomoLongBreakInterval">Every</label>
+          <div class="pomo-stepper">
+            <button class="pomo-step" type="button" data-step="-1" aria-label="Decrease session interval" tabindex="-1">&minus;</button>
+            <input type="number" inputmode="numeric" id="pomoLongBreakInterval" aria-label="Long break after this many sessions" class="pomo-settings-input" data-key="longBreakInterval" value="4" min="2" max="10">
+            <button class="pomo-step" type="button" data-step="1" aria-label="Increase session interval" tabindex="-1">+</button>
+          </div>
+          <span class="pomo-settings-unit">sessions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/pomodoro.js"></script>
+
 <!-- ═══ CLOUD SYNC (Vite/TS bundle) ═══ -->
 <script type="module" src="/src/main.ts"></script>
 
@@ -619,7 +741,7 @@
     if (e.target === overlay) overlay.classList.remove('open');
   });
 
-  /* Customize Layout — hand off to layout.js edit mode */
+  /* Customize Layout - hand off to layout.js edit mode */
   var layoutBtn = document.getElementById('layoutCustomizeBtn');
   if (layoutBtn) layoutBtn.addEventListener('click', function() {
     overlay.classList.remove('open');

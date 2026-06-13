@@ -106,7 +106,7 @@
     return svg ? '<img src="data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg) + '" alt="" class="hl-mood-svg">' : null;
   }
 
-  // Mood → readiness score (0–1)
+  // Mood → readiness score (0-1)
   const MOOD_SCORES = {
     motivated: 0.95, happy: 0.90, calm: 0.80,
     numb: 0.35, tired: 0.35, anxious: 0.30, frustrated: 0.25, sad: 0.20,
@@ -124,7 +124,7 @@
     return streak;
   }
 
-  // ---- Readiness score — Phase 2: 7-factor weighted formula ----
+  // ---- Readiness score - Phase 2: 7-factor weighted formula ----
   // All factors always included; missing data defaults to neutral (0.5).
   // Returns null only when no health data has been logged at all.
   function calcReadiness(date, day, settings) {
@@ -271,7 +271,7 @@
 
     // Sleep
     const sleep = day.sleep_hours != null ? day.sleep_hours : null;
-    const sleepDisp = sleep != null ? (Math.round(sleep * 10) / 10) : '–';
+    const sleepDisp = sleep != null ? (Math.round(sleep * 10) / 10) : '-';
     const sleepHit = sleep != null && sleep >= settings.sleep_goal_hours * 0.875;
 
     // Water
@@ -300,7 +300,7 @@
 
     const html =
       tile('heart-pulse', 'READINESS',
-        readiness != null ? readiness : '–', readiness != null ? '%' : '',
+        readiness != null ? readiness : '-', readiness != null ? '%' : '',
         readiness != null ? _trendSub(rDiff, '') : 'No data yet',
         _sparkline(readinessSeries, 60, 28, 'var(--accent)')) +
       tile('moon', 'SLEEP',
@@ -895,7 +895,12 @@
       return;
     }
 
-    const iconMap = { positive: '↑', warn: '▲', info: '◆' };
+    const sv = 'viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    const iconMap = {
+      positive: `<svg ${sv}><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>`,
+      warn: `<svg ${sv}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+      info: `<svg ${sv}><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+    };
     el.innerHTML = `<div class="hi-list">${
       insights.map(ins => `<div class="hi-item hi-${ins.type}">
         <span class="hi-icon">${iconMap[ins.type]}</span>
@@ -951,7 +956,7 @@
     const lateAvg = vals.slice(-half).reduce((a, b) => a + b, 0) / half;
     const delta = Math.round(lateAvg - earlyAvg);
     const dir = delta > 0 ? 'up' : delta < 0 ? 'down' : 'flat';
-    const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '–';
+    const arrow = delta > 0 ? '▲' : delta < 0 ? '▼' : '-';
     const sign = delta > 0 ? '+' : '';
     const label = delta === 0 ? 'flat' : `${sign}${delta} vs last week`;
     return `<span class="htrend-trend htrend-trend-${dir}">${arrow} ${label}</span>`;
@@ -978,7 +983,7 @@
       </linearGradient>
     </defs>`;
 
-    // Subtle threshold gridlines (60 / 80) — reference only, no zone bands.
+    // Subtle threshold gridlines (60 / 80) - reference only, no zone bands.
     [[60, yScale(60)], [80, yScale(80)]].forEach(([val, yy]) => {
       html += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" class="htrend-gridline"/>`;
       html += `<text x="${W - padR}" y="${(yy - 3).toFixed(1)}" class="htrend-axis-y">${val}</text>`;
@@ -995,7 +1000,7 @@
       html += `<path d="${area}" class="htrend-area" fill="url(#${uid}-area)"/>`;
     });
 
-    // Accent line — pathLength=1 lets CSS draw it in regardless of real length.
+    // Accent line - pathLength=1 lets CSS draw it in regardless of real length.
     segs.forEach(seg => {
       if (seg.length >= 2) html += `<path d="${htLinePath(seg)}" pathLength="1" class="htrend-line-readiness"/>`;
     });
@@ -1009,7 +1014,7 @@
       emphasis.add(valid.reduce((a, b) => b.v < a.v ? b : a).i); // low
     }
 
-    // Dots — faint for all, emphasized for endpoints. Native title = hover value.
+    // Dots - faint for all, emphasized for endpoints. Native title = hover value.
     html += `<g class="htrend-points">`;
     readinessVals.forEach((v, i) => {
       if (v == null) return;

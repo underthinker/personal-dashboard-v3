@@ -1,4 +1,4 @@
--- Ikigai Dashboard — cloud sync schema
+-- Ikigai Dashboard - cloud sync schema
 -- Offline-first hybrid model: date-keyed JSON blobs live in `entries`,
 -- normalized data in `profiles` and `habits`, everything else in `settings`.
 -- Every table is owner-scoped via RLS on auth.uid(). Last-Write-Wins uses updated_at.

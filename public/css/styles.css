@@ -1,5 +1,5 @@
 /* ============================================================
-   personal-dashboard-v3 — Design System
+   personal-dashboard-v3 - Design System
    ============================================================ */
 
 /* ─── Design Tokens ─── */
@@ -177,7 +177,7 @@ body {
   line-height: 1.45;
 }
 
-/* ─── Scrollbar (Chromium base — overridden per-element where needed) ─── */
+/* ─── Scrollbar (Chromium base - overridden per-element where needed) ─── */
 *::-webkit-scrollbar { width: 4px; height: 4px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(var(--tint),0.10); border-radius: 2px; }
@@ -265,6 +265,33 @@ body {
 }
 .nav-item.active .badge { background: var(--accent-soft); color: var(--accent); }
 
+/* Focus call-to-action button (replaces Focus nav tab) */
+.nav-focus-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 12px 4px 2px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.14);
+  color: var(--accent);
+  width: calc(100% - 8px);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, box-shadow 120ms, transform 120ms;
+}
+.nav-focus-btn .icon { width: 18px; height: 18px; flex: 0 0 18px; color: var(--accent); }
+.nav-focus-btn:hover {
+  background: rgba(var(--accent-rgb), 0.22);
+  border-color: rgba(var(--accent-rgb), 0.6);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), var(--shadow-glow-sm);
+}
+.nav-focus-btn:active { transform: translateY(1px); }
+
 .sidebar-user {
   margin-top: auto;
   margin-left: -5px;
@@ -322,15 +349,9 @@ body {
   outline: none;
   cursor: text;
 }
-.su-status-group { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.su-status-group { display: flex; align-items: center; gap: 8px; }
 .su-online-status { font-size: 13px; color: var(--green); display: flex; align-items: center; gap: 4px; }
-.su-status-group:not(.is-running) .su-online-dot { animation: breathe 2.5s ease-in-out infinite; }
-.su-focus-status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-.su-focus-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: 0 0 8px; }
-.su-status-group.is-running .su-online-status { display: none; }
-.su-status-group:not(.is-running) .su-focus-status { display: none; }
-.su-status-group.is-running .su-focus-dot { animation: breathe 2.5s ease-in-out infinite; }
-.su-status-group.is-running .su-focus-status { color: var(--accent); }
+.su-online-dot { animation: breathe 2.5s ease-in-out infinite; }
 @keyframes breathe { 0%,100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.5); opacity: 1; } }
 
 /* ─── Main Area ─── */
@@ -432,7 +453,7 @@ body {
 .card-head { display: flex; align-items: center; justify-content: space-between; }
 
 /* ─── H2: card tiering (uniform surface, border + label weight = hierarchy) ──
-   No fill changes — lighter card patches read muddy on dark. Tier is signaled
+   No fill changes - lighter card patches read muddy on dark. Tier is signaled
    only by border weight and label color so the surface stays clean.
    Primary daily-action cards (focus session, goals, timeline, habits) keep the
    brighter border + accent label = "act here". Ambient reference cards recede
@@ -497,7 +518,7 @@ body {
 /* ─── Home grid card containment ─── */
 .home-grid .card { overflow: hidden; min-height: 0; min-width: 0; }
 /* Card header: when a card is narrow, the label truncates with an ellipsis and
-   the trailing pill (streak/badge) stays whole — instead of the pill getting
+   the trailing pill (streak/badge) stays whole - instead of the pill getting
    hard-clipped mid-word by the card's overflow:hidden (e.g. "DAY STREAK" cut). */
 .home-grid .card-head { gap: 8px; min-width: 0; }
 .home-grid .card-head > .card-label {
@@ -507,7 +528,7 @@ body {
 /* Input rows must never be clipped when a grid row is short */
 .home-grid .add-goal { flex-shrink: 0; }
 .home-grid .a-tomorrow > div[style*="flex:1"] { overflow: hidden; }
-/* Performance Overview: spans rows 1+2 — more room to breathe */
+/* Performance Overview: spans rows 1+2 - more room to breathe */
 .home-grid .a-stats { gap: 14px; padding: 18px; }
 .home-grid .po-hero { flex: 1; min-height: 0; overflow: hidden; }
 .home-grid .po-week { flex: 1; min-height: 0; margin-top: 4px; }
@@ -941,7 +962,7 @@ body {
 
 /* ─── Timeline Card v2 ─── */
 /* Always a query container so the schedule rescales on any width change
-   (window resize, responsive reflow, custom layout) — not just in edit mode. */
+   (window resize, responsive reflow, custom layout) - not just in edit mode. */
 .a-timeline { position: relative; container-type: inline-size; container-name: card; }
 
 .timeline { --tl-gap: 8px; display: flex; flex-direction: column; gap: var(--tl-gap); position: relative; }
@@ -977,7 +998,7 @@ body {
 .tl-dur { font-size: 10px; color: #8a8a96; font-family: var(--font-mono); background: rgba(var(--tint),0.06); padding: 1.5px 6px; border-radius: 99px; flex-shrink: 0; font-weight: 500; }
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(var(--tint),0.04)); padding: 0 2px; min-width: 40px; }
 
-/* Editable affordance — signal tl labels are click-to-edit */
+/* Editable affordance - signal tl labels are click-to-edit */
 .tl-title[data-tl-label] { cursor: text; border-radius: 3px; padding: 0 3px; margin: 0 -3px; transition: background .15s ease, box-shadow .15s ease; }
 .tl-title[data-tl-label]::after { content: ""; display: inline-block; width: 11px; height: 11px; margin-left: 5px; vertical-align: -1px; opacity: 0; transform: translateY(1px); transition: opacity .15s ease, transform .15s ease; background: currentColor; -webkit-mask: var(--tl-pencil) center/contain no-repeat; mask: var(--tl-pencil) center/contain no-repeat; }
 .tl-title[data-tl-label]:hover { background: rgba(var(--tint),0.06); box-shadow: inset 0 0 0 1px rgba(var(--tint),0.12); }
@@ -1005,7 +1026,7 @@ body {
 /* Card-head buttons */
 .tl-add-btn { background: transparent; border: none; color: var(--muted-2); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 6px; border-radius: 4px; transition: color 0.15s, background 0.15s; }
 .tl-add-btn:hover { color: var(--accent); background: var(--accent-soft); }
-.tl-reset-sort-btn { background: transparent; border: 1px solid var(--line, rgba(var(--tint),0.08)); color: var(--muted-2); cursor: pointer; padding: 2px 8px; border-radius: 4px; font: inherit; font-size: 10px; transition: color 0.15s, border-color 0.15s; }
+.tl-reset-sort-btn { display: inline-flex; align-items: center; gap: 4px; background: transparent; border: 1px solid var(--line, rgba(var(--tint),0.08)); color: var(--muted-2); cursor: pointer; padding: 2px 8px; border-radius: 4px; font: inherit; font-size: 10px; transition: color 0.15s, border-color 0.15s; }
 .tl-reset-sort-btn:hover { color: var(--accent); border-color: var(--accent); }
 
 /* Drag states */
@@ -1086,7 +1107,7 @@ body {
 .hfr-ring svg { width: 100%; height: 100%; }
 .hfr-track { fill: none; stroke: var(--surface-2); stroke-width: 5; }
 .hfr-fill { fill: none; stroke: var(--green); stroke-width: 5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 36px 36px; }
-/* Ring draw-in (habits + home readiness widget) — c = 2*PI*31 = 194.78 */
+/* Ring draw-in (habits + home readiness widget) - c = 2*PI*31 = 194.78 */
 @media (prefers-reduced-motion: no-preference) {
   .hfr-fill { animation: hfr-ring-draw 0.8s var(--ease-out) both; }
 }
@@ -1591,7 +1612,7 @@ body {
   .home-grid { grid-template-rows: minmax(0, 1fr) minmax(0, 0.78fr) auto; }
 }
 
-/* ── 4-column intermediate (1025px–1400px) ── */
+/* ── 4-column intermediate (1025px-1400px) ── */
 @media (max-width: 1400px) and (min-width: 1025px) {
   .home-grid {
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -1608,7 +1629,7 @@ body {
   .home-grid .card { padding: 14px; }
 }
 
-/* ── 3-column tablet (901px–1024px) ── */
+/* ── 3-column tablet (901px-1024px) ── */
 @media (max-width: 1024px) and (min-width: 901px) {
   .home-grid {
     grid-template-columns: 1fr 1fr 1fr;
@@ -1776,7 +1797,7 @@ body {
   gap: 16px;
 }
 
-/* Card entrance — same staggered pattern as habits & health */
+/* Card entrance - same staggered pattern as habits & health */
 @media (prefers-reduced-motion: no-preference) {
   #tab-finances .card {
     animation: card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -2949,6 +2970,8 @@ margin-top: 15px;
   border-bottom: none; padding-bottom: 2px;
 }
 
+.ps-head-check { display: inline-flex; align-items: center; justify-content: center; }
+
 .ps-row input[type="checkbox"] {
   width: 16px; height: 16px; cursor: pointer; justify-self: center;
 }
@@ -3740,7 +3763,7 @@ margin-top: 15px;
 .gt-modal-actions .gt-btn.danger { background: rgba(255,107,107,0.15); border-color: rgba(255,107,107,0.35); color: var(--danger); }
 .gt-modal-actions .gt-btn.danger:hover { background: rgba(255,107,107,0.25); }
 
-/* (Tab bar replaced by sidebar — see APP LAYOUT section above)
+/* (Tab bar replaced by sidebar - see APP LAYOUT section above)
    ============================================================ */
 
 .wip-placeholder {
@@ -3993,7 +4016,7 @@ margin-top: 15px;
   display: none;
 }
 
-/* HABITS TAB — Habit Tracker + Mood Tracker
+/* HABITS TAB - Habit Tracker + Mood Tracker
    ============================================================ */
 
 .ht-notes-wrap {
@@ -4821,7 +4844,8 @@ margin-top: 15px;
 }
 
 .dr-block-to {
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
   color: var(--muted-2);
   flex-shrink: 0;
 }
@@ -4853,7 +4877,7 @@ margin-top: 15px;
   background: rgba(0,0,0,0.40);
 }
 
-/* Hide native picker indicator — custom clock button used in all browsers */
+/* Hide native picker indicator - custom clock button used in all browsers */
 .dr-time-input::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
@@ -5128,7 +5152,7 @@ margin-top: 15px;
 .hl-ring-svg { width: 100%; height: 100%; transform: scale(1.18); overflow: visible; }
 .hl-ring-track { stroke: rgba(255,255,255,0.06); }
 :root[data-theme="light"] .hl-ring-track { stroke: rgba(var(--tint),0.09); }
-/* Ring draw-in (health readiness) — CIRC = 2*PI*48 = 301.59 */
+/* Ring draw-in (health readiness) - CIRC = 2*PI*48 = 301.59 */
 @media (prefers-reduced-motion: no-preference) {
   .hl-ring-fill { animation: hl-ring-draw 0.9s var(--ease-out) both; }
 }
@@ -6084,7 +6108,7 @@ input.sleep-picker-val:focus {
 .htrend-svg-readiness {
   height: clamp(210px, 22vw, 300px);
 }
-/* HTML bar charts — match Home tab Deep Work bars */
+/* HTML bar charts - match Home tab Deep Work bars */
 .htbar-chart {
   display: flex;
   flex: 1;
@@ -6223,16 +6247,16 @@ input.sleep-picker-val:focus {
 @keyframes hl-spark-draw { to { stroke-dashoffset: 0; } }
 @keyframes hl-cell-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1) translateZ(0); } }
 
-/* Consistency bar — grow from 0 on every render */
+/* Consistency bar - grow from 0 on every render */
 @keyframes ht-bar-grow { from { width: 0%; } }
 
-/* Checkmark SVG draw — stroke draws in left→right on tab entry */
+/* Checkmark SVG draw - stroke draws in left→right on tab entry */
 @keyframes hm-check-draw { to { stroke-dashoffset: 0; } }
 
 @media (prefers-reduced-motion: no-preference) {
   /* Entrance-animated text rows stay on their compositing layer after
      `is-entering` is stripped (tabs.js, 1800ms) so layer demotion doesn't
-     snap subpixel text. Finance rows are exempt — their inline `both`
+     snap subpixel text. Finance rows are exempt - their inline `both`
      animation is never cleared, so they never demote. */
   .hl-factor-row, .nt-macro-row, .hi-item, .rc-row,
   .ht-ov-row, .ht-focus-inner > *,
@@ -6242,7 +6266,7 @@ input.sleep-picker-val:focus {
   }
 
   /* ─── Health tab ─── */
-  /* Readiness factor rows — staggered fade/slide */
+  /* Readiness factor rows - staggered fade/slide */
   #tab-health.is-entering .hl-factor-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-health.is-entering .hl-factor-row:nth-child(1) { animation-delay: 0.30s; }
   #tab-health.is-entering .hl-factor-row:nth-child(2) { animation-delay: 0.37s; }
@@ -6251,7 +6275,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .hl-factor-row:nth-child(5) { animation-delay: 0.58s; }
   #tab-health.is-entering .hl-factor-row:nth-child(6) { animation-delay: 0.65s; }
 
-  /* Nutrition macro rows — fade in, then bars grow from zero */
+  /* Nutrition macro rows - fade in, then bars grow from zero */
   #tab-health.is-entering .nt-macro-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-health.is-entering .nt-macro-row:nth-child(1) { animation-delay: 0.05s; }
   #tab-health.is-entering .nt-macro-row:nth-child(2) { animation-delay: 0.12s; }
@@ -6263,7 +6287,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .nt-macro-row:nth-child(3) .nt-macro-fill { animation-delay: 0.29s; }
   #tab-health.is-entering .nt-macro-row:nth-child(4) .nt-macro-fill { animation-delay: 0.36s; }
 
-  /* Trend bar charts (sleep/energy/hydration) — grow up, left to right */
+  /* Trend bar charts (sleep/energy/hydration) - grow up, left to right */
   #tab-health.is-entering .htbar { animation: htbar-grow 0.6s var(--ease-out) both; transform-origin: bottom; }
   #tab-health.is-entering .htbar-bars .htbar:nth-child(1) { animation-delay: 0.10s; }
   #tab-health.is-entering .htbar-bars .htbar:nth-child(2) { animation-delay: 0.16s; }
@@ -6273,7 +6297,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .htbar-bars .htbar:nth-child(6) { animation-delay: 0.40s; }
   #tab-health.is-entering .htbar-bars .htbar:nth-child(7) { animation-delay: 0.46s; }
 
-  /* Insights — staggered fade/slide */
+  /* Insights - staggered fade/slide */
   #tab-health.is-entering .hi-item { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-health.is-entering .hi-item:nth-child(1) { animation-delay: 0.10s; }
   #tab-health.is-entering .hi-item:nth-child(2) { animation-delay: 0.18s; }
@@ -6281,7 +6305,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .hi-item:nth-child(4) { animation-delay: 0.34s; }
   #tab-health.is-entering .hi-item:nth-child(5) { animation-delay: 0.42s; }
 
-  /* Top metric tiles — draw the sparkline in, staggered across tiles */
+  /* Top metric tiles - draw the sparkline in, staggered across tiles */
   #tab-health.is-entering .ht-spark-path {
     stroke-dasharray: 1; stroke-dashoffset: 1;
     animation: hl-spark-draw 0.9s var(--ease-out) both;
@@ -6291,7 +6315,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(3) .ht-spark-path { animation-delay: 0.35s; }
   #tab-health.is-entering .hl-metric-row .hl-mc:nth-child(4) .ht-spark-path { animation-delay: 0.45s; }
 
-  /* Recovery rows — fade/slide, then bars grow from zero */
+  /* Recovery rows - fade/slide, then bars grow from zero */
   #tab-health.is-entering .rc-row { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-health.is-entering .rc-row:nth-child(1) { animation-delay: 0.05s; }
   #tab-health.is-entering .rc-row:nth-child(2) { animation-delay: 0.12s; }
@@ -6310,7 +6334,7 @@ input.sleep-picker-val:focus {
   #tab-health.is-entering .rc-row:nth-child(7) .rc-row-fill { animation-delay: 0.57s; }
 
   /* ─── Habits tab ─── */
-  /* Top metric tiles + overview trend sparklines — draw in */
+  /* Top metric tiles + overview trend sparklines - draw in */
   #tab-habits.is-entering .ht-spark-path {
     stroke-dasharray: 1; stroke-dashoffset: 1;
     animation: hl-spark-draw 0.9s var(--ease-out) both;
@@ -6321,11 +6345,11 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(4) .ht-spark-path { animation-delay: 0.45s; }
   #tab-habits.is-entering .ht-top-row .ht-mc:nth-child(5) .ht-spark-path { animation-delay: 0.55s; }
 
-  /* Overview rows — fade/slide, then 30-day bars grow from zero */
-  /* Overview rows — fade/slide, tight stagger. The 30-day bars grow from zero.
+  /* Overview rows - fade/slide, then 30-day bars grow from zero */
+  /* Overview rows - fade/slide, tight stagger. The 30-day bars grow from zero.
      Each row's sparkline draws on the SAME delay as the row fade, and its draw
      (0.4s) is shorter than the fade (0.45s) so the line always finishes drawing
-     by the time the row reaches full opacity — no "visible row, half-drawn line"
+     by the time the row reaches full opacity - no "visible row, half-drawn line"
      gap (the old 0.9s draw outlasted the fade and flickered on the last row).
      If `is-entering` is stripped mid-draw on a rapid swap, the base path has no
      dash offset, so it falls back to solid rather than blank. */
@@ -6333,7 +6357,7 @@ input.sleep-picker-val:focus {
   /* `.ht-ov-body` clips with overflow:hidden. Every row enters via hl-row-in,
      which slides it translateY(6px)→0; for all rows but the last that 6px is
      masked by the row below, but the LAST row's slide reaches the body's bottom
-     clip edge, so its sparkline is nipped then revealed mid-draw — the bottom-
+     clip edge, so its sparkline is nipped then revealed mid-draw - the bottom-
      row-only flicker. Drop the clip during entrance (the card's bottom padding
      absorbs the 6px); overflow:hidden returns once `is-entering` is stripped. */
   #tab-habits.is-entering .ht-ov-body { overflow: visible; }
@@ -6349,7 +6373,7 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-ov-row:nth-child(9), #tab-habits.is-entering .ht-ov-row:nth-child(9) .ht-spark-path { animation-delay: 0.27s; }
   #tab-habits.is-entering .ht-ov-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) 0.2s both; }
 
-  /* Weekly heatmap cells — pop in, column by column (left → right) */
+  /* Weekly heatmap cells - pop in, column by column (left → right) */
   #tab-habits.is-entering .ht-wk-cell:not(.future) { animation: hl-cell-pop 0.4s var(--ease-out) both; }
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(2) { animation-delay: 0.10s; }
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(3) { animation-delay: 0.16s; }
@@ -6359,13 +6383,13 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(7) { animation-delay: 0.40s; }
   #tab-habits.is-entering .ht-wk-row .ht-wk-cell:nth-child(8) { animation-delay: 0.46s; }
 
-  /* Checked cell checkmarks — stroke draws in after cell appears */
+  /* Checked cell checkmarks - stroke draws in after cell appears */
   #tab-habits.is-entering .ht-wk-cell.done svg path {
     stroke-dashoffset: 15;
     animation: hm-check-draw 0.25s var(--ease-out) 0.15s both;
   }
 
-  /* Insights mini bar chart — grow up */
+  /* Insights mini bar chart - grow up */
   #tab-habits.is-entering .ht-mini-bar { animation: htbar-grow 0.5s var(--ease-out) both; transform-origin: bottom; }
   #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(1) .ht-mini-bar { animation-delay: 0.10s; }
   #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(2) .ht-mini-bar { animation-delay: 0.16s; }
@@ -6375,7 +6399,7 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(6) .ht-mini-bar { animation-delay: 0.40s; }
   #tab-habits.is-entering .ht-mini-bar-wrap:nth-child(7) .ht-mini-bar { animation-delay: 0.46s; }
 
-  /* Focus card content — fade/slide in */
+  /* Focus card content - fade/slide in */
   #tab-habits.is-entering .ht-focus-inner > * { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-habits.is-entering .ht-focus-inner > *:nth-child(1) { animation-delay: 0.10s; }
   #tab-habits.is-entering .ht-focus-inner > *:nth-child(2) { animation-delay: 0.20s; }
@@ -6383,7 +6407,7 @@ input.sleep-picker-val:focus {
   #tab-habits.is-entering .ht-focus-inner > *:nth-child(4) { animation-delay: 0.40s; }
 
   /* ─── Home tab (#tab-main) ─── */
-  /* Performance Overview week bars — grow up, left → right */
+  /* Performance Overview week bars - grow up, left → right */
   #tab-main.is-entering .po-week-bar { animation: htbar-grow 0.6s var(--ease-out) both; transform-origin: bottom; }
   #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(1) { animation-delay: 0.10s; }
   #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(2) { animation-delay: 0.16s; }
@@ -6393,21 +6417,21 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(6) { animation-delay: 0.40s; }
   #tab-main.is-entering .po-week-bars .po-week-bar:nth-child(7) { animation-delay: 0.46s; }
 
-  /* Weekly insight cards — staggered fade/slide */
+  /* Weekly insight cards - staggered fade/slide */
   #tab-main.is-entering .ins-card { opacity: 0; animation: hl-row-in 0.45s var(--ease-out) both; }
   #tab-main.is-entering .ins-card:nth-child(1) { animation-delay: 0.10s; }
   #tab-main.is-entering .ins-card:nth-child(2) { animation-delay: 0.18s; }
   #tab-main.is-entering .ins-card:nth-child(3) { animation-delay: 0.26s; }
   #tab-main.is-entering .ins-card:nth-child(4) { animation-delay: 0.34s; }
 
-  /* Mood sparkline — lines fade, dots pop */
+  /* Mood sparkline - lines fade, dots pop */
   #tab-main.is-entering .mood-spark line { opacity: 0; animation: hl-row-in 0.5s var(--ease-out) 0.2s both; }
   #tab-main.is-entering .mood-spark circle {
     transform-box: fill-box; transform-origin: center;
     animation: hl-cell-pop 0.4s var(--ease-bounce) 0.35s both;
   }
 
-  /* Today's Plan + Tomorrow goal lists — staggered fade/slide */
+  /* Today's Plan + Tomorrow goal lists - staggered fade/slide */
   #tab-main.is-entering .goal-item { opacity: 0; animation: hl-row-in 0.4s var(--ease-out) both; }
   #tab-main.is-entering .goal-item:nth-child(1) { animation-delay: 0.06s; }
   #tab-main.is-entering .goal-item:nth-child(2) { animation-delay: 0.12s; }
@@ -6418,7 +6442,7 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .goal-item:nth-child(7) { animation-delay: 0.42s; }
   #tab-main.is-entering .goal-item:nth-child(n+8) { animation-delay: 0.48s; }
 
-  /* Timeline blocks — staggered fade/slide */
+  /* Timeline blocks - staggered fade/slide */
   #tab-main.is-entering .tl-row { opacity: 0; animation: hl-row-in 0.4s var(--ease-out) both; }
   #tab-main.is-entering .tl-row:nth-child(1) { animation-delay: 0.06s; }
   #tab-main.is-entering .tl-row:nth-child(2) { animation-delay: 0.12s; }
@@ -6428,7 +6452,7 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .tl-row:nth-child(6) { animation-delay: 0.36s; }
   #tab-main.is-entering .tl-row:nth-child(n+7) { animation-delay: 0.42s; }
 
-  /* Session card — day ring draws in (JS sets dashoffset; no transition on it),
+  /* Session card - day ring draws in (JS sets dashoffset; no transition on it),
      plus status + range text fade in */
   #tab-main.is-entering #dayRingFill { animation: dayring-draw 0.9s var(--ease-out) both; }
   #tab-main.is-entering .session-status,
@@ -6436,12 +6460,12 @@ input.sleep-picker-val:focus {
     opacity: 0; animation: hl-row-in 0.5s var(--ease-out) 0.25s both;
   }
 
-  /* Performance bars — Task Completion + Readiness — grow from 0 */
+  /* Performance bars - Task Completion + Readiness - grow from 0 */
   #tab-main.is-entering .po-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
   #tab-main.is-entering .po-metric:nth-child(1) .po-bar-fill { animation-delay: 0.15s; }
   #tab-main.is-entering .po-metric:nth-child(3) .po-bar-fill { animation-delay: 0.25s; }
 
-  /* Consistency dots — pop in left to right */
+  /* Consistency dots - pop in left to right */
   #tab-main.is-entering .po-dot-wrap { animation: hl-cell-pop 0.4s var(--ease-bounce) both; }
   #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(1) { animation-delay: 0.10s; }
   #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(2) { animation-delay: 0.16s; }
@@ -6451,7 +6475,7 @@ input.sleep-picker-val:focus {
   #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(6) { animation-delay: 0.40s; }
   #tab-main.is-entering .po-dots .po-dot-wrap:nth-child(7) { animation-delay: 0.46s; }
 
-  /* Sleep/Water/Protein bars in Habits Mini card — grow from 0 */
+  /* Sleep/Water/Protein bars in Habits Mini card - grow from 0 */
   #tab-main.is-entering .rm-h-bar-fill { animation: hl-bar-grow 0.8s var(--ease-out) both; }
   #tab-main.is-entering .rm-h-item:nth-child(1) .rm-h-bar-fill { animation-delay: 0.10s; }
   #tab-main.is-entering .rm-h-item:nth-child(2) .rm-h-bar-fill { animation-delay: 0.18s; }
@@ -6483,7 +6507,7 @@ input.sleep-picker-val:focus {
 .hi-positive { background: var(--green-soft); border-left-color: var(--green); }
 .hi-warn     { background: var(--amber-soft); border-left-color: var(--amber); }
 .hi-info     { background: rgba(var(--accent-rgb), 0.07); border-left-color: rgba(var(--accent-rgb), 0.55); }
-.hi-icon { font-size: 11px; font-weight: 700; min-width: 14px; margin-top: 2px; }
+.hi-icon { display: inline-flex; align-items: center; justify-content: center; min-width: 14px; margin-top: 1px; }
 .hi-positive .hi-icon { color: var(--green); }
 .hi-warn     .hi-icon { color: var(--amber); }
 .hi-info     .hi-icon { color: var(--accent); }
@@ -6593,6 +6617,19 @@ input.sleep-picker-val:focus {
 }
 .mob-tab.active { color: var(--accent); }
 .mob-tab-icon { width: 20px; height: 20px; flex: 0 0 20px; }
+
+/* Focus CTA in mobile tab bar - always accent-tinted */
+.mob-tab-focus { color: var(--accent); }
+.mob-tab-focus .mob-tab-icon {
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: rgba(var(--accent-rgb), 0.16);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+}
+.mob-tab-focus:active .mob-tab-icon { background: rgba(var(--accent-rgb), 0.26); }
 
 /* ─── First-run Setup Overlay ─── */
 @keyframes setup-overlay-in { from { opacity: 0; } to { opacity: 1; } }
@@ -6797,6 +6834,9 @@ input.sleep-picker-val:focus {
 .hl-date-prev, .hl-date-next {
   width: 28px;
   padding-inline: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .hl-date-prev:hover, .hl-date-next:hover {
   background: rgba(var(--accent-rgb), 0.10);
@@ -6961,7 +7001,7 @@ input.sleep-picker-val:focus {
   padding: 0;
 }
 
-/* Health settings modal grid — reuses .setup-field, .setup-label, .setup-input from setup wizard */
+/* Health settings modal grid - reuses .setup-field, .setup-label, .setup-input from setup wizard */
 .hl-settings-modal-grid {
   display: flex;
   flex-direction: column;
@@ -7063,7 +7103,7 @@ input.sleep-picker-val:focus {
 }
 
 /* ============================================================
-   HABITS TAB v2 — Analytics Dashboard
+   HABITS TAB v2 - Analytics Dashboard
    ============================================================ */
 
 /* Override old grid layout */
@@ -7238,7 +7278,7 @@ input.sleep-picker-val:focus {
 }
 .ht-wk-cell.future { opacity: 0.22; cursor: default; pointer-events: none; }
 
-/* Base state for checkmark SVG — enables stroke-draw animation on entry */
+/* Base state for checkmark SVG - enables stroke-draw animation on entry */
 .ht-wk-cell.done svg path {
   stroke-dasharray: 15;
 }
@@ -7503,7 +7543,7 @@ input.sleep-picker-val:focus {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   HOME LAYOUT CUSTOMIZATION (custom weighted-track editor) — desktop ≥1401px
+   HOME LAYOUT CUSTOMIZATION (custom weighted-track editor) - desktop ≥1401px
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Saved custom layout + edit mode: rendered into the PLAIN CSS grid ──
@@ -7518,7 +7558,7 @@ input.sleep-picker-val:focus {
 }
 
 /* ── Drag handle: full-card overlay (whole card draggable in edit mode) with a
-   small grip badge in the corner as the affordance — no longer overlaps the
+   small grip badge in the corner as the affordance - no longer overlaps the
    card's own header content. ── */
 .home-grid .card { position: relative; }
 .card-drag-handle { display: none; }
@@ -7830,12 +7870,12 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 }
 .layout-customize-btn:hover { border-color: var(--accent); color: var(--accent); }
 .layout-customize-note { margin-top: 6px; font-size: 11px; color: var(--muted-2); }
-/* Customization is desktop-only — hide entry below the breakpoint. */
+/* Customization is desktop-only - hide entry below the breakpoint. */
 @media (max-width: 1400px) {
   .tweaks-section--layout { display: none; }
 }
 
-/* ── Fluid text rescaling (container queries) — when cards are resizable
+/* ── Fluid text rescaling (container queries) - when cards are resizable
    (editing) OR rendered at a custom size, so non-desktop stacks are untouched. */
 .home-grid--editing .card,
 .home-grid--custom .card { container-type: inline-size; container-name: card; }
@@ -7859,7 +7899,7 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 .home-grid--custom .a-goals .goal-text,
 .home-grid--custom .a-tomorrow .tom-text { font-size: clamp(12px, 4.5cqi, 15px); }
 
-/* Timeline rescaling — applies on ANY container width (window resize, responsive
+/* Timeline rescaling - applies on ANY container width (window resize, responsive
    reflow, custom layout), keeping text + structure in step so the schedule never
    cramps or wraps oddly when narrow. Container set on .a-timeline (always-on). */
 .a-timeline .tl-content { font-size: clamp(11px, 4.5cqi, 14px); }
@@ -8127,10 +8167,13 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 }
 
 .ob-sidebar-arrow {
-  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
-  transition: transform 200ms;
+  transition: transform 200ms ease;
 }
+.ob-sidebar-arrow.open { transform: rotate(180deg); }
 
 .ob-sidebar-body { padding-top: 8px; }
 
@@ -8157,7 +8200,11 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
   margin-top: 4px;
 }
 
-.ob-completed-icon { font-size: 14px; }
+.ob-completed-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent);
+}
 
 .ob-completed-text {
   font-size: 12px;
@@ -8182,4 +8229,420 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
   .ob-modal,
   .ob-modal::before,
   .ob-modal > * { animation: none; }
+}
+
+/* ─── POMODORO TIMER MODAL ─── */
+
+.pomo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease, backdrop-filter 0.25s ease;
+  pointer-events: none;
+}
+.pomo-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.pomo-overlay[hidden] { display: none; }
+
+.pomo-modal {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 32px 36px 24px;
+  width: 360px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-lg), 0 8px 32px rgba(0,0,0,0.12);
+  position: relative;
+  transform: scale(0.94) translateY(8px);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  outline: none;
+}
+.pomo-overlay.open .pomo-modal {
+  transform: scale(1) translateY(0);
+}
+
+.pomo-icon-btn {
+  position: absolute;
+  top: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
+}
+.pomo-icon-btn:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+.pomo-close { right: 12px; }
+.pomo-mute { left: 12px; }
+.pomo-mute .pomo-mute-off { display: none; }
+.pomo-mute[aria-pressed="true"] { color: var(--accent); }
+.pomo-mute[aria-pressed="true"] .pomo-mute-on { display: none; }
+.pomo-mute[aria-pressed="true"] .pomo-mute-off { display: block; }
+
+.pomo-icon-btn:focus-visible,
+.pomo-btn:focus-visible,
+.pomo-step:focus-visible,
+.pomo-settings-input:focus-visible,
+.pomo-settings-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─── Session dots ─── */
+
+.pomo-dots {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  align-items: center;
+  min-height: 10px;
+  margin-top: 4px;
+}
+.pomo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.pomo-dot.done {
+  background: var(--accent);
+}
+.pomo-dot.current {
+  background: var(--accent);
+  transform: scale(1.35);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* ─── Timer display ─── */
+
+.pomo-timer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 8px;
+}
+
+.pomo-ring-wrapper {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pomo-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pomo-ring-track {
+  stroke: var(--line);
+  stroke-linecap: round;
+}
+
+.pomo-ring-progress {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s linear;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 30%, transparent));
+}
+
+.pomo-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 44px;
+  font-weight: 500;
+  color: var(--text);
+  z-index: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.pomo-phase {
+  position: absolute;
+  bottom: 38px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  z-index: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+/* ─── Controls ─── */
+
+.pomo-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  padding: 16px 0 4px;
+}
+
+.pomo-btn {
+  padding: 11px 24px;
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  font-family: inherit;
+  min-width: 90px;
+}
+.pomo-btn:hover {
+  background: var(--surface);
+}
+.pomo-btn:active {
+  transform: scale(0.97);
+}
+
+.pomo-btn-primary {
+  background: var(--accent);
+  color: #0b0b0e;
+  border-color: var(--accent);
+}
+.pomo-btn-primary:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.pomo-btn-secondary {
+  color: var(--text-muted);
+  border-color: transparent;
+  background: transparent;
+  min-width: 0;
+  padding: 11px 16px;
+}
+.pomo-btn-secondary:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+
+/* ─── Progress label ─── */
+
+.pomo-progress-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 6px 0 2px;
+  letter-spacing: 0.02em;
+  min-height: 18px;
+}
+
+/* ─── Keyboard hint (dismissed after first use) ─── */
+
+.pomo-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 0 4px;
+  opacity: 0.75;
+  transition: opacity 0.25s ease, max-height 0.25s ease, padding 0.25s ease;
+  overflow: hidden;
+  max-height: 24px;
+}
+.pomo-hint[hidden] {
+  display: flex;
+  opacity: 0;
+  max-height: 0;
+  padding: 0;
+  pointer-events: none;
+}
+.pomo-hint kbd {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 6px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+.pomo-hint-sep { opacity: 0.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pomo-hint { transition: none; }
+}
+
+/* ─── Settings ─── */
+
+.pomo-settings {
+  margin-top: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.pomo-settings-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: color 0.15s, background 0.15s;
+  width: 100%;
+}
+.pomo-settings-toggle:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+.pomo-settings-toggle svg {
+  opacity: 0.7;
+}
+
+.pomo-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+}
+.pomo-settings-body[hidden] {
+  display: none;
+}
+
+.pomo-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pomo-settings-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  min-width: 44px;
+}
+
+.pomo-stepper {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--bg);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.pomo-stepper:focus-within {
+  border-color: var(--accent);
+}
+
+.pomo-step {
+  width: 34px;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pomo-step:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.pomo-step:active {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.pomo-settings-input {
+  width: 44px;
+  padding: 0;
+  min-height: 40px;
+  border: none;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.pomo-settings-input::-webkit-inner-spin-button,
+.pomo-settings-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pomo-settings-unit {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ─── Ring pulse animation (on completion) ─── */
+
+@keyframes pomo-ring-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.04); opacity: 0.85; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pomo-ring-pulse .pomo-ring-progress {
+  animation: pomo-ring-pulse 0.4s ease 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pomo-overlay,
+  .pomo-modal,
+  .pomo-ring-progress,
+  .pomo-btn,
+  .pomo-dot {
+    transition: none;
+    animation: none;
+  }
+  .pomo-ring-pulse .pomo-ring-progress {
+    animation: none;
+  }
+  .pomo-dot.current {
+    transform: none;
+  }
 }

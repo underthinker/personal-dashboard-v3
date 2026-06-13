@@ -1,4 +1,4 @@
-// Authentication layer — a thin, typed wrapper over supabase.auth.
+// Authentication layer - a thin, typed wrapper over supabase.auth.
 // Supabase handles session persistence (localStorage) and token auto-refresh.
 // Sign-in is OAuth-only (Google / GitHub); no email/password.
 import type { Session, User } from '@supabase/supabase-js';

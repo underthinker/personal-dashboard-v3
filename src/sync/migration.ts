@@ -19,7 +19,7 @@ export function isDeviceMigrated(userId: string): boolean {
 }
 
 /**
- * Upload only the local keys that the pull did NOT reconcile — an empty shadow
+ * Upload only the local keys that the pull did NOT reconcile - an empty shadow
  * means the cloud lacks that key, so it is local-only and must be pushed up.
  * Cloud-present keys are left exactly as the pull resolved them (cloud has a
  * real timestamp; legacy local data does not). Returns the number of keys
