@@ -560,7 +560,6 @@ body {
 .home-grid .tl-content { padding: 8px 10px; gap: 9px; border-radius: 12px; }
 .home-grid .tl-icon { width: 32px; height: 32px; border-radius: 9px; }
 .home-grid .tl-title { font-size: 12.5px; }
-.home-grid .tl-dur { font-size: 9px; }
 /* Tomorrow */
 .home-grid .tom-text { font-size: 12px; }
 .home-grid .tom-item { padding: 3px 0; }
@@ -995,7 +994,6 @@ body {
 .tl-content.active .tl-title { color: var(--accent); font-weight: 600; }
 .tl-title { font-size: 13.5px; font-weight: 600; color: var(--text, #f2f2f5); }
 .tl-title-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
-.tl-dur { font-size: 10px; color: #8a8a96; font-family: var(--font-mono); background: rgba(var(--tint),0.06); padding: 1.5px 6px; border-radius: 99px; flex-shrink: 0; font-weight: 500; }
 .tl-editing { outline: 1px solid var(--accent); outline-offset: 1px; border-radius: 3px; background: var(--line-2, rgba(var(--tint),0.04)); padding: 0 2px; min-width: 40px; }
 
 /* Editable affordance - signal tl labels are click-to-edit */
@@ -7910,7 +7908,6 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
   gap: clamp(6px, 2.5cqi, 10px);
 }
 .a-timeline .tl-dot { width: clamp(6px, 2cqi, 7px); height: clamp(6px, 2cqi, 7px); }
-.a-timeline .tl-dur { font-size: clamp(9px, 3cqi, 10px); }
 .a-timeline .tl-qa-start { width: clamp(42px, 15cqi, 52px); }
 
 /* Vertical auto-fit: JS sets --tl-fit (1 → ~0.55) on the widget so the default
@@ -8429,6 +8426,7 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
   border-color: var(--accent);
 }
 .pomo-btn-primary:hover {
+  background: var(--accent);
   filter: brightness(1.08);
   box-shadow: 0 2px 12px color-mix(in srgb, var(--accent) 30%, transparent);
 }
@@ -8529,9 +8527,11 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 }
 
 .pomo-settings-body {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: max-content max-content auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 6px;
   padding-top: 10px;
 }
 .pomo-settings-body[hidden] {
@@ -8539,16 +8539,13 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 }
 
 .pomo-settings-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: contents;
 }
 
 .pomo-settings-label {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
-  min-width: 44px;
 }
 
 .pomo-stepper {

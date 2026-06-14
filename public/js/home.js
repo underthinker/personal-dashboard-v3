@@ -35,13 +35,6 @@
     return h + ':' + String(m).padStart(2, '0');
   }
 
-  function fmtDur(start, end) {
-    const d = parseMin(end) - parseMin(start);
-    if (d <= 0) return '';
-    const h = Math.floor(d / 60), m = d % 60;
-    return h && m ? h + 'h ' + m + 'm' : h ? h + 'h' : m + 'm';
-  }
-
   /* v1 → v2 migration (runs once) */
   (function() {
     const raw = localStorage.getItem(TL_KEY_V1);
@@ -438,8 +431,6 @@
       const state    = tlState(b.start, b.end, nowMin);
       const isActive = state === 'active';
       const isLast   = i === allEntries.length - 1;
-      const dur = fmtDur(b.start, b.end);
-      const durPill = dur ? '<span class="tl-dur">' + esc(dur) + '</span>' : '';
 
       if (b._isGoal) {
         return (
@@ -452,7 +443,6 @@
               '<div class="tl-body">' +
                 '<div class="tl-title-row">' +
                   '<span class="tl-title' + (b.done ? ' tl-goal-done' : '') + '">' + esc(b.label) + '</span>' +
-                  durPill +
                 '</div>' +
               '</div>' +
               '<input type="checkbox" class="tl-goal-check"' + (b.done ? ' checked' : '') + ' aria-label="Mark done">' +
@@ -472,7 +462,6 @@
             '<div class="tl-body">' +
               '<div class="tl-title-row">' +
                 '<span class="tl-title" data-tl-label>' + esc(b.label) + '</span>' +
-                durPill +
               '</div>' +
             '</div>' +
             tlStatusHtml(state) +
