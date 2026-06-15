@@ -424,7 +424,7 @@ body {
      and is reached via the .tab-content scroll. Was: height:100% (clipped). */
   min-height: 100%;
   grid-template-columns: 305fr 285fr 245fr 195fr 360fr;
-  grid-template-rows: minmax(0, 1fr) minmax(0, 0.72fr) auto;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 0.86fr) minmax(0, 0.86fr);
   grid-template-areas:
     "session  session  goals     goals    stats"
     "tomorrow tomorrow timeline  timeline stats"
