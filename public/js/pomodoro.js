@@ -4,7 +4,6 @@
   // ─── Constants ───
   var SK_STATE = 'pomodoro_session_v1';
   var SK_SETTINGS = 'pomodoro_settings_v1';
-  var SK_HINT_SEEN = 'pomodoro_hint_seen_v1';
   var RING_CIRCUMFERENCE = 2 * Math.PI * 52; // ≈ 326.73
 
   var PHASE = {
@@ -37,7 +36,7 @@
   // ─── DOM refs (set on init) ───
   var $ = function(id) { return document.getElementById(id); };
   var overlay, modalEl, closeBtn, startBtn, resetBtn, skipBtn, muteBtn;
-  var ringEl, timeEl, phaseEl, progressEl, dotsEl, hintEl;
+  var ringEl, timeEl, phaseEl, progressEl, dotsEl;
   var settingsToggle, settingsBody, settingsInputs, stepButtons;
   var sidebarBtn;
   var prevFocus = null; // element to restore focus to on close
@@ -133,18 +132,11 @@
 
   // Wall-clock model: anchor an endTime; remaining is always derived from now.
   function beginRunning() {
-    dismissHint();
     s.isRunning = true;
     s.endTime = Date.now() + s.timeRemaining * 1000;
     startInterval();
     saveState();
     updateUI();
-  }
-
-  function dismissHint() {
-    if (!hintEl || hintEl.hidden) return;
-    hintEl.hidden = true;
-    try { localStorage.setItem(SK_HINT_SEEN, '1'); } catch (e) {}
   }
 
   function pauseTimer() {
@@ -437,8 +429,6 @@
     phaseEl = $('pomoPhase');
     progressEl = $('pomoProgress');
     dotsEl = $('pomoDots');
-    hintEl = $('pomoHint');
-    if (hintEl && localStorage.getItem(SK_HINT_SEEN)) hintEl.hidden = true;
     settingsToggle = $('pomoSettingsToggle');
     settingsBody = $('pomoSettingsBody');
     settingsInputs = overlay.querySelectorAll('.pomo-settings-input');

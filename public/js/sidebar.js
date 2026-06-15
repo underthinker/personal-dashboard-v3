@@ -9,7 +9,7 @@
     '#5ba8f7': 'assets/avatars/Giyu.webp',
     '#e66a3b': 'assets/avatars/Rengoku.webp',
     '#2aa198': 'assets/avatars/Iguro.jpg',
-    '#cfa846': 'assets/avatars/Uzui.webp',
+    '#D6BE94': 'assets/avatars/Uzui.webp',
     '#7bc4b2': 'assets/avatars/Tokito.jpg',
     '#7d8462': 'assets/avatars/Himejima.webp'
   };
