@@ -20,7 +20,7 @@
     { id: 'productive', name: 'Productive Tasks', active: true },
     { id: 'creativity', name: 'Creativity', active: true },
     { id: 'journal', name: 'Journal', active: true },
-    { id: 'reading', name: 'Reading', active: true }
+    { id: 'study', name: 'Study', active: true }
   ];
 
   var DEFAULT_LAYOUT_CARDS = {

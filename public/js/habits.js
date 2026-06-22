@@ -57,7 +57,7 @@
     { id: 'productive', name: 'Productive Tasks', icon: 'list-checks', active: true },
     { id: 'creativity', name: 'Creativity', icon: 'pen-tool', active: true },
     { id: 'journal', name: 'Journal', icon: 'notebook', active: true },
-    { id: 'reading', name: 'Reading', icon: 'book', active: true },
+    { id: 'study', name: 'Study', icon: 'book', active: true },
   ];
 
   const WEEKLY_TARGET_PCT = 0.8;
@@ -94,6 +94,14 @@
         if (d.emoji && !d.icon) {
           d.icon = EMOJI_TO_ICON[d.emoji] || 'circle';
           delete d.emoji;
+          migrated = true;
+        }
+        if (d.id === 'reading') {
+          d.id = 'study';
+          d.name = 'Study';
+          migrated = true;
+        } else if (d.name === 'Reading') {
+          d.name = 'Study';
           migrated = true;
         }
       });
