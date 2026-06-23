@@ -376,6 +376,7 @@
       if (fillEl) fillEl.style.width = pct.toFixed(1) + '%';
     }
     renderMetricRow(date, settings);
+    renderSnapshot(date, day, settings);
   }
 
   // ---- Quick Log ----
