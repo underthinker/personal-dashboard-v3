@@ -428,7 +428,7 @@
     var existing = document.getElementById('ob-sidebar');
     var wasExpanded = existing &&
       existing.querySelector('.ob-sidebar-body') &&
-      existing.querySelector('.ob-sidebar-body').style.display !== 'none';
+      existing.querySelector('.ob-sidebar-body').classList.contains('open');
     if (existing) existing.remove();
 
     if (isCompleted()) {
@@ -448,9 +448,9 @@
       '<div class="ob-sidebar-header" id="obSidebarToggle">' +
         '<span class="ob-sidebar-title">Getting Started</span>' +
         '<span class="ob-sidebar-count">' + done + '/' + total + '</span>' +
-        '<span class="ob-sidebar-arrow' + (wasExpanded ? ' open' : '') + '">' + chevronSvg() + '</span>' +
+        '<span class="ob-sidebar-arrow' + (wasExpanded ? '' : ' open') + '">' + chevronSvg() + '</span>' +
       '</div>' +
-      '<div class="ob-sidebar-body" id="obSidebarBody" style="display:' + (wasExpanded ? '' : 'none') + '">' +
+      '<div class="ob-sidebar-body' + (wasExpanded ? ' open' : '') + '" id="obSidebarBody">' +
         '<div class="ob-progress-bar-wrap ob-sidebar-progress">' +
           '<div class="ob-progress-bar"><div class="ob-progress-fill" style="width:' + pct + '%"></div></div>' +
         '</div>' +
@@ -462,13 +462,8 @@
     document.getElementById('obSidebarToggle').addEventListener('click', function () {
       var body = document.getElementById('obSidebarBody');
       var arrow = section.querySelector('.ob-sidebar-arrow');
-      if (body.style.display === 'none') {
-        body.style.display = '';
-        arrow.classList.add('open');
-      } else {
-        body.style.display = 'none';
-        arrow.classList.remove('open');
-      }
+      body.classList.toggle('open');
+      arrow.classList.toggle('open');
     });
 
     var signInSidebar = section.querySelector('[data-action="sign-in-sidebar"]');

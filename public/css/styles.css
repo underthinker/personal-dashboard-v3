@@ -8172,7 +8172,16 @@ body.is-editing-layout .card-resize-handle * { pointer-events: auto; }
 }
 .ob-sidebar-arrow.open { transform: rotate(180deg); }
 
-.ob-sidebar-body { padding-top: 8px; }
+.ob-sidebar-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease, padding-top 300ms ease;
+  padding-top: 0;
+}
+.ob-sidebar-body.open {
+  max-height: 300px;
+  padding-top: 8px;
+}
 
 .ob-sidebar-progress { margin-bottom: 8px; }
 
