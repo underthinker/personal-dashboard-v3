@@ -1290,10 +1290,8 @@
 
       var hasTimedGoals = goals && goals.some(function(g) { return g && g.timeSlot && g.timeSlot.start; });
       html += '<div class="cal-day' + (isToday ? ' is-today' : '') + (hasTimedGoals ? ' cal-has-timed' : '') + '" data-ymd="' + ymd + '">' + day;
-      if (ymd <= todayYMD) {
-        if (isDeepWork) html += '<span class="cal-dot cal-dot-deep"' + moodStyle + '></span>';
-        else if (isRestorative) html += '<span class="cal-dot cal-dot-rest"' + moodStyle + '></span>';
-        else if (hasGoals) html += '<span class="cal-dot"' + moodStyle + '></span>';
+      if (ymd <= todayYMD && moodKey) {
+        html += '<span class="cal-dot"' + moodStyle + '></span>';
       }
       if (hasTimedGoals) html += '<span class="cal-bar"></span>';
       html += '</div>';
